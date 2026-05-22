@@ -445,14 +445,15 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
 
       {/* 摄像头拍照弹窗 */}
       {showCamera && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col">
-          <div className="flex-1 relative flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black flex flex-col h-screen">
+          {/* 视频预览区 */}
+          <div className="flex-1 min-h-0 relative">
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className="w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
             <canvas ref={canvasRef} className="hidden" />
             {!cameraReady && (
@@ -461,22 +462,26 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               </div>
             )}
           </div>
-          <div className="shrink-0 p-6 pb-8 flex items-center justify-center gap-6 bg-black">
+          {/* 底部操作栏 */}
+          <div
+            className="shrink-0 h-28 flex items-center justify-center gap-8 bg-black"
+            style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
+          >
             <Button
               type="button"
               onClick={closeCamera}
-              className="rounded-full bg-white/10 text-white hover:bg-white/20 border-0"
+              className="rounded-full bg-white/10 text-white hover:bg-white/20 border-0 h-11 px-5"
             >
               取消
             </Button>
-            <Button
+            <button
               type="button"
               onClick={takePhoto}
               disabled={!cameraReady}
-              className="w-16 h-16 rounded-full bg-white text-[#1D1D1F] hover:bg-white/90 disabled:opacity-40 border-0 p-0 flex items-center justify-center"
+              className="w-[72px] h-[72px] rounded-full bg-white disabled:opacity-40 flex items-center justify-center"
             >
-              <div className="w-14 h-14 rounded-full border-2 border-[#1D1D1F]" />
-            </Button>
+              <div className="w-16 h-16 rounded-full border-[3px] border-[#1D1D1F]" />
+            </button>
           </div>
         </div>
       )}
