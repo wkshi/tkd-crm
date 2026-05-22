@@ -327,6 +327,25 @@ const { messages, sendMessage, status } = useChat({
 });
 ```
 
+### 提交前检查流程（强制）
+
+**每次修改代码后，必须按以下顺序执行，全部通过后才能 commit 并推送到远程：**
+
+1. **Lint 检查**：`npm run lint`
+   - 必须 0 errors、0 warnings
+   - 如有 warning，先修复或添加合理的 eslint-disable 注释
+
+2. **运行所有测试**：`npm test`
+   - 所有测试必须通过
+   - 如测试失败，先修复代码或更新测试
+
+3. **Commit**：`git commit`
+   - 项目配置了 pre-commit hook，会自动执行 `npm test`
+   - 测试未通过时 commit 会被阻止
+
+4. **推送**：`git push origin main`
+   - 仅在 lint 和测试全部通过后推送
+
 ---
 
 ## 测试策略
