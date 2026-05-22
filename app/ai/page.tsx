@@ -7,7 +7,53 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Send, Loader2, Bot, User, Wrench, Sparkles, RotateCcw } from "lucide-react";
+import { Send, Loader2, Bot, User, Wrench, Sparkles, RotateCcw, Mic } from "lucide-react";
+
+// Web Speech API 类型声明（Chrome/Safari 支持，非标准 DOM 类型）
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  length: number;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
 
 const STORAGE_KEY = "tkd-crm-ai-chat-history";
 
@@ -43,7 +89,14 @@ const quickCommands = [
 export default function AIPage() {
   const [input, setInput] = useState("");
   const [modelName, setModelName] = useState<string>("");
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // 检查浏览器是否支持语音输入
+  const isSpeechSupported =
+    typeof window !== "undefined" &&
+    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
 
   // 从服务端获取当前模型配置（客户端无法直接读取 process.env）
   useEffect(() => {
@@ -78,6 +131,15 @@ export default function AIPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // 清理语音识别实例
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
   // 提交消息
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -92,6 +154,52 @@ export default function AIPage() {
     if (isLoading) return;
     setInput("");
     sendMessage({ text });
+  }
+
+  // 切换语音输入
+  function toggleVoiceInput() {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognitionConstructor =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionConstructor) return;
+
+    const recognition = new SpeechRecognitionConstructor();
+    recognition.lang = "zh-CN";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let finalTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        }
+      }
+      if (finalTranscript) {
+        setInput((prev) => (prev ? prev + finalTranscript : finalTranscript));
+      }
+    };
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (event.error !== "aborted" && event.error !== "no-speech") {
+        console.error("语音识别错误:", event.error);
+      }
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
   }
 
   return (
@@ -241,10 +349,24 @@ export default function AIPage() {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="输入问题，例如：查找所有在籍学员..."
+          placeholder={isListening ? "正在聆听，请说话..." : "输入问题，例如：查找所有在籍学员..."}
           disabled={isLoading}
           className="flex-1 bg-black/[0.06] rounded-full px-5 py-3 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
+        {isSpeechSupported && !isLoading && (
+          <Button
+            type="button"
+            onClick={toggleVoiceInput}
+            className={`w-9 h-9 rounded-full p-0 flex items-center justify-center border-0 shadow-none transition-colors ${
+              isListening
+                ? "bg-[#1D1D1F] text-white"
+                : "bg-black/[0.06] text-[#6E6E73] hover:bg-black/[0.1] hover:text-[#1D1D1F]"
+            }`}
+            title={isListening ? "停止语音输入" : "语音输入"}
+          >
+            <Mic className={`w-4 h-4 ${isListening ? "animate-pulse" : ""}`} />
+          </Button>
+        )}
         {isLoading ? (
           <Button type="button" onClick={stop} className="rounded-full bg-black/[0.06] hover:bg-black/[0.1] text-[#6E6E73] px-4 h-9 text-sm font-medium border-0 shadow-none">
             <Loader2 className="w-4 h-4 animate-spin" />
