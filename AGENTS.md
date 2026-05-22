@@ -390,7 +390,7 @@ const { messages, sendMessage, setMessages, status } = useChat({
 
 ### 提交前检查流程（强制）
 
-**每次修改代码后，必须按以下顺序执行，全部通过后才能 commit 并推送到远程：**
+**每次修改代码后，必须按以下顺序执行：**
 
 1. **Lint 检查**：`npm run lint`
    - 必须 0 errors、0 warnings
@@ -400,10 +400,15 @@ const { messages, sendMessage, setMessages, status } = useChat({
    - 所有测试必须通过
    - 如测试失败，先修复代码或更新测试
 
-3. **Commit**：`git commit`
+3. **用户确认**：**必须经用户确认修改无误后，才能执行后续步骤**
+   - 向用户展示修改摘要（改了哪些文件、核心变更点）
+   - 等待用户明确回复"可以提交"或类似确认
+   - **未经用户确认，不得擅自 commit**
 
-4. **推送**：`git push origin main`
-   - 仅在 lint 和测试全部通过后推送
+4. **Commit**：`git commit`
+
+5. **推送**：`git push origin main`
+   - 仅在 lint、测试全部通过且用户确认后推送
 
 ---
 
