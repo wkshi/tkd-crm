@@ -28,8 +28,13 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
   const [loading, setLoading] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const existingPhotoUrl = initialData?.photoUrl || null;
 
@@ -83,6 +88,70 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
     setPhotoPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (cameraInputRef.current) cameraInputRef.current.value = "";
+  }
+
+  // 打开摄像头（桌面端用 getUserMedia，移动端回退到 capture input）
+  async function openCamera() {
+    // 优先尝试 getUserMedia（支持桌面端和移动端实时预览）
+    if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        streamRef.current = stream;
+        setShowCamera(true);
+        setCameraReady(false);
+        // 等待 video 元素挂载后再绑定 stream
+        setTimeout(() => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.onloadedmetadata = () => {
+              setCameraReady(true);
+            };
+          }
+        }, 50);
+        return;
+      } catch {
+        // 权限被拒绝或不支持，回退到 capture input
+      }
+    }
+    // 回退：触发 capture input（移动端原生相机）
+    cameraInputRef.current?.click();
+  }
+
+  // 拍照：从 video 流捕获帧
+  function takePhoto() {
+    if (!videoRef.current || !canvasRef.current || !cameraReady) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
+        if (photoPreview) URL.revokeObjectURL(photoPreview);
+        setPhotoFile(file);
+        setPhotoPreview(URL.createObjectURL(file));
+        closeCamera();
+      },
+      "image/jpeg",
+      0.9
+    );
+  }
+
+  // 关闭摄像头
+  function closeCamera() {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setShowCamera(false);
+    setCameraReady(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -185,7 +254,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               />
               <Button
                 type="button"
-                onClick={() => cameraInputRef.current?.click()}
+                onClick={openCamera}
                 className="rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
               >
                 拍照
@@ -373,6 +442,44 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
           {loading ? "保存中..." : "保存"}
         </Button>
       </div>
+
+      {/* 摄像头拍照弹窗 */}
+      {showCamera && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col">
+          <div className="flex-1 relative flex items-center justify-center">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+            <canvas ref={canvasRef} className="hidden" />
+            {!cameraReady && (
+              <div className="absolute inset-0 flex items-center justify-center text-white/60">
+                <span className="text-sm">正在启动摄像头...</span>
+              </div>
+            )}
+          </div>
+          <div className="shrink-0 p-6 pb-8 flex items-center justify-center gap-6 bg-black">
+            <Button
+              type="button"
+              onClick={closeCamera}
+              className="rounded-full bg-white/10 text-white hover:bg-white/20 border-0"
+            >
+              取消
+            </Button>
+            <Button
+              type="button"
+              onClick={takePhoto}
+              disabled={!cameraReady}
+              className="w-16 h-16 rounded-full bg-white text-[#1D1D1F] hover:bg-white/90 disabled:opacity-40 border-0 p-0 flex items-center justify-center"
+            >
+              <div className="w-14 h-14 rounded-full border-2 border-[#1D1D1F]" />
+            </Button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
