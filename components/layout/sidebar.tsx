@@ -27,11 +27,11 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[220px] shrink-0 border-r border-slate-200 bg-white flex flex-col h-screen sticky top-0">
-      <div className="h-14 flex items-center px-4 border-b border-slate-200">
-        <span className="text-lg font-bold text-slate-900">跆拳道 CRM</span>
+    <aside className="w-[220px] shrink-0 border-r border-black/[0.04] backdrop-blur-xl bg-white/70 flex flex-col h-screen sticky top-0 z-40">
+      <div className="h-14 flex items-center px-5">
+        <span className="text-[17px] font-semibold text-[#1D1D1F]">跆拳道 CRM</span>
       </div>
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -41,12 +41,15 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center h-10 px-3 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center h-11 px-3 rounded-[10px] text-[14px] font-medium transition-colors duration-150 relative",
                 isActive
-                  ? "text-red-600 bg-red-50 border-r-2 border-red-600"
-                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                  ? "bg-[#D9264A]/10 text-[#D9264A]"
+                  : "text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/[0.06]"
               )}
             >
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[#D9264A] rounded-r-full" />
+              )}
               <Icon className="w-5 h-5 mr-3" />
               {item.label}
             </Link>

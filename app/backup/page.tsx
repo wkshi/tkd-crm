@@ -121,17 +121,17 @@ export default function BackupPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-900">数据备份与恢复</h2>
-        <HardDrive className="w-6 h-6 text-slate-400" />
+        <h2 className="text-2xl font-bold text-[#1D1D1F]">数据备份与恢复</h2>
+        <HardDrive className="w-6 h-6 text-[#A1A1A6]" />
       </div>
 
       {/* 操作提示 */}
       {message && (
         <div
-          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm ${
+          className={`flex items-center gap-2 px-4 py-3 rounded-full text-sm backdrop-blur-md ${
             message.type === "success"
-              ? "bg-green-50 text-green-700 border border-green-200"
-              : "bg-red-50 text-red-700 border border-red-200"
+              ? "bg-green-500/10 text-green-700"
+              : "bg-red-500/10 text-[#D9264A]"
           }`}
         >
           {message.type === "success" ? (
@@ -144,18 +144,21 @@ export default function BackupPage() {
       )}
 
       {/* 备份区域 */}
-      <Card className="p-6">
+      <Card className="p-6 rounded-[20px] shadow-none">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">数据备份</h3>
-            <p className="text-sm text-slate-500 mt-1">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+              <h3 className="text-lg font-semibold text-[#1D1D1F]">数据备份</h3>
+            </div>
+            <p className="text-sm text-[#6E6E73] mt-1">
               导出数据库和上传的照片文件为 ZIP 压缩包
             </p>
           </div>
           <Button
             onClick={handleBackup}
             disabled={isBackingUp}
-            className="bg-red-600 hover:bg-red-700"
+            className="rounded-full bg-[#D9264A] text-white hover:opacity-90"
           >
             {isBackingUp ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -168,9 +171,12 @@ export default function BackupPage() {
       </Card>
 
       {/* 恢复区域 */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">数据恢复</h3>
-        <p className="text-sm text-slate-500 mb-4">
+      <Card className="p-6 rounded-[20px] shadow-none">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+          <h3 className="text-lg font-semibold text-[#1D1D1F]">数据恢复</h3>
+        </div>
+        <p className="text-sm text-[#6E6E73] mb-4">
           上传之前导出的 ZIP 备份文件，系统将自动恢复数据库和照片
         </p>
 
@@ -179,17 +185,17 @@ export default function BackupPage() {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+          className={`border-2 border-dashed rounded-[20px] p-8 text-center cursor-pointer transition-colors ${
             dragOver
-              ? "border-red-400 bg-red-50"
-              : "border-slate-300 hover:border-slate-400 bg-slate-50"
+              ? "border-[#D9264A]/40 bg-[#D9264A]/[0.02]"
+              : "border-black/[0.12] hover:border-[#D9264A]/40 hover:bg-[#D9264A]/[0.02]"
           }`}
         >
-          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-3" />
-          <p className="text-sm font-medium text-slate-600">
+          <Upload className="w-8 h-8 mx-auto text-[#A1A1A6] mb-3" />
+          <p className="text-sm font-medium text-[#6E6E73]">
             点击或拖放 ZIP 备份文件到此处
           </p>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-[#A1A1A6] mt-1">
             支持格式：.zip（包含 backup.sql 和 uploads/）
           </p>
           <input
@@ -202,7 +208,7 @@ export default function BackupPage() {
         </div>
 
         {isRestoring && (
-          <div className="flex items-center gap-2 mt-4 text-sm text-amber-600">
+          <div className="flex items-center gap-2 mt-4 px-4 py-3 text-sm text-orange-600 bg-orange-500/10 rounded-[14px]">
             <Loader2 className="w-4 h-4 animate-spin" />
             正在恢复数据，请稍候...
           </div>
@@ -222,22 +228,25 @@ export default function BackupPage() {
                 您即将从备份文件 <Badge variant="outline">{restoreFile?.name}</Badge>{" "}
                 恢复数据。
               </p>
-              <p className="text-red-600 font-medium">
+              <p className="text-[#D9264A] font-medium">
                 此操作将覆盖当前数据库和照片文件，且无法撤销！
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[#6E6E73]">
                 系统会先自动创建当前数据的快照，以便紧急回滚。
               </p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowConfirm(false)}>
+            <Button
+              onClick={() => setShowConfirm(false)}
+              className="bg-black/[0.06] text-[#1D1D1F] rounded-full hover:bg-black/[0.1]"
+            >
               取消
             </Button>
             <Button
-              variant="destructive"
               onClick={handleConfirmRestore}
               disabled={isRestoring}
+              className="bg-[#D9264A] text-white rounded-full hover:opacity-90"
             >
               {isRestoring ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />

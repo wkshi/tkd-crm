@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 export interface StudentFormData {
   name: string;
@@ -70,8 +69,51 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-      <Card className="p-6 space-y-4">
-        <h3 className="text-lg font-semibold">基本信息</h3>
+      {/* 照片预览 */}
+      <div className="bg-white rounded-[20px] p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+          <h3 className="text-lg font-semibold">照片</h3>
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="w-32 h-32 rounded-[20px] border-2 border-dashed border-black/[0.12] bg-black/[0.04] flex items-center justify-center overflow-hidden">
+            <span className="text-3xl font-bold text-[#A1A1A6]">
+              {form.name?.[0] || "?"}
+            </span>
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                className="rounded-full bg-[#D9264A] text-white hover:opacity-90"
+              >
+                拍照
+              </Button>
+              <Button
+                type="button"
+                className="rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
+              >
+                选择文件
+              </Button>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-[#A1A1A6] hover:text-red-500 hover:bg-red-500/10 rounded-full w-fit"
+            >
+              清除照片
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* 基本信息 */}
+      <div className="bg-white rounded-[20px] p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+          <h3 className="text-lg font-semibold">基本信息</h3>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>姓名 *</Label>
@@ -79,18 +121,32 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
             <Label>性别 *</Label>
-            <select
-              value={form.gender}
-              onChange={(e) => setForm({ ...form, gender: e.target.value as "male" | "female" })}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-            >
-              <option value="male">男</option>
-              <option value="female">女</option>
-            </select>
+            <div className="bg-black/[0.06] rounded-[10px] p-1 flex">
+              {[
+                { value: "male", label: "男" },
+                { value: "female", label: "女" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() =>
+                    setForm({ ...form, gender: opt.value as "male" | "female" })
+                  }
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                    form.gender === opt.value
+                      ? "bg-white shadow-sm text-[#1D1D1F]"
+                      : "text-[#6E6E73]"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="space-y-2">
             <Label>出生日期</Label>
@@ -98,6 +154,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               type="date"
               value={form.birthDate}
               onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -105,6 +162,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
             <Input
               value={form.idCard}
               onChange={(e) => setForm({ ...form, idCard: e.target.value })}
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -112,13 +170,18 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
             <Input
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
             />
           </div>
         </div>
-      </Card>
+      </div>
 
-      <Card className="p-6 space-y-4">
-        <h3 className="text-lg font-semibold">课务信息</h3>
+      {/* 课务信息 */}
+      <div className="bg-white rounded-[20px] p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+          <h3 className="text-lg font-semibold">课务信息</h3>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>入学时间 *</Label>
@@ -126,7 +189,10 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               type="date"
               required
               value={form.enrollmentDate}
-              onChange={(e) => setForm({ ...form, enrollmentDate: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, enrollmentDate: e.target.value })
+              }
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -135,7 +201,13 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               type="number"
               required
               value={form.remainingSessions}
-              onChange={(e) => setForm({ ...form, remainingSessions: parseInt(e.target.value) || 0 })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  remainingSessions: parseInt(e.target.value) || 0,
+                })
+              }
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -143,29 +215,56 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
             <Input
               type="date"
               value={form.expiryDate}
-              onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, expiryDate: e.target.value })
+              }
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
             <Label>在籍状态</Label>
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as "active" | "inactive" | "suspended" })}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-            >
-              <option value="active">在籍</option>
-              <option value="inactive">已结业</option>
-              <option value="suspended">暂停</option>
-            </select>
+            <div className="bg-black/[0.06] rounded-[10px] p-1 flex">
+              {[
+                { value: "active", label: "在籍" },
+                { value: "inactive", label: "已结业" },
+                { value: "suspended", label: "暂停" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      status: opt.value as "active" | "inactive" | "suspended",
+                    })
+                  }
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                    form.status === opt.value
+                      ? "bg-white shadow-sm text-[#1D1D1F]"
+                      : "text-[#6E6E73]"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </Card>
+      </div>
 
       <div className="flex justify-end gap-4">
-        <Button type="button" variant="outline" onClick={() => router.push("/students")}>
+        <Button
+          type="button"
+          onClick={() => router.push("/students")}
+          className="rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
+        >
           取消
         </Button>
-        <Button type="submit" className="bg-red-600 hover:bg-red-700" disabled={loading}>
+        <Button
+          type="submit"
+          className="rounded-full bg-[#D9264A] text-white hover:opacity-90"
+          disabled={loading}
+        >
           {loading ? "保存中..." : "保存"}
         </Button>
       </div>

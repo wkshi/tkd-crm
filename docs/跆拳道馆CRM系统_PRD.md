@@ -73,7 +73,7 @@
 4. **集训与拓展记录**：卡片式布局，展示活动日期、活动名称、活动地点、时长、备注
 5. **考勤统计**：小型柱状图展示近 6 个月的出勤率趋势，下方列出最近 10 次考勤记录（日期、课程名、出勤状态）
 
-配色方案采用跆拳道主题色——以**黑红为主色调**，白色背景，金色作为强调色用于重要数据和徽章。
+配色方案采用 Apple 风格通透设计——以系统灰白背景层级构建空间感，道馆红仅作为强调色（accent tint）点缀于按钮、选中态与徽章中，界面清透无负担。
 
 ---
 
@@ -1075,12 +1075,12 @@ export default function ChatPage() {
       <div className="flex-1 overflow-auto p-4 space-y-4">
         {messages.map(msg => (
           <div key={msg.id} className={msg.role === 'user' ? 'text-right' : 'text-left'}>
-            <div className={`inline-block px-4 py-2 rounded-lg ${
-              msg.role === 'user' ? 'bg-slate-800 text-white' : 'bg-slate-100'
+            <div className={`inline-block px-4 py-3 rounded-[18px] ${
+              msg.role === 'user' ? 'bg-[#D9264A] text-white rounded-tr-sm' : 'bg-white rounded-tl-sm'
             }`}>
               {msg.content}
               {msg.toolInvocations?.map(tool => (
-                <div key={tool.toolCallId} className="text-sm text-slate-500 mt-1">
+                <div key={tool.toolCallId} className="text-[12px] text-[#6E6E73] mt-1">
                   正在执行: {tool.toolName}...
                 </div>
               ))}
@@ -1088,12 +1088,12 @@ export default function ChatPage() {
           </div>
         ))}
       </div>
-      <form onSubmit={handleSubmit} className="p-4 border-t">
+      <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-black/[0.04]">
         <input
           value={input}
           onChange={handleInputChange}
           placeholder="输入指令，例如：帮我查找叫张三的学员"
-          className="w-full px-4 py-2 border rounded-lg"
+          className="w-full bg-black/[0.06] rounded-full px-5 py-3 text-[15px] text-[#1D1D1F] placeholder:text-[#A1A1A6] border-0 focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white transition-all duration-200"
         />
       </form>
     </div>
@@ -1146,7 +1146,7 @@ export default function ChatPage() {
 
 **该页面为只读展示页，UI 设计目标是美观专业，适合向学员/家长展示。**
 
-页面采用卡片式布局，配色方案为跆拳道主题黑红金配色。
+页面采用卡片式布局，配色方案为 Apple 风格通透设计，以背景色层级替代阴影表达深度。
 
 **顶部信息卡片**：
 - 左侧：学员姓名（大号字体）、性别图标、在籍状态徽章
@@ -1227,13 +1227,13 @@ export default function ChatPage() {
 #### 6.6.2 照片预览区域
 
 - 尺寸：`w-48 h-48`（192×192px），居中显示
-- 圆角：`rounded-2xl`
-- 边框：`border-2 border-dashed border-slate-200`
-- 背景：`bg-slate-50`
+- 圆角：`rounded-[20px]`
+- 边框：`border-2 border-dashed border-black/[0.12]`
+- 背景：`bg-black/[0.04]`
 
 **无照片状态**：
-- 居中显示 `User` 图标 `w-16 h-16 text-slate-300`
-- 下方文字：`text-sm text-slate-400 mt-2` "暂无照片"
+- 居中显示 `User` 图标 `w-16 h-16 text-[#A1A1A6]`
+- 下方文字：`text-[14px] text-[#A1A1A6] mt-2` "暂无照片"
 
 **有照片状态**：
 - 显示照片图片 `object-cover w-full h-full rounded-2xl`
@@ -1245,9 +1245,9 @@ export default function ChatPage() {
 
 | 按钮 | 图标 | 样式 | 功能 |
 |------|------|------|------|
-| **打开摄像头** | `Camera` | `bg-red-600 text-white px-4 py-2 rounded-lg text-sm` | 调起系统摄像头 |
-| **选择文件** | `FolderOpen` | `border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm hover:bg-slate-50` | 打开文件选择器 |
-| **清除照片** | `Trash2` | `text-slate-400 hover:text-red-600 p-2 rounded-lg` | 清除已选照片 |
+| **打开摄像头** | `Camera` | `bg-[#D9264A] text-white px-5 py-2.5 rounded-full text-[14px] font-medium hover:opacity-90` | 调起系统摄像头 |
+| **选择文件** | `FolderOpen` | `bg-black/[0.06] text-[#1D1D1F] px-5 py-2.5 rounded-full text-[14px] font-medium hover:bg-black/[0.1]` | 打开文件选择器 |
+| **清除照片** | `Trash2` | `text-[#A1A1A6] hover:text-red-500 px-3 py-2 rounded-full hover:bg-red-500/10 transition-colors` | 清除已选照片 |
 
 #### 6.6.4 摄像头拍照流程
 
@@ -1261,16 +1261,16 @@ export default function ChatPage() {
 **步骤 2：实时预览**
 - 模态框中央显示 `<video>` 元素，实时展示摄像头画面
 - 模态框尺寸：`max-w-lg w-full`
-- 视频区域：`w-full aspect-[4/3] bg-black rounded-lg overflow-hidden`
+- 视频区域：`w-full aspect-[4/3] bg-black rounded-b-[20px] overflow-hidden`
 - 底部操作栏：`flex justify-center gap-4 mt-4`
-  - "拍照" 按钮：`bg-red-600 text-white w-14 h-14 rounded-full flex items-center justify-center`（圆形大按钮，模拟相机快门）
-  - "取消" 按钮：`text-slate-500 text-sm px-4 py-2`
+  - "拍照" 按钮：`bg-[#D9264A] text-white w-14 h-14 rounded-full flex items-center justify-center hover:opacity-90`（圆形大按钮，模拟相机快门）
+  - "取消" 按钮：`text-[#6E6E73] hover:text-[#1D1D1F] text-[14px] px-4 py-2 rounded-full hover:bg-black/[0.06]`
 
 **步骤 3：拍照确认**
 - 点击快门后，视频暂停，展示定格画面
 - 底部按钮变为：
-  - "重拍"：`border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm`
-  - "确认使用"：`bg-red-600 text-white px-4 py-2 rounded-lg text-sm`
+  - "重拍"：`bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] px-4 py-2 rounded-full text-[14px] font-medium flex items-center gap-1`
+  - "确认使用"：`bg-[#D9264A] text-white px-5 py-2.5 rounded-full text-[14px] font-medium hover:opacity-90`
 - 点击"确认使用"：将视频帧转为 JPEG 文件，关闭模态框，预览区域显示照片
 - 点击"重拍"：视频继续播放，回到步骤 2
 
@@ -1397,62 +1397,62 @@ async function handleSubmit(formData: StudentFormData) {
 
 #### 备份数据卡片
 
-白色卡片，`rounded-xl shadow-sm p-8`
+白色卡片，`bg-white rounded-[20px] p-8`
 
-**卡片标题**：`text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2`
-- 左侧色条 `w-1 h-5 bg-red-600 rounded-full`
-- `HardDrive` 图标 `w-5 h-5 text-red-600 mr-1`
+**卡片标题**：`text-[17px] font-semibold text-[#1D1D1F] mb-6 flex items-center gap-2`
+- 左侧色条 `w-1 h-5 bg-[#D9264A] rounded-full`
+- `HardDrive` 图标 `w-5 h-5 text-[#D9264A] mr-1`
 - 文字 "备份数据"
 
 **内容区域**：
-- 说明文字 `text-sm text-slate-600 mb-6`
+- 说明文字 `text-[14px] text-[#6E6E73] mb-6`
 - 备份项列表 `space-y-3 mb-8`：
-  - 每项 `flex items-center gap-3 text-sm text-slate-700`
+  - 每项 `flex items-center gap-3 text-[14px] text-[#1D1D1F]`
   - 图标 `Database w-4 h-4 text-blue-500` + "PostgreSQL 数据库（所有表结构和数据）"
   - 图标 `Image w-4 h-4 text-green-500` + "学员照片文件（uploads/students/ 目录）"
   - 图标 `FileJson w-4 h-4 text-amber-500` + "备份元数据（时间戳、版本信息）"
 
-**备份按钮**：`bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 mx-auto`
+**备份按钮**：`bg-[#D9264A] text-white px-6 py-3 rounded-full text-[14px] font-medium hover:opacity-90 flex items-center gap-2 mx-auto`
 - 图标 `Download w-4 h-4`
 - 文字 "立即备份"
 - 加载状态：`Loader2 w-4 h-4 animate-spin` + "备份中..."
 - 成功状态：`CheckCircle w-4 h-4` + "备份完成"
 
-**上次备份信息**：`text-xs text-slate-400 mt-4 text-center`
+**上次备份信息**：`text-[12px] text-[#A1A1A6] mt-4 text-center`
 - "上次备份：2025-01-15 14:30:52"
 - "从未备份" 时显示灰色文字
 
 #### 恢复数据卡片
 
-白色卡片，`rounded-xl shadow-sm p-8 mt-6`
+白色卡片，`bg-white rounded-[20px] p-8 mt-6`
 
-**卡片标题**：`text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2`
-- `Upload` 图标 `w-5 h-5 text-red-600 mr-1`
+**卡片标题**：`text-[17px] font-semibold text-[#1D1D1F] mb-6 flex items-center gap-2`
+- `Upload` 图标 `w-5 h-5 text-[#D9264A] mr-1`
 - 文字 "恢复数据"
 
 **内容区域**：
-- 说明文字 `text-sm text-slate-600 mb-4`
-- **警告提示**：`bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3`
-  - `AlertTriangle w-5 h-5 text-yellow-600 shrink-0 mt-0.5`
-  - `text-sm text-yellow-800` "恢复操作会覆盖当前所有数据，建议在恢复前先备份当前数据。"
+- 说明文字 `text-[14px] text-[#6E6E73] mb-4`
+- **警告提示**：`bg-orange-500/10 rounded-[14px] p-4 mb-6 flex items-start gap-3`
+  - `AlertTriangle w-5 h-5 text-orange-500 shrink-0 mt-0.5`
+  - `text-[14px] text-orange-600` "恢复操作会覆盖当前所有数据，建议在恢复前先备份当前数据。"
 
-**上传区域**：`border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-red-400 hover:bg-red-50/20 transition-colors cursor-pointer`
+**上传区域**：`border-2 border-dashed border-black/[0.12] rounded-[20px] p-8 text-center hover:border-[#D9264A]/40 hover:bg-[#D9264A]/[0.02] transition-colors cursor-pointer`
 - 点击触发隐藏 `<input type="file" accept=".zip" />`
 - 拖拽状态：`border-red-500 bg-red-50/30`
-- 上传中状态：进度条 `w-full h-1 bg-slate-100 rounded-full overflow-hidden mt-4`
-  - 进度填充 `h-full bg-red-600 transition-all duration-300`
+- 上传中状态：进度条 `w-full h-1 bg-black/[0.06] rounded-full overflow-hidden mt-4`
+  - 进度填充 `h-full bg-[#D9264A] transition-all duration-300`
 - 上传完成：`CheckCircle w-8 h-8 text-green-500 mx-auto mb-2`
 
 **确认恢复模态框**（上传 ZIP 后弹出）：
-- 标题：`text-lg font-semibold text-slate-800` "确认恢复数据"
+- 标题：`text-[17px] font-semibold text-[#1D1D1F]` "确认恢复数据"
 - 内容：
-  - 备份信息卡片 `bg-slate-50 rounded-lg p-4 mb-4`
+  - 备份信息卡片 `bg-black/[0.04] rounded-[14px] p-4 mb-4`
     - 备份时间、数据库引擎、表列表、照片数量
   - `AlertTriangle w-8 h-8 text-yellow-500 mx-auto mb-3`
-  - `text-sm text-slate-600 text-center` "此操作将清空当前所有数据并用备份数据替换，是否继续？"
+  - `text-[14px] text-[#6E6E73] text-center` "此操作将清空当前所有数据并用备份数据替换，是否继续？"
 - 操作按钮：
-  - "取消"：`border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm`
-  - "确认恢复"：`bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-sm font-medium`
+  - "取消"：`bg-black/[0.06] text-[#1D1D1F] px-5 py-2.5 rounded-full text-[14px] font-medium hover:bg-black/[0.1]`
+  - "确认恢复"：`bg-[#D9264A] text-white px-6 py-2.5 rounded-full text-[14px] font-medium hover:opacity-90`
 
 **恢复进度**（确认后显示）：
 - 步骤指示器（3 步）：

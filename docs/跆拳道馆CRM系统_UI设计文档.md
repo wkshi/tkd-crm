@@ -4,16 +4,17 @@
 
 ### 1.1 设计目标
 
-为跆拳道馆打造一套**专业、沉稳、高效**的管理界面。视觉风格参考现代 SaaS 仪表盘，融入跆拳道运动的**力量感与仪式感**，让管理员和教练能快速完成操作，同时让学员/家长在查看详情页时感受到道馆的专业品质。
+为跆拳道馆打造一套**通透、精致、高效**的管理界面。视觉风格深度参照 Apple Human Interface Guidelines，融入 macOS System Settings 与 iPadOS 管理类 App 的设计语言，让管理员和教练在清爽、无干扰的环境中快速完成操作。学员/家长查看详情页时，感受到的是如同原生 Apple 应用般的专业品质与精致细节。
 
 ### 1.2 设计原则
 
 | 原则 | 说明 |
 |------|------|
-| **效率优先** | 高频操作（点名、查学员）三步以内可达，表格信息密度适中 |
-| **视觉清晰** | 状态通过颜色+图标双重编码，数据层级分明，不堆砌装饰 |
-| **跆拳道基因** | 黑红金配色贯穿全局，圆角克制（以锐利小圆角体现力量感），留白有度 |
-| **一致性** | 所有页面共享同一套设计系统，交互模式统一，降低学习成本 |
+| **通透层级** | 通过背景色差异与毛玻璃材质（vibrancy）表达层级，废除厚重阴影，界面呼吸感极强 |
+| **充裕留白** | 信息密度适中，列表行高 44px+，卡片间距 20px+，眼睛不易疲劳 |
+| **精致圆角** | 全面采用大圆角与 pill 形状，按钮、卡片、头像均呈现 Apple 标志性的柔和边缘 |
+| **品牌克制** | 道馆红仅作为系统强调色（accent tint）出现，不主导大面积背景，保持界面清透 |
+| **一致动效** | 所有交互反馈通过透明度与背景色变化表达，过渡自然流畅，无突兀位移 |
 
 ---
 
@@ -21,110 +22,147 @@
 
 ### 2.1 色彩体系
 
-#### 主色调（Primary）
+#### 系统背景层级（System Background Levels）
 
-| 名称 | 色值 | Tailwind 类 | 用途 |
-|------|------|-------------|------|
-| **道馆黑** | `#1A1A2E` | `bg-slate-900` / `text-slate-900` | 侧边栏背景、顶部栏、主标题文字 |
-| **道馆红** | `#DC2626` | `bg-red-600` / `text-red-600` | 强调色、主按钮、危险操作、激活状态 |
-| **道馆红深** | `#B91C1C` | `bg-red-700` | 按钮悬停、主色调加深 |
-| **道馆红浅** | `#FEE2E2` | `bg-red-50` | 红色背景浅底、高亮区域 |
+Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 
-#### 中性色（Neutral）
+| 令牌 | 色值 | Tailwind 实现 | 用途 |
+|------|------|---------------|------|
+| **system-background** | `#FFFFFF` | `bg-white` | 页面最底层背景、卡片表面 |
+| **secondary-background** | `#F5F5F7` | `bg-[#F5F5F7]` | 分组列表背景、页面主体底色 |
+| **tertiary-background** | `#FFFFFF` | `bg-white` | 位于 secondary 之上的列表项、输入框 |
+| **system-fill** | `rgba(120,120,128,0.12)` | `bg-black/[0.08]` | 轻微填充背景、hover 态、图标底色 |
 
-| 名称 | 色值 | Tailwind 类 | 用途 |
-|------|------|-------------|------|
-| **背景浅灰** | `#F8FAFC` | `bg-slate-50` | 页面底层背景 |
-| **卡片白** | `#FFFFFF` | `bg-white` | 卡片、模态框、面板背景 |
-| **边框灰** | `#E2E8F0` | `border-slate-200` | 卡片边框、分割线、表头下划线 |
-| **文字主色** | `#334155` | `text-slate-700` | 正文、表格数据 |
-| **文字次要** | `#64748B` | `text-slate-500` | 辅助文字、占位符、时间戳 |
-| **文字禁用** | `#94A3B8` | `text-slate-400` | 禁用状态、非常次要信息 |
+#### 文字色（Label Colors）
 
-#### 功能色（Semantic）
+| 令牌 | 色值 | Tailwind 实现 | 用途 |
+|------|------|---------------|------|
+| **label-primary** | `#1D1D1F` | `text-[#1D1D1F]` | 主标题、正文、表格数据 |
+| **label-secondary** | `#6E6E73` | `text-[#6E6E73]` | 辅助文字、表头、时间戳 |
+| **label-tertiary** | `#A1A1A6` | `text-[#A1A1A6]` | 占位符、禁用状态、非常次要信息 |
 
-| 状态 | 色值 | Tailwind 类 | 用途 |
-|------|------|-------------|------|
-| **成功/出勤** | `#16A34A` | `text-green-600` / `bg-green-50` | 在籍状态、出勤标记、成功提示 |
-| **警告** | `#EAB308` | `text-yellow-600` / `bg-yellow-50` | 暂停状态、到期预警、课时不足 |
-| **危险/缺勤** | `#DC2626` | `text-red-600` / `bg-red-50` | 缺勤标记、删除操作、已过期 |
-| **信息/请假** | `#2563EB` | `text-blue-600` / `bg-blue-50` | 请假标记、提示信息 |
-| **次要/迟到** | `#F97316` | `text-orange-500` / `bg-orange-50` | 迟到标记、次要警示 |
+#### 分隔线（Separator）
 
-#### 强调色（Accent）
+| 令牌 | 色值 | Tailwind 实现 | 用途 |
+|------|------|---------------|------|
+| **separator** | `rgba(60,60,67,0.15)` | `border-black/[0.08]` | 卡片边框、列表分隔线、分割线 |
 
-| 名称 | 色值 | Tailwind 类 | 用途 |
-|------|------|-------------|------|
-| **道馆金** | `#D97706` | `text-amber-600` / `bg-amber-50` | 成就徽章、带位晋升高亮、重要数据 |
-| **道馆金浅** | `#FEF3C7` | `bg-amber-100` | 金色背景底、VIP/优秀标识 |
+> 分隔线极其克制，仅在必要时使用，且颜色极淡。大量依赖留白实现内容分隔。
+
+#### 强调色（Accent / Tint）
+
+道馆红作为品牌强调色，降低饱和度以融入 Apple 审美：
+
+| 名称 | 色值 | Tailwind 实现 | 用途 |
+|------|------|---------------|------|
+| **accent** | `#D9264A` | `bg-[#D9264A]` / `text-[#D9264A]` | 主按钮、选中状态、链接、激活指示器 |
+| **accent-light** | `rgba(217,38,74,0.10)` | `bg-[#D9264A]/10` | 选中项背景、hover 高亮底 |
+
+#### 功能色（Semantic Colors）
+
+采用 Apple System Colors 语义，更清透：
+
+| 状态 | 色值 | 背景实现 | 文字实现 | 用途 |
+|------|------|----------|----------|------|
+| **成功/出勤** | `#34C759` | `bg-green-500/10` | `text-green-600` | 在籍状态、出勤标记 |
+| **警告** | `#FF9500` | `bg-orange-500/10` | `text-orange-600` | 暂停状态、课时不足预警 |
+| **危险/缺勤** | `#FF3B30` | `bg-red-500/10` | `text-red-500` | 缺勤标记、删除操作 |
+| **信息/请假** | `#007AFF` | `bg-blue-500/10` | `text-blue-500` | 请假标记、提示信息 |
+| **次要/迟到** | `#FF9F0A` | `bg-amber-500/10` | `text-amber-600` | 迟到标记 |
+| **成就/带位** | `#BF5AF2` | `bg-purple-500/10` | `text-purple-600` | 高阶带位、成就徽章 |
+
+> 所有功能色背景均使用 10% 透明度，呈现 Apple 标志性的「色块标签」效果，而非实色填充。
 
 ### 2.2 字体系统
 
+**字体栈**：`ui-sans-serif, -apple-system, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`
+
+> 优先使用 Apple 设备原生字体（SF Pro / PingFang SC），Windows 设备回退至系统默认无衬线字体，保证跨平台一致的中西文混排体验。
+
 | 层级 | 字号 | 字重 | 行高 | 字间距 | Tailwind 类 | 用途 |
 |------|------|------|------|--------|-------------|------|
-| **Display** | 28px | 700 | 1.2 | -0.02em | `text-3xl font-bold` | 页面大标题（仪表盘标题） |
-| **H1** | 22px | 600 | 1.3 | -0.01em | `text-2xl font-semibold` | 模块标题、学员姓名 |
-| **H2** | 18px | 600 | 1.4 | 0 | `text-lg font-semibold` | 卡片标题、分区标题 |
-| **H3** | 15px | 600 | 1.4 | 0 | `text-base font-semibold` | 小标题、表头 |
-| **Body** | 14px | 400 | 1.6 | 0 | `text-sm` | 正文、表格内容 |
-| **Caption** | 12px | 400 | 1.5 | 0 | `text-xs` | 辅助说明、时间戳、标签 |
-
-**字体栈**：`'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif`
-
-> 英文/数字使用 Inter，中文回退到系统字体，保证代码编号和数据的等宽对齐感。
+| **Large Title** | 34px | 700 | 1.2 | -0.02em | `text-[34px] font-bold` | 仪表盘大标题 |
+| **Title 1** | 28px | 700 | 1.25 | -0.02em | `text-[28px] font-bold` | 页面标题（学员详情姓名等） |
+| **Title 2** | 22px | 600 | 1.3 | -0.01em | `text-[22px] font-semibold` | 模块标题、卡片标题 |
+| **Title 3** | 17px | 600 | 1.35 | 0 | `text-[17px] font-semibold` | 分区标题、小标题、表头 |
+| **Body** | 15px | 400 | 1.5 | 0 | `text-[15px]` | 正文、表格内容、列表项 |
+| **Callout** | 14px | 500 | 1.4 | 0 | `text-sm font-medium` | 辅助说明、按钮文字、操作标签 |
+| **Caption** | 12px | 400 | 1.4 | 0 | `text-xs` | 时间戳、角标、脚注 |
 
 ### 2.3 间距系统
 
-基于 4px 的基数（Tailwind 默认）：
+基于 4px 基数，但全面增大留白：
 
 | 令牌 | 值 | Tailwind | 用途 |
 |------|-----|----------|------|
-| `space-1` | 4px | `p-1` / `m-1` | 图标与文字的紧间距 |
-| `space-2` | 8px | `p-2` / `gap-2` | 按钮内边距、小间距 |
-| `space-3` | 12px | `p-3` | 表单控件内边距 |
-| `space-4` | 16px | `p-4` / `gap-4` | 卡片内边距、常规间距 |
+| `space-1` | 4px | `p-1` / `m-1` | 图标与文字紧间距 |
+| `space-2` | 8px | `p-2` / `gap-2` | 按钮内图标间距 |
+| `space-3` | 12px | `p-3` | 紧凑内边距 |
+| `space-4` | 16px | `p-4` / `gap-4` | 常规内边距 |
+| `space-5` | 20px | `p-5` / `gap-5` | 卡片内边距、卡片网格间距 |
 | `space-6` | 24px | `p-6` / `gap-6` | 模块间间距 |
 | `space-8` | 32px | `p-8` / `gap-8` | 页面级间距 |
 | `space-10` | 40px | `p-10` | 大模块间距 |
 
 **页面布局间距**：
-- 页面主体 padding：`px-6 py-6`（24px 左右，24px 上下）
-- 卡片网格 gap：`gap-6`（24px）
-- 卡片内部 padding：`p-6`（24px）
-- 表单字段间距：`space-y-4`（16px）
+- 页面主体 padding：`px-8 py-8`（32px）
+- 卡片网格 gap：`gap-5`（20px）
+- 卡片内部 padding：`p-5`（20px）
+- 表单字段间距：`space-y-5`（20px）
+- 列表项高度：最小 44px（Apple 标准触控目标）
 
 ### 2.4 圆角系统
 
+全面增大圆角，模拟 Apple 连续圆角（continuous corner radius）视觉：
+
 | 令牌 | 值 | Tailwind | 用途 |
 |------|-----|----------|------|
-| `radius-sm` | 4px | `rounded` | 按钮、标签、输入框 |
-| `radius-md` | 8px | `rounded-lg` | 卡片、下拉面板 |
-| `radius-lg` | 12px | `rounded-xl` | 大卡片、模态框 |
-| `radius-xl` | 16px | `rounded-2xl` | 特殊容器、照片预览区 |
-| `radius-full` | 9999px | `rounded-full` | 头像、状态点、圆形按钮 |
+| `radius-sm` | 6px | `rounded-md` | 小标签、内嵌元素 |
+| `radius-md` | 10px | `rounded-[10px]` | 按钮、输入框、下拉选项 |
+| `radius-lg` | 14px | `rounded-[14px]` | 卡片、下拉面板、列表项 |
+| `radius-xl` | 20px | `rounded-[20px]` | 大卡片、模态框、照片容器 |
+| `radius-2xl` | 24px | `rounded-[24px]` | 特殊大容器 |
+| `radius-full` | 9999px | `rounded-full` | pill 按钮、胶囊徽章 |
 
-### 2.5 阴影系统
+**头像圆角特殊规则**：
+- 列表/表格头像：从纯圆改为 `rounded-xl`（圆角方形，Apple 现代审美）
+- 详情页大头像：`rounded-[20px]`（大圆角方形）
+- 极小头像（xs）：`rounded-lg`
 
-| 令牌 | Tailwind | 用途 |
-|------|----------|------|
-| `shadow-sm` | `shadow-sm` | 卡片默认状态、输入框 |
-| `shadow-md` | `shadow-md` | 卡片悬停、下拉面板、浮动元素 |
-| `shadow-lg` | `shadow-lg` | 模态框、抽屉面板 |
-| `shadow-xl` | `shadow-xl` | 全屏覆盖层、重要弹窗 |
+### 2.5 材质与深度系统（替代阴影）
+
+**核心原则：废除四级阴影系统，改用背景色层级 + 毛玻璃材质表达深度。**
+
+| 层级 | 表达方式 | Tailwind 实现 |
+|------|----------|---------------|
+| **基础层** | 纯白背景 | `bg-white` |
+| **页面底层** | Apple 经典分组灰 | `bg-[#F5F5F7]` |
+| **卡片层** | 在灰色背景上纯白卡片，无阴影 | `bg-white rounded-[20px]` |
+| **悬浮层** | 毛玻璃 + 极淡边框 | `backdrop-blur-xl bg-white/80 border border-white/20` |
+| **模态层** | 淡遮罩 + 纯白面板 | `bg-black/25 backdrop-blur-md` + `bg-white rounded-[20px]` |
+| **侧边栏/Header** | 半透明毛玻璃 | `backdrop-blur-xl bg-white/70 border-r border-black/[0.04]` |
+
+**唯一保留的阴影**：仅模态框/抽屉使用微弱环境阴影：
+- 模态框：`shadow-[0_20px_60px_rgba(0,0,0,0.12)]`
+- 抽屉：`shadow-[-8px_0_40px_rgba(0,0,0,0.08)]`
+- 下拉面板：`shadow-[0_8px_32px_rgba(0,0,0,0.1)]`
 
 ### 2.6 动画与过渡
 
+**核心原则：废除位移类 hover 效果，采用透明度与背景色变化。**
+
 | 场景 | 过渡效果 | Tailwind |
 |------|----------|----------|
-| 按钮悬停 | 背景色 150ms + 轻微上浮 | `transition-all duration-150 hover:-translate-y-0.5` |
-| 卡片悬停 | 阴影加深 200ms | `transition-shadow duration-200 hover:shadow-md` |
+| 按钮悬停 | 不透明度降低或背景叠加 `bg-black/5`，150ms | `transition-opacity duration-150 hover:opacity-90` 或 `hover:bg-black/5` |
+| 列表项悬停 | 背景填充色变化，150ms | `transition-colors duration-150 hover:bg-black/[0.06]` |
+| 卡片悬停 | 背景色变化（列表卡片）或 opacity | `transition-colors duration-150` |
 | 页面切换 | 淡入 200ms | `animate-in fade-in duration-200` |
-| 模态框弹出 | 淡入 + 轻微上滑 200ms | `animate-in fade-in slide-in-from-bottom-4 duration-200` |
-| 侧边栏展开 | 宽度 300ms ease-in-out | `transition-all duration-300 ease-in-out` |
-| 数据加载 | 骨架屏脉冲 | `animate-pulse` |
-| Toast 通知 | 从右滑入 300ms，停留 3s 后滑出 | `animate-in slide-in-from-right duration-300` |
+| 模态框弹出 | 淡入 + 轻微缩放 200ms | `animate-in fade-in zoom-in-[0.98] duration-200` |
+| 侧边栏展开 | 宽度 300ms ease-out | `transition-all duration-300 ease-out` |
+| 数据加载 | 骨架屏脉冲 | `animate-pulse bg-black/[0.06]` |
+| Toast 通知 | 从顶部淡入滑入 200ms，3s 后淡出 | `animate-in fade-in slide-in-from-top-2 duration-200` |
+| 抽屉滑出 | 从右侧滑入 300ms ease-out | `animate-in slide-in-from-right duration-300 ease-out` |
 | 照片预览切换 | 淡入 150ms | `transition-opacity duration-150` |
-| 摄像头模态框 | 从底部滑入 300ms | `animate-in slide-in-from-bottom duration-300` |
 
 ---
 
@@ -134,32 +172,37 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ 顶部栏 (Header)  高度 56px                                   │
+│ 顶部栏 (Header)  高度 56px   毛玻璃材质                       │
 │  [Logo]  [页面标题]                    [通知] [设置] [头像]   │
 ├──────────┬──────────────────────────────────────────────────┤
 │          │                                                    │
 │ 侧边栏   │              页面主体 (Main Content)               │
-│ (Sidebar)│              px-6 py-6, bg-slate-50               │
+│ (Sidebar)│              px-8 py-8, bg-[#F5F5F7]              │
 │ 宽度 220px│                                                   │
 │ 折叠 64px│              [面包屑导航]                          │
 │          │              [页面标题 + 操作按钮]                  │
 │          │                                                    │
 │          │              ┌────────────────────┐               │
 │          │              │   内容区域          │               │
-│          │              │   (卡片/表格/表单)  │               │
+│          │              │   (纯白卡片/表格)   │               │
 │          │              └────────────────────┘               │
 │          │                                                    │
 └──────────┴──────────────────────────────────────────────────┘
 ```
 
+**背景层级**：
+- 最底层：侧边栏与页面主体共享 `bg-[#F5F5F7]`（secondary-background）
+- 内容卡片：`bg-white rounded-[20px]`，在灰色背景上自然浮现，无需阴影
+
 ### 3.2 侧边栏（Sidebar）
 
-**默认状态**：宽度 `220px`，白色背景，右边框 `border-r border-slate-200`
+**背景**：`backdrop-blur-xl bg-white/70`，右边框 `border-r border-black/[0.04]`
 
+**默认状态**：宽度 `220px`
 **折叠状态**：宽度 `64px`，只显示图标，文字隐藏
 
 **布局结构**：
-- 顶部：Logo 区域（高度 56px，与顶部栏对齐），折叠时显示简化图标
+- 顶部：Logo 区域（高度 56px，与顶部栏对齐），去除底部边框，简洁文字 Logo
 - 中部：导航菜单
 - 底部：折叠切换按钮 + 用户信息缩略
 
@@ -175,28 +218,28 @@
 | `/backup` | `HardDrive` | 数据备份 | 备份/导入操作入口 |
 | `/ai` | `Sparkles` | AI 助手 | 智能交互入口 |
 
-**菜单项样式**：
-- 默认：`text-slate-500`，hover 时 `text-slate-700 bg-slate-50`
-- 激活（当前路由）：`text-red-600 bg-red-50 border-r-2 border-red-600`
+**菜单项样式（Apple 风格）**：
+- 默认：`text-[#6E6E73]`，`h-11`（44px），圆角 `rounded-[10px]`，padding `px-3`
+- hover：`bg-black/[0.06] text-[#1D1D1F]`
+- 激活（当前路由）：`bg-[#D9264A]/10 text-[#D9264A]` + 左侧 3px 圆角竖条指示器 `absolute left-0 w-[3px] h-5 bg-accent rounded-r-full`
 - 图标：`w-5 h-5 mr-3`
-- 菜单项高度：`h-10`，圆角 `rounded-lg`，padding `px-3`
-- 菜单项间距：`space-y-1`
+- 菜单项间距：`space-y-0.5`
 
 ### 3.3 顶部栏（Header）
 
 **高度**：`56px (h-14)`
-**背景**：白色，底部边框 `border-b border-slate-200`
-**布局**：Flex 两端对齐，`items-center px-4`
+**背景**：`backdrop-blur-xl bg-white/70`，底部边框 `border-b border-black/[0.08]`
+**布局**：Flex 两端对齐，`items-center px-5`
 
 **左侧**：
-- 侧边栏折叠/展开按钮（小屏下为汉堡菜单）
-- 页面标题：`text-lg font-semibold text-slate-800`
-- 面包屑（可选）：`text-sm text-slate-500`，分隔符 `/`
+- 侧边栏折叠/展开按钮（小屏下为汉堡菜单）：圆形触控区域 `w-9 h-9 rounded-full hover:bg-black/[0.06] flex items-center justify-center`
+- 页面标题：`text-[22px] font-semibold text-[#1D1D1F]`
+- 面包屑（可选）：`text-[13px] text-[#6E6E73]`，分隔符 `text-[#A1A1A6] mx-1.5`
 
 **右侧**：
-- 通知图标（铃铛）+ 红点徽章：`relative` 定位，`w-2 h-2 bg-red-500 rounded-full absolute -top-0.5 -right-0.5`
-- 设置图标（齿轮）
-- 用户头像：`w-8 h-8 rounded-full bg-slate-200`
+- 通知图标（铃铛）：圆形触控区域 `w-9 h-9 rounded-full hover:bg-black/[0.06] flex items-center justify-center`，红点徽章 `w-2 h-2 bg-accent rounded-full absolute top-1.5 right-1.5`
+- 设置图标（齿轮）：同上圆形触控区域
+- 用户头像：`w-8 h-8 rounded-xl bg-black/[0.06]`（圆角方形）
 
 ### 3.4 面包屑导航
 
@@ -206,9 +249,9 @@
 首页 / 学员管理 / 张小明
 ```
 
-样式：`text-sm text-slate-500`，当前页 `text-slate-800 font-medium`，分隔符 `text-slate-300 mx-2`
+样式：`text-[13px] text-[#6E6E73]`，当前页 `text-[#1D1D1F] font-medium`
 
-点击可跳转的面包屑项 hover 时 `text-red-600 underline`
+可点击项 hover：`text-accent`
 
 ---
 
@@ -240,53 +283,50 @@
 └─────────────────────────────────────────────────────────┘
 ```
 
-#### 统计卡片（4 列网格，`grid-cols-4 gap-6`）
+#### 统计卡片（4 列网格，`grid-cols-4 gap-5`）
 
-每张卡片：白色背景，`rounded-xl shadow-sm p-6`
+每张卡片：`bg-white rounded-[20px] p-5`
+
+> 无阴影！纯白卡片在 `#F5F5F7` 灰色背景上自然形成层级。
 
 **内部结构**：
-- 顶部一行：左侧图标（圆形背景，`w-10 h-10 rounded-full`），右侧趋势箭头（绿色向上/红色向下）+ 百分比
-- 中部：大数字 `text-3xl font-bold text-slate-800 mt-4`
-- 底部：标签 `text-sm text-slate-500 mt-1`
+- 顶部一行：左侧图标（圆形背景 `w-10 h-10 rounded-full bg-black/[0.06]`），右侧趋势箭头 + 百分比
+- 中部：大数字 `text-[28px] font-bold text-[#1D1D1F] mt-3`
+- 底部：标签 `text-[13px] text-[#6E6E73] mt-1`
 
 **图标配色**：
-- 在籍学员：`bg-blue-50 text-blue-600`（图标 `Users`）
-- 今日课程：`bg-green-50 text-green-600`（图标 `CalendarDays`）
-- 本月出勤率：`bg-amber-50 text-amber-600`（图标 `TrendingUp`）
-- 即将到期：`bg-red-50 text-red-600`（图标 `AlertCircle`）
+- 在籍学员：`text-blue-500`（图标 `Users`，底 `bg-blue-500/10`）
+- 今日课程：`text-green-500`（图标 `CalendarDays`，底 `bg-green-500/10`）
+- 本月出勤率：`text-purple-500`（图标 `TrendingUp`，底 `bg-purple-500/10`）
+- 即将到期：`text-orange-500`（图标 `AlertCircle`，底 `bg-orange-500/10`）
 
 #### 今日课程列表（左侧，占 8 列）
 
-白色卡片，`rounded-xl shadow-sm`
-- 卡片头部：`p-6 border-b border-slate-100`，标题 `text-lg font-semibold` + 右侧 "查看全部" 链接 `text-sm text-red-600`
-- 列表内容：每条课程是一个行项，`px-6 py-4 border-b border-slate-50 last:border-0`
+白色卡片，`bg-white rounded-[20px]`
+- 卡片头部：`p-5`，标题 `text-[17px] font-semibold text-[#1D1D1F]` + 右侧 "查看全部" 链接 `text-[13px] text-accent`
+- 列表内容：每条课程是一个行项，`px-5 py-3.5`，分隔线 `border-b border-black/[0.04] last:border-0`
 - 行项结构：
   ```
-  [时间色块: bg-slate-100 rounded-lg px-3 py-1 text-sm font-medium]
-  [课程名: text-sm font-medium text-slate-800]
-  [教练: text-xs text-slate-500]
+  [时间色块: bg-black/[0.06] rounded-lg px-3 py-1 text-[13px] font-medium]
+  [课程名: text-[15px] font-medium text-[#1D1D1F]]
+  [教练: text-[13px] text-[#6E6E73]]
   [状态徽章/点名按钮: ml-auto]
   ```
-- 如果课程已开始且未点名：显示红色 "待点名" 徽章 + 点名按钮
-- 如果已点名：显示绿色 "已完成" 徽章
+- 如果课程已开始且未点名：显示 accent 色 "待点名" pill 徽章 + 点名按钮
+- 如果已点名：显示绿色 "已完成" pill 徽章
 
 #### 快捷入口（右侧，占 4 列）
 
-白色卡片，`rounded-xl shadow-sm p-6`
-- 标题：`text-lg font-semibold mb-4`
-- 2×3 网格：`grid-cols-2 gap-4`
+白色卡片，`bg-white rounded-[20px] p-5`
+- 标题：`text-[17px] font-semibold mb-4`
+- 2×3 网格：`grid-cols-2 gap-3`
 - 每个入口项：
   ```
-  ┌─────────────────┐
-  │  [图标]         │
-  │  新增学员        │
-  │  text-xs text-   │
-  │  slate-500      │
-  └─────────────────┘
+  bg-black/[0.06] rounded-[14px] p-4 text-center
+  hover:bg-accent/10 hover:text-accent transition-colors duration-150
   ```
-  - 背景 `bg-slate-50 rounded-lg p-4 text-center`
-  - hover：`bg-red-50 text-red-600 shadow-sm transition-all duration-200`
-  - 图标：`w-8 h-8 mx-auto mb-2`
+  - 图标：`w-7 h-7 mx-auto mb-2`
+  - 标签：`text-[13px] text-[#6E6E73]`，hover 时继承 `text-accent`
 
 **6 个入口**：新增学员、查看日历、考勤查询、考级录入、比赛录入、AI 助手
 
@@ -315,65 +355,67 @@
 
 #### 搜索与筛选栏
 
-白色卡片，`rounded-xl shadow-sm p-4 mb-6`
-- Flex 布局，`items-center gap-4`
+去除白色卡片容器，直接嵌入页面背景：
+- Flex 布局，`items-center gap-3 mb-5`
 - 搜索框：
   - `relative flex-1 max-w-md`
-  - 左侧搜索图标 `absolute left-3 top-1/2 -translate-y-1/2 text-slate-400`
-  - 输入框 `pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent`
+  - 左侧搜索图标 `absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1A6] w-4 h-4`
+  - 输入框 `w-full bg-black/[0.06] rounded-[10px] pl-10 pr-4 py-2.5 text-[15px] text-[#1D1D1F] placeholder:text-[#A1A1A6] border-0 focus:ring-2 focus:ring-accent/20 focus:bg-white transition-all duration-200`
   - placeholder：`搜索学员姓名...`
 - 状态筛选下拉：
-  - `w-36`，触发器 `border border-slate-200 rounded-lg px-3 py-2 text-sm`
+  - `bg-black/[0.06] rounded-full px-4 py-2 text-[14px] text-[#1D1D1F] font-medium`
   - 选项：`全部` / `在籍` / `已结业` / `暂停`
-- 每页条数下拉：`w-24`，选项 `10` / `20` / `50`
+- 每页条数下拉：同上 pill 形状
 - 右侧"新增学员"按钮：
-  - `bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium`
-  - hover：`bg-red-700`
+  - `bg-accent text-white px-5 py-2.5 rounded-full text-[14px] font-medium`
+  - hover：`opacity-90`
   - 左侧加号图标 `w-4 h-4 mr-2`
 
 #### 数据表格
 
-白色卡片，`rounded-xl shadow-sm overflow-hidden`
+白色卡片容器：`bg-white rounded-[20px] overflow-hidden`
 
-**表头**：`bg-slate-50 px-6 py-3 border-b border-slate-200`
-- 文字：`text-xs font-semibold text-slate-500 uppercase tracking-wider`
+**表头**：`px-5 py-3`
+- 文字：`text-[13px] font-medium text-[#6E6E73]`
+- **去除** `uppercase tracking-wider`，Apple 不使用大写字母间距
 - 列宽分配：头像(6%) 姓名(18%) 性别(8%) 入学时间(13%) 剩余课时(12%) 到期时间(14%) 状态(10%) 操作(19%)
 
-**数据行**：`px-6 py-4 border-b border-slate-50 last:border-0`
-- hover：`bg-slate-50/50`
-- 文字：`text-sm text-slate-700`
+**数据行**：`px-5 py-3.5`
+- hover：`bg-black/[0.06] transition-colors duration-150`
+- 分隔线：`border-b border-black/[0.04] last:border-0`
+- 文字：`text-[15px] text-[#1D1D1F]`
 
 **头像列（表格首列）**：
-- 有照片：`<img>`，`w-10 h-10 rounded-full object-cover border border-slate-200`
-- 无照片：占位头像，`w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-400`，显示姓名首字母
+- 有照片：`<img>`，`w-10 h-10 rounded-xl object-cover`（**圆角方形**，非纯圆）
+- 无照片：占位头像，`w-10 h-10 rounded-xl bg-black/[0.06] flex items-center justify-center text-[13px] font-bold text-[#A1A1A6]`，显示姓名首字母
 - 点击头像可跳转学员详情页
 
 **特殊样式规则**：
-- **剩余课时 ≤ 5**：数字 `text-red-600 font-bold`，右侧显示警告图标 `AlertTriangle w-4 h-4 text-yellow-500`
-- **剩余课时 = 0**：数字 `text-red-600 font-bold line-through`
-- **到期时间已过期**：日期 `text-red-600 font-medium`，显示 "已过期"
-- **到期时间 ≤ 30 天**：日期 `text-yellow-600`
+- **剩余课时 ≤ 5**：数字 `text-orange-600 font-semibold`，右侧显示警告图标 `AlertTriangle w-4 h-4 text-orange-500`
+- **剩余课时 = 0**：数字 `text-red-500 font-semibold line-through`
+- **到期时间已过期**：日期 `text-red-500 font-medium`
+- **到期时间 ≤ 30 天**：日期 `text-orange-600`
 
-**状态徽章样式**：
+**状态徽章样式（全部 pill 形状）**：
 
-| 状态 | 背景 | 文字 | 圆点 |
-|------|------|------|------|
-| 在籍 | `bg-green-50` | `text-green-700` | `w-2 h-2 bg-green-500 rounded-full mr-2` |
-| 已结业 | `bg-slate-100` | `text-slate-600` | `w-2 h-2 bg-slate-400 rounded-full mr-2` |
-| 暂停 | `bg-yellow-50` | `text-yellow-700` | `w-2 h-2 bg-yellow-500 rounded-full mr-2` |
+| 状态 | 样式 |
+|------|------|
+| 在籍 | `bg-green-500/10 text-green-600 px-2.5 py-1 rounded-full text-[12px] font-medium` + 绿色圆点 `w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5` |
+| 已结业 | `bg-black/[0.06] text-[#6E6E73] px-2.5 py-1 rounded-full text-[12px] font-medium` |
+| 暂停 | `bg-orange-500/10 text-orange-600 px-2.5 py-1 rounded-full text-[12px] font-medium` |
 
 **操作列**：
-- 编辑按钮：图标 `Pencil`，`text-slate-400 hover:text-blue-600 transition-colors`
-- 删除按钮：图标 `Trash2`，`text-slate-400 hover:text-red-600 transition-colors`
+- 编辑按钮：图标 `Pencil`，`text-[#A1A1A6] hover:text-accent transition-colors`
+- 删除按钮：图标 `Trash2`，`text-[#A1A1A6] hover:text-red-500 transition-colors`
 - 按钮间距：`gap-2`
 
-**分页器**：卡片底部，`px-6 py-4 border-t border-slate-100`
-- 左侧：共 X 条 `text-sm text-slate-500`
+**分页器**：卡片底部，`px-5 py-4`
+- 左侧：共 X 条 `text-[13px] text-[#6E6E73]`
 - 中间：页码按钮组
-  - 当前页：`bg-red-600 text-white w-8 h-8 rounded-lg text-sm font-medium`
-  - 其他页：`text-slate-600 hover:bg-slate-100 w-8 h-8 rounded-lg text-sm`
-  - 上一页/下一页：箭头图标按钮
-- 右侧：`text-sm text-slate-500`
+  - 当前页：`bg-accent text-white w-8 h-8 rounded-full text-[13px] font-medium`
+  - 其他页：`text-[#6E6E73] hover:bg-black/[0.06] w-8 h-8 rounded-full text-[13px]`
+  - 上一页/下一页：箭头图标按钮，圆形触控区域
+- 右侧：`text-[13px] text-[#6E6E73]`
 
 ---
 
@@ -408,22 +450,22 @@
 | 搜索占位符 | "搜索学员姓名..." | "搜索教练姓名..." |
 | 新增按钮 | "+ 新增学员" | "+ 新增教练" |
 | 表头列 | 头像 姓名 性别 入学时间 剩余课时 到期时间 状态 操作 | 头像 姓名 性别 执教时间 状态 操作 |
-| 剩余课时预警 | 有（≤5次标红/0次删除线） | 无（教练无课时概念） |
+| 剩余课时预警 | 有（≤5次标橙/0次标红） | 无（教练无课时概念） |
 | 到期时间 | 有 | 无（教练无到期时间） |
 
 #### 教练状态徽章
 
-| 状态 | 背景 | 文字 | 圆点 |
-|------|------|------|------|
-| 在职 | `bg-green-50` | `text-green-700` | `w-2 h-2 bg-green-500 rounded-full mr-2` |
-| 离职 | `bg-slate-100` | `text-slate-600` | `w-2 h-2 bg-slate-400 rounded-full mr-2` |
-| 休假 | `bg-blue-50` | `text-blue-700` | `w-2 h-2 bg-blue-500 rounded-full mr-2` |
+| 状态 | 样式 |
+|------|------|
+| 在职 | `bg-green-500/10 text-green-600 px-2.5 py-1 rounded-full text-[12px] font-medium` |
+| 离职 | `bg-black/[0.06] text-[#6E6E73] px-2.5 py-1 rounded-full text-[12px] font-medium` |
+| 休假 | `bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full text-[12px] font-medium` |
 
 ---
 
 ### 4.3 学员详情页（`/students/[id]`）
 
-**核心目标**：美观专业的只读展示页，面向学员和家长。
+**核心目标**：美观专业的只读展示页，面向学员和家长，呈现 Apple 原生应用般的精致感。
 
 #### 整体布局
 
@@ -464,93 +506,93 @@
 
 #### 顶部信息卡
 
-白色卡片，`rounded-xl shadow-sm p-8`，**跆拳道黑红金主题**
+白色卡片，`bg-white rounded-[20px] p-8`，无阴影
 
 **左侧区域（占 30%）—— 学员大头像**：
-- 照片容器：`w-36 h-36 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-sm`
+- 照片容器：`w-36 h-36 rounded-[20px] overflow-hidden`（**大圆角方形**，无边框）
 - 有照片：`<img src={photoUrl} className="w-full h-full object-cover" />`
-- 无照片：占位头像 `bg-slate-100 flex items-center justify-center`
-  - 图标 `User w-16 h-16 text-slate-300`
-  - 或姓名首字母 `text-4xl font-bold text-slate-400`
-- 照片下方：学员姓名 `text-xl font-bold text-center mt-4`
-- 照片悬停效果（管理员视角）：半透明遮罩 + "更换照片" 提示（如可编辑）
+- 无照片：占位头像 `bg-black/[0.06] flex items-center justify-center`
+  - 图标 `User w-16 h-16 text-[#A1A1A6]`
+  - 或姓名首字母 `text-4xl font-bold text-[#A1A1A6]`
+- 照片下方：学员姓名 `text-[17px] font-semibold text-center mt-4 text-[#1D1D1F]`
+- 照片悬停效果（管理员视角）：半透明遮罩 `bg-black/30` + "更换照片" 提示
 
 **右侧区域（占 70%）**：
-- 返回按钮：`text-slate-500 hover:text-slate-800 text-sm mb-4 flex items-center gap-1`
-- 学员姓名：`text-3xl font-bold text-slate-900`，旁边性别图标（男 `Mars` / 女 `Venus`），`w-5 h-5 text-slate-400 ml-2`
-- 状态徽章：跟在姓名后，`ml-3`
+- 返回按钮：`text-[#6E6E73] hover:text-[#1D1D1F] text-[14px] mb-4 flex items-center gap-1`
+- 学员姓名：`text-[28px] font-bold text-[#1D1D1F]`，旁边性别图标（男 `Mars` / 女 `Venus`），`w-5 h-5 text-[#A1A1A6] ml-2`
+- 状态徽章：跟在姓名后，`ml-3`，pill 形状
 - 信息行：`mt-4 flex flex-wrap gap-x-6 gap-y-2`
-  - 每项：`flex items-center gap-2 text-sm text-slate-500`
+  - 每项：`flex items-center gap-2 text-[15px] text-[#6E6E73]`
   - 图标 + 文字，如 `📞 13800138001` / `📅 入学 2024-01-15`
 - 环形进度图（Recharts）：展示 `剩余课时 / 总课时`
-  - 圆环主色：`#DC2626`（道馆红）
-  - 背景色：`#E2E8F0`
-  - 中心文字：剩余课时大数字 `text-2xl font-bold` + "剩余课时" 标签
-- 到期倒计时：到期时间 `text-lg font-semibold` + 剩余天数徽章
-  - 正常：`bg-green-50 text-green-700`
-  - 即将到期（≤30天）：`bg-yellow-50 text-yellow-700`
-  - 已过期：`bg-red-50 text-red-700`
+  - 圆环主色：`#D9264A`（accent）
+  - 背景色：`bg-black/[0.06]`
+  - 中心文字：剩余课时大数字 `text-[22px] font-bold` + "剩余课时" 标签 `text-[13px] text-[#6E6E73]`
+- 到期倒计时：到期时间 `text-[17px] font-semibold` + 剩余天数 pill 徽章
+  - 正常：`bg-green-500/10 text-green-600`
+  - 即将到期（≤30天）：`bg-orange-500/10 text-orange-600`
+  - 已过期：`bg-red-500/10 text-red-500`
 
 #### 成长时间线
 
-白色卡片，`rounded-xl shadow-sm p-6 mt-6`
+白色卡片，`bg-white rounded-[20px] p-6 mt-6`
 
 **卡片头部**：`flex items-center justify-between mb-6`
-- 标题：`text-lg font-semibold text-slate-800`，左侧带 `Trophy` 图标 `w-5 h-5 text-amber-500 mr-2`
-- 右侧："共 X 次考级" `text-sm text-slate-500`
+- 标题：`text-[17px] font-semibold text-[#1D1D1F]`，左侧带 `Trophy` 图标 `w-5 h-5 text-purple-500 mr-2`
+- 右侧："共 X 次考级" `text-[13px] text-[#6E6E73]`
 
 **时间线设计**：纵向时间线
-- 时间轴：左侧竖线 `w-0.5 bg-slate-200 absolute left-6 top-0 bottom-0`
+- 时间轴：左侧竖线 `w-[1.5px] bg-black/[0.08] absolute left-6 top-0 bottom-0`
 - 每个节点：`relative pl-12 pb-8 last:pb-0`
-  - 节点圆点：`absolute left-0 w-4 h-4 rounded-full border-2`
-    - 最新节点：`bg-red-600 border-red-600`（实心）
-    - 其他节点：`bg-white border-slate-300`
-  - 日期：`text-xs text-slate-500 mb-1`
-  - Belt 级别名称：`text-base font-semibold`
-    - 白带-绿带：`text-slate-700`
-    - 蓝带-红带：`text-blue-700`
-    - 红黑带-黑带：`text-amber-700 font-bold`（高阶带位金色）
-  - 证书编号：`text-xs text-slate-400 mt-1`
-  - 备注（如有）：`text-sm text-slate-500 mt-1 bg-slate-50 rounded px-2 py-1 inline-block`
+  - 节点圆点：`absolute left-0 w-5 h-5 rounded-full`
+    - 最新节点：`bg-accent`（实心）
+    - 其他节点：`bg-white border-2 border-black/[0.12]`
+  - 日期：`text-[12px] text-[#A1A1A6] mb-1`
+  - Belt 级别名称：`text-[17px] font-semibold`
+    - 白带-绿带：`text-[#1D1D1F]`
+    - 蓝带-红带：`text-blue-600`
+    - 红黑带-黑带：`text-purple-600 font-bold`（高阶带位高亮）
+  - 证书编号：`text-[12px] text-[#A1A1A6] mt-1`
+  - 备注（如有）：`text-[14px] text-[#6E6E73] mt-1`
 
-**Belt 颜色编码**：每个 belt 级别用对应颜色的竖条标识 `w-1 h-full absolute left-0 rounded`
+**Belt 颜色编码**：每个 belt 级别用对应颜色的细竖条标识 `w-[3px] h-full absolute left-0 rounded-full`
 
 #### 比赛记录表格
 
-白色卡片，`rounded-xl shadow-sm p-6`
+白色卡片，`bg-white rounded-[20px] p-6`
 
-- 标题行：`flex items-center mb-4`，`Award` 图标 `w-5 h-5 text-amber-500 mr-2` + "比赛记录"
+- 标题行：`flex items-center mb-4`，`Award` 图标 `w-5 h-5 text-purple-500 mr-2` + "比赛记录"
 - 表格样式同学员列表页的表格，列：日期、比赛名称、组别、成绩、获奖
-- 空状态：`text-center py-8 text-slate-400`，图标 `Award` + "暂无比赛记录"
+- 空状态：`text-center py-8`，图标 `Award w-12 h-12 text-[#A1A1A6] mx-auto mb-3` + "暂无比赛记录" `text-[14px] text-[#6E6E73]`
 
 #### 集训记录卡片网格
 
-白色卡片，`rounded-xl shadow-sm p-6`
+白色卡片，`bg-white rounded-[20px] p-6`
 
-- 标题行：`MapPin` 图标 + "集训与拓展记录"
+- 标题行：`MapPin` 图标 `w-5 h-5 text-blue-500 mr-2` + "集训与拓展记录"
 - 网格：`grid-cols-3 gap-4`
-- 每张卡片：`bg-slate-50 rounded-lg p-4 border border-slate-100`
-  - 日期：`text-xs text-slate-500`
-  - 活动名：`text-sm font-semibold text-slate-800 mt-1`
-  - 地点：`text-xs text-slate-400 mt-1 flex items-center gap-1` + `MapPin w-3 h-3`
-  - 时长：`text-xs text-slate-400 mt-1`
+- 每张卡片：`bg-black/[0.04] rounded-[14px] p-4`
+  - 日期：`text-[12px] text-[#A1A1A6]`
+  - 活动名：`text-[15px] font-semibold text-[#1D1D1F] mt-1`
+  - 地点：`text-[12px] text-[#6E6E73] mt-1 flex items-center gap-1` + `MapPin w-3 h-3`
+  - 时长：`text-[12px] text-[#6E6E73] mt-1`
 
 #### 考勤统计区
 
-白色卡片，`rounded-xl shadow-sm p-6 mt-6`
+白色卡片，`bg-white rounded-[20px] p-6 mt-6`
 
-- 标题：`BarChart3` 图标 + "考勤统计"
+- 标题：`BarChart3` 图标 `w-5 h-5 text-blue-500 mr-2` + "考勤统计"
 - 柱状图（Recharts）：
   - X 轴：近 6 个月（YYYY-MM）
   - Y 轴：出勤率 %
-  - 柱子颜色：`#DC2626`，圆角顶部
-  - 网格线：`#E2E8F0` 虚线
+  - 柱子颜色：`#D9264A`，圆角顶部
+  - 网格线：`bg-black/[0.06]` 虚线
   - 高度：`240px`
 - 最近考勤记录列表（图下方）：
   - 最多 10 条
-  - 每行：`flex items-center justify-between py-2 border-b border-slate-50`
-    - 左侧：日期 `text-sm text-slate-600` + 课程名 `text-sm text-slate-800 ml-4`
-    - 右侧：状态徽章（同功能色定义）
+  - 每行：`flex items-center justify-between py-2.5 border-b border-black/[0.04]`
+    - 左侧：日期 `text-[15px] text-[#6E6E73]` + 课程名 `text-[15px] text-[#1D1D1F] ml-4`
+    - 右侧：状态 pill 徽章（同功能色定义）
 
 ---
 
@@ -593,37 +635,39 @@
 
 #### 顶部信息卡
 
-白色卡片，`rounded-xl shadow-sm p-8`
+白色卡片，`bg-white rounded-[20px] p-8`
 
 **左侧区域（占 30%）—— 教练大头像**：
-- 与学员详情页完全一致：照片容器 `w-36 h-36 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-sm`
+- 与学员详情页完全一致：照片容器 `w-36 h-36 rounded-[20px] overflow-hidden`
 - 有照片：`<img>` `object-cover`
-- 无照片：占位头像 `bg-slate-100` + `User` 图标 `w-16 h-16 text-slate-300` 或姓名首字母
+- 无照片：占位头像 `bg-black/[0.06]` + `User` 图标 `w-16 h-16 text-[#A1A1A6]` 或姓名首字母
 
 **右侧区域（占 70%）**：
 - 返回按钮
-- 教练姓名 `text-3xl font-bold text-slate-900` + 性别图标
-- 在职状态徽章（在职/离职/休假）
+- 教练姓名 `text-[28px] font-bold text-[#1D1D1F]` + 性别图标
+- 在职状态徽章（在职/离职/休假），pill 形状
 - 信息行：电话、执教时间
-- **执教年限**：根据 `joinDate` 自动计算，如"执教 3 年 2 个月" `text-lg font-semibold text-amber-600`
+- **执教年限**：根据 `joinDate` 自动计算，如"执教 3 年 2 个月" `text-[17px] font-semibold text-purple-600`
 
 #### 个人简介卡片
 
-白色卡片，`rounded-xl shadow-sm p-6 mt-6`
+白色卡片，`bg-white rounded-[20px] p-6 mt-6`
 
-- 标题：`text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2`
-  - `FileText` 图标 `w-5 h-5 text-slate-500 mr-1` + "个人简介"
-- 内容：`text-sm text-slate-600 leading-relaxed whitespace-pre-line`
-  - 如果 `bio` 为空：显示 `text-slate-400 italic` "暂无简介"
+- 标题：`text-[17px] font-semibold text-[#1D1D1F] mb-4 flex items-center gap-2`
+  - `FileText` 图标 `w-5 h-5 text-[#6E6E73] mr-1` + "个人简介"
+- 内容：`text-[15px] text-[#6E6E73] leading-relaxed whitespace-pre-line`
+  - 如果 `bio` 为空：显示 `text-[#A1A1A6] italic` "暂无简介"
 
 #### 所授课程列表
 
-白色卡片，`rounded-xl shadow-sm p-6 mt-6`
+白色卡片，`bg-white rounded-[20px] p-6 mt-6`
 
-- 标题：`CalendarDays` 图标 + "所授课程"
-- 表格列：课程名称、类型（彩色徽章）、上课时间、学员人数
-- 空状态：`CalendarX w-12 h-12 text-slate-300 mx-auto mb-3` + "暂无授课记录"
+- 标题：`CalendarDays` 图标 `w-5 h-5 text-blue-500 mr-2` + "所授课程"
+- 表格列：课程名称、类型（彩色 pill 徽章）、上课时间、学员人数
+- 空状态：`CalendarX w-12 h-12 text-[#A1A1A6] mx-auto mb-3` + "暂无授课记录"
 - 课程类型颜色编码与日历页一致（蓝色-常规课/紫色-考级辅导/橙色-集训营/红色-比赛预备）
+
+
 
 ---
 
@@ -652,38 +696,39 @@
 
 #### 左侧边栏（可收起，默认展开，宽 `280px`）
 
-白色背景，`border-r border-slate-200 p-4`
+背景：`bg-white/70 backdrop-blur-xl border-r border-black/[0.04] p-5`
 
 **快速创建课程表单**：
-- 标题：`text-sm font-semibold mb-3`
+- 标题：`text-[14px] font-semibold text-[#1D1D1F] mb-3`
 - 表单字段（紧凑版）：
-  - 课程名称：`input text-sm`，placeholder "课程名称"
-  - 日期时间：并排两个 `input type="datetime-local"`
+  - 课程名称：`input` `bg-black/[0.06] border-0 rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1D1D1F] placeholder:text-[#A1A1A6] focus:ring-2 focus:ring-accent/20 focus:bg-white`，placeholder "课程名称"
+  - 日期时间：并排两个 `input type="datetime-local"`，同上样式
   - 课程类型：下拉选择，`regular` / `exam_prep` / `camp` / `competition`
   - **教练**：下拉选择框（从 Coach 表中选择），展示教练头像 + 姓名
-    - 触发器：`flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 text-sm`
-      - 左侧教练头像 `w-6 h-6 rounded-full object-cover`（无照片则显示首字母占位）
-      - 教练姓名 `text-slate-700`
-      - 右侧下拉箭头 `ChevronDown w-4 h-4 text-slate-400 ml-auto`
+    - 触发器：`flex items-center gap-2 bg-black/[0.06] border-0 rounded-[10px] px-3.5 py-2.5 text-[14px]`
+      - 左侧教练头像 `w-6 h-6 rounded-lg object-cover`（无照片则显示首字母占位）
+      - 教练姓名 `text-[#1D1D1F]`
+      - 右侧下拉箭头 `ChevronDown w-4 h-4 text-[#A1A1A6] ml-auto`
     - 下拉面板：
+      - `bg-white rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-black/[0.04] py-2`
       - 在职教练列表，按姓名排序
-      - 每项：`flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer`
-        - 头像 `w-8 h-8 rounded-full`
-        - 姓名 `text-sm text-slate-700`
-      - 选中项：`bg-red-50 text-red-700`
-      - 底部："+ 新增教练" 快捷链接 `text-xs text-red-600 hover:underline px-3 py-2`
+      - 每项：`flex items-center gap-3 px-3.5 py-2.5 hover:bg-black/[0.06] cursor-pointer`
+        - 头像 `w-8 h-8 rounded-lg`
+        - 姓名 `text-[14px] text-[#1D1D1F]`
+      - 选中项：`bg-accent/10 text-accent font-medium`
+      - 底部："+ 新增教练" 快捷链接 `text-[12px] text-accent hover:underline px-3.5 py-2`
     - 无教练选项：列表顶部添加 "不指定教练" 选项
-  - 地点：`input text-sm` placeholder "上课地点"
-- 提交按钮：`w-full bg-red-600 text-white py-2 rounded-lg text-sm mt-3`
+  - 地点：`input` 同上样式，placeholder "上课地点"
+- 提交按钮：`w-full bg-accent text-white py-2.5 rounded-full text-[14px] font-medium mt-3`
 
 **课程筛选器**：
-- 标题：`text-sm font-semibold mt-6 mb-3`
+- 标题：`text-[14px] font-semibold text-[#1D1D1F] mt-6 mb-3`
 - 复选框列表：
   - `☑ 常规课` — 蓝色左侧色条标识
   - `☑ 考级辅导` — 紫色色条
   - `☑ 集训营` — 橙色色条
   - `☑ 比赛预备` — 红色色条
-- 每个复选框：`flex items-center gap-2 text-sm text-slate-600 mb-2`
+- 每个复选框：`flex items-center gap-2 text-[14px] text-[#6E6E73] mb-2`
 
 #### 日历主区域
 
@@ -691,12 +736,12 @@
 
 | 元素 | 样式 |
 |------|------|
-| 日历头部工具栏 | 白色背景，`border-b border-slate-200`，按钮圆角 `rounded-lg` |
-| "今天" 按钮 | `bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm` |
-| 上/下箭头按钮 | `border border-slate-200 text-slate-600 hover:bg-slate-50 w-8 h-8 rounded-lg` |
-| 视图切换按钮组 | `border border-slate-200 rounded-lg overflow-hidden`，激活项 `bg-slate-800 text-white` |
-| 月视图网格 | 单元格最小高度 `120px`，边框 `border-slate-100` |
-| 日期数字 | `text-sm text-slate-700`，今天高亮 `bg-red-600 text-white w-7 h-7 rounded-full` |
+| 日历头部工具栏 | 透明背景，按钮圆角 `rounded-full` |
+| "今天" 按钮 | `bg-accent text-white px-4 py-2 rounded-full text-[14px] font-medium` |
+| 上/下箭头按钮 | `bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] w-9 h-9 rounded-full flex items-center justify-center` |
+| 视图切换按钮组 | `bg-black/[0.06] rounded-full overflow-hidden p-0.5`，激活项 `bg-[#1D1D1F] text-white rounded-full px-3 py-1.5` |
+| 月视图网格 | 单元格最小高度 `120px`，边框 `border-black/[0.04]` |
+| 日期数字 | `text-[14px] text-[#1D1D1F]`，今天高亮 `bg-accent text-white w-7 h-7 rounded-full flex items-center justify-center` |
 
 **课程事件卡片（日历格内）**：
 
@@ -708,27 +753,26 @@
 └────────────────────┘
 ```
 
-- 容器：`rounded-md px-2 py-1 text-xs cursor-pointer hover:opacity-90 transition-opacity`
-- 左侧色条：`w-1 rounded-full absolute left-0 top-1 bottom-1`
-- 课程类型颜色：
+- 容器：`rounded-lg px-2 py-1.5 text-[12px] cursor-pointer hover:opacity-80 transition-opacity`
+- 左侧色条：`w-1.5 rounded-full absolute left-0 top-1.5 bottom-1.5`
+- 课程类型颜色（降低饱和度，更清透）：
 
 | 类型 | 背景 | 左侧色条 |
 |------|------|----------|
-| 常规课 | `bg-blue-50` | `bg-blue-500` |
-| 考级辅导 | `bg-purple-50` | `bg-purple-500` |
-| 集训营 | `bg-orange-50` | `bg-orange-500` |
-| 比赛预备 | `bg-red-50` | `bg-red-500` |
+| 常规课 | `bg-blue-500/10` | `bg-blue-500` |
+| 考级辅导 | `bg-purple-500/10` | `bg-purple-500` |
+| 集训营 | `bg-orange-500/10` | `bg-orange-500` |
+| 比赛预备 | `bg-red-500/10` | `bg-red-500` |
 
 #### 课程详情/创建抽屉面板
 
-右侧滑出抽屉：`w-96 bg-white shadow-xl h-full fixed right-0 top-0 z-50`
-- 动画：`animate-in slide-in-from-right duration-300`
-- 头部：`p-4 border-b border-slate-200 flex items-center justify-between`
-  - 标题 `text-lg font-semibold` + 关闭按钮 `X`
-- 内容区：`p-4 overflow-auto`
-- 底部操作栏：`p-4 border-t border-slate-200 flex gap-3`
-  - "编辑" 按钮：`flex-1 border border-slate-200 py-2 rounded-lg text-sm`
-  - "开始点名" 按钮：`flex-1 bg-red-600 text-white py-2 rounded-lg text-sm`
+右侧滑出抽屉：`fixed right-0 top-0 h-full bg-white w-[420px] flex flex-col rounded-l-[20px] shadow-[-8px_0_40px_rgba(0,0,0,0.08)] z-50`
+- 动画：`animate-in slide-in-from-right duration-300 ease-out`
+- 头部：`p-5`，标题 `text-[17px] font-semibold text-[#1D1D1F]` + 关闭按钮 `X w-5 h-5 text-[#A1A1A6] hover:text-[#1D1D1F] rounded-full hover:bg-black/[0.06] w-8 h-8 flex items-center justify-center`
+- 内容区：`flex-1 overflow-auto p-5`
+- 底部操作栏：`p-5 flex gap-3`
+  - "编辑" 按钮：`flex-1 bg-black/[0.06] text-[#1D1D1F] py-2.5 rounded-full text-[14px] font-medium hover:bg-black/[0.1]`
+  - "开始点名" 按钮：`flex-1 bg-accent text-white py-2.5 rounded-full text-[14px] font-medium hover:opacity-90`
 
 ---
 
@@ -738,47 +782,54 @@
 
 #### 模态框设计
 
-居中模态框，`max-w-2xl w-full mx-auto`，背景遮罩 `bg-black/50 backdrop-blur-sm`
+居中模态框，`max-w-2xl w-full mx-auto`
 
-**头部**：`p-6 border-b border-slate-200`
-- 课程名：`text-xl font-semibold`
-- 时间/教练：`text-sm text-slate-500 mt-1`
-- 右侧："全部出勤" 快捷按钮 `bg-green-600 text-white px-4 py-2 rounded-lg text-sm`
+- 遮罩：`fixed inset-0 bg-black/25 backdrop-blur-md z-50 flex items-center justify-center`
+- 容器：`bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] w-full mx-4 overflow-hidden`
+
+**头部**：`px-6 py-5`
+- 课程名：`text-[20px] font-semibold text-[#1D1D1F]`
+- 时间/教练：`text-[14px] text-[#6E6E73] mt-1`
+- 右侧："全部出勤" 快捷按钮 `bg-green-500 text-white px-4 py-2 rounded-full text-[14px] font-medium hover:opacity-90`
+
+> 头部与内容区之间**不设置 border-b**，靠 `pb-5` 与内容区的 `pt-0` 自然分隔。
 
 **学员列表区**：`max-h-[60vh] overflow-auto`
-- 每行：`flex items-center px-6 py-3 border-b border-slate-50 hover:bg-slate-50`
+- 每行：`flex items-center px-6 py-3 border-b border-black/[0.04] hover:bg-black/[0.04] transition-colors duration-150`
 - 左侧：
-  - 学员头像：有照片则 `w-8 h-8 rounded-full object-cover`，无照片则 `w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500`
-  - 姓名：`text-sm font-medium text-slate-800 ml-3`
-  - 剩余课时：`text-xs text-slate-500 ml-2`
-    - 正常：`text-slate-500`
-    - ≤5次：`text-yellow-600 font-medium`
-    - 0次：`text-red-600 font-bold`
-- 右侧：状态选择器（5 个单选按钮组成的按钮组）
+  - 学员头像：有照片则 `w-9 h-9 rounded-lg object-cover`，无照片则 `w-9 h-9 rounded-lg bg-black/[0.06] flex items-center justify-center text-[12px] font-bold text-[#A1A1A6]`
+  - 姓名：`text-[15px] font-medium text-[#1D1D1F] ml-3`
+  - 剩余课时：`text-[12px] text-[#6E6E73] ml-2`
+    - 正常：`text-[#6E6E73]`
+    - ≤5次：`text-orange-600 font-medium`
+    - 0次：`text-red-500 font-bold`
+- 右侧：状态选择器（5 个 pill 单选按钮组成的按钮组）
 
-**状态按钮组**：`flex gap-1`
+**状态按钮组**：`flex gap-1.5`
 
 | 状态 | 默认 | 选中 |
 |------|------|------|
-| 未点名 | `bg-slate-100 text-slate-400` | — |
-| 出勤 | `hover:bg-green-50 hover:text-green-700` | `bg-green-600 text-white` |
-| 缺勤 | `hover:bg-red-50 hover:text-red-700` | `bg-red-600 text-white` |
-| 迟到 | `hover:bg-orange-50 hover:text-orange-700` | `bg-orange-500 text-white` |
-| 请假 | `hover:bg-blue-50 hover:text-blue-700` | `bg-blue-600 text-white` |
+| 未点名 | `bg-black/[0.06] text-[#A1A1A6] rounded-full` | — |
+| 出勤 | `hover:bg-green-500/10 hover:text-green-600 rounded-full` | `bg-green-500 text-white rounded-full` |
+| 缺勤 | `hover:bg-red-500/10 hover:text-red-500 rounded-full` | `bg-red-500 text-white rounded-full` |
+| 迟到 | `hover:bg-orange-500/10 hover:text-orange-600 rounded-full` | `bg-orange-500 text-white rounded-full` |
+| 请假 | `hover:bg-blue-500/10 hover:text-blue-500 rounded-full` | `bg-blue-500 text-white rounded-full` |
 
-按钮样式：`px-3 py-1 rounded-md text-xs font-medium transition-colors duration-150`
+按钮样式：`px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors duration-150`
 
-**底部**：`p-6 border-t border-slate-200 flex justify-between items-center`
-- 左侧：已点 X / 共 Y 人 `text-sm text-slate-500`
+**底部**：`px-6 py-5 flex justify-between items-center`
+- 左侧：已点 X / 共 Y 人 `text-[14px] text-[#6E6E73]`
 - 右侧：
-  - "取消"：`border border-slate-200 px-4 py-2 rounded-lg text-sm`
-  - "提交点名"：`bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-medium`
+  - "取消"：`bg-black/[0.06] text-[#1D1D1F] px-5 py-2.5 rounded-full text-[14px] font-medium hover:bg-black/[0.1]`
+  - "提交点名"：`bg-accent text-white px-6 py-2.5 rounded-full text-[14px] font-medium hover:opacity-90`
 
 ---
 
 ### 4.6 AI 对话页（`/ai`）
 
 #### 整体布局（全屏聊天界面）
+
+参照 Apple Messages / macOS ChatGPT 客户端风格：
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -810,38 +861,42 @@
 
 #### 聊天消息区
 
-全屏高度减去输入区，`flex-1 overflow-auto p-6 space-y-4`
+全屏高度减去输入区，`flex-1 overflow-auto p-6 space-y-5`
+
+**背景**：`bg-[#F5F5F7]`（secondary-background），非纯白
 
 **AI 消息气泡**：
 - 容器：`flex items-start gap-3`
-- AI 头像：`w-8 h-8 rounded-full bg-red-600 flex items-center justify-center`
+- AI 头像：`w-8 h-8 rounded-lg bg-accent flex items-center justify-center`
   - 内部图标 `Sparkles w-5 h-5 text-white`
-- 气泡：`bg-white rounded-xl rounded-tl-none shadow-sm px-4 py-3 max-w-[80%]`
-- 文字：`text-sm text-slate-700 leading-relaxed`
-- 时间戳：`text-xs text-slate-400 mt-1`
+- 气泡：`bg-white rounded-[18px] rounded-tl-sm px-4 py-3 max-w-[80%]`
+  - 去除阴影！纯白气泡在灰色背景上自然可见
+- 文字：`text-[15px] text-[#1D1D1F] leading-relaxed`
+- 时间戳：`text-[12px] text-[#A1A1A6] mt-1`
 
 **用户消息气泡**：
 - 容器：`flex items-start gap-3 flex-row-reverse`
-- 气泡：`bg-slate-800 text-white rounded-xl rounded-tr-none shadow-sm px-4 py-3 max-w-[80%]`
-- 文字：`text-sm leading-relaxed`
+- 气泡：`bg-accent text-white rounded-[18px] rounded-tr-sm px-4 py-3 max-w-[80%]`
+  - 从深色 slate 改为品牌强调色，更 Apple Messages 风格
+- 文字：`text-[15px] leading-relaxed`
 
 **工具调用状态卡片**：
 - 嵌套在 AI 消息气泡内
-- `bg-slate-50 border border-slate-200 rounded-lg p-3 mt-2`
-- 标题：`text-xs font-medium text-slate-600 flex items-center gap-2`
+- `bg-black/[0.04] rounded-[14px] p-3 mt-2`
+- 标题：`text-[12px] font-medium text-[#6E6E73] flex items-center gap-2`
   - 加载中：`Loader2 w-3 h-3 animate-spin`
-  - 完成：`CheckCircle w-3 h-3 text-green-600`
-- 内容：`text-xs text-slate-500 mt-1`
+  - 完成：`CheckCircle w-3 h-3 text-green-500`
+- 内容：`text-[12px] text-[#A1A1A6] mt-1`
   - 工具名 + 参数摘要
 
 #### 快捷指令栏
 
-输入框上方，`p-3 border-t border-slate-200 bg-white`
+输入框上方，`p-3 bg-white border-t border-black/[0.04]`
 
 水平滚动条：`flex gap-2 overflow-x-auto`
 
 快捷按钮：
-- `bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors`
+- `bg-black/[0.06] hover:bg-accent/10 hover:text-accent text-[#6E6E73] px-3.5 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors duration-150`
 - 预置指令：
   - "查看今日课程" + `CalendarDays w-3 h-3 mr-1`
   - "搜索学员" + `Users w-3 h-3 mr-1`
@@ -850,7 +905,7 @@
 
 #### 输入框区
 
-固定在底部，`p-4 border-t border-slate-200 bg-white`
+固定在底部，`p-4 bg-white border-t border-black/[0.04]`
 
 ```
 ┌────────────────────────────────────────────────────────────┐
@@ -859,8 +914,8 @@
 ```
 
 - 容器：`flex items-center gap-3`
-- 输入框：`flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none`
-- 发送按钮：`w-10 h-10 bg-red-600 text-white rounded-lg flex items-center justify-center hover:bg-red-700 transition-colors`
+- 输入框：`flex-1 bg-black/[0.06] rounded-full px-5 py-3 text-[15px] text-[#1D1D1F] placeholder:text-[#A1A1A6] border-0 focus:ring-2 focus:ring-accent/20 focus:bg-white transition-all duration-200 resize-none`
+- 发送按钮：`w-9 h-9 bg-accent text-white rounded-full flex items-center justify-center hover:opacity-90 transition-opacity`
   - 图标 `Send w-5 h-5`
   - 加载中：`Loader2 w-5 h-5 animate-spin`
 
@@ -895,7 +950,7 @@
 │  基本信息                                                   │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │  姓名 *          性别 *                               │  │
-│  │  [________]      ( )男  ( )女                         │  │
+│  │  [________]      [ ○男  ○女 ]                        │  │
 │  │                                                      │  │
 │  │  出生日期        身份证号                              │  │
 │  │  [________]      [________]                          │  │
@@ -910,7 +965,7 @@
 │  │  [________]      [________]    [________]             │  │
 │  │                                                      │  │
 │  │  在籍状态                                             │  │
-│  │  ( )在籍  ( )已结业  ( )暂停                          │  │
+│  │  [ 在籍 | 已结业 | 暂停 ]                             │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                                                             │
 │                                    [取消]  [保存]           │
@@ -919,34 +974,34 @@
 
 #### 照片采集区域
 
-白色卡片，`rounded-xl shadow-sm p-8 mb-6`
+白色卡片，`bg-white rounded-[20px] p-8 mb-6`
 
-**卡片标题**：`text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2`
-- 左侧色条 `w-1 h-5 bg-red-600 rounded-full`
+**卡片标题**：`text-[17px] font-semibold text-[#1D1D1F] mb-6 flex items-center gap-2`
+- 左侧色条 `w-1 h-5 bg-accent rounded-full`
 - 文字 "学员照片"
 
 **照片预览区**：居中 `flex flex-col items-center`
 
-- 预览容器：`w-48 h-48 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center transition-all duration-200`
-  - 有照片时边框变为实线 `border-solid border-red-200`
-  - 悬停时 `border-red-300 bg-red-50/30`
+- 预览容器：`w-48 h-48 rounded-[20px] overflow-hidden border-2 border-dashed border-black/[0.12] bg-black/[0.04] flex items-center justify-center transition-all duration-200`
+  - 有照片时边框变为实线 `border-solid border-accent/20`
+  - 悬停时 `border-accent/40 bg-accent/[0.02]`
 
 - **无照片状态**：
-  - `User` 图标 `w-16 h-16 text-slate-300`
-  - 文字 `text-sm text-slate-400 mt-2` "暂无照片"
+  - `User` 图标 `w-16 h-16 text-[#A1A1A6]`
+  - 文字 `text-[14px] text-[#A1A1A6] mt-2` "暂无照片"
 
 - **有照片状态**（预览/已保存）：
   - `<img>` `w-full h-full object-cover`
-  - 悬停遮罩：`absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200`
-  - 遮罩文字：`text-white text-sm font-medium` "更换照片"
+  - 悬停遮罩：`absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 rounded-[20px]`
+  - 遮罩文字：`text-white text-[14px] font-medium` "更换照片"
 
 **操作按钮组**：`flex gap-3 justify-center mt-6`
 
 | 按钮 | 图标 | 样式 | 功能 |
 |------|------|------|------|
-| **打开摄像头** | `Camera` | `bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2` | 调起摄像头拍照 |
-| **选择文件** | `FolderOpen` | `border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2` | 打开文件选择器 |
-| **清除照片** | `Trash2` | `text-slate-400 hover:text-red-600 px-3 py-2 rounded-lg transition-colors` | 清除已选照片 |
+| **打开摄像头** | `Camera` | `bg-accent text-white px-5 py-2.5 rounded-full text-[14px] font-medium hover:opacity-90 flex items-center gap-2` | 调起摄像头拍照 |
+| **选择文件** | `FolderOpen` | `bg-black/[0.06] text-[#1D1D1F] px-5 py-2.5 rounded-full text-[14px] font-medium hover:bg-black/[0.1] flex items-center gap-2` | 打开文件选择器 |
+| **清除照片** | `Trash2` | `text-[#A1A1A6] hover:text-red-500 px-3 py-2 rounded-full hover:bg-red-500/10 transition-colors` | 清除已选照片 |
 
 - 隐藏的文件输入：`<input type="file" accept="image/*" className="hidden" ref={fileInputRef} />`
 
@@ -978,7 +1033,7 @@
 │  基本信息                                                   │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │  姓名 *          性别 *                               │  │
-│  │  [________]      ( )男  ( )女                         │  │
+│  │  [________]      [ ○男  ○女 ]                        │  │
 │  │                                                      │  │
 │  │  出生日期        身份证号      电话号码                │  │
 │  │  [________]      [________]   [________]             │  │
@@ -995,7 +1050,7 @@
 │  │  └──────────────────────────────────────────────┘   │  │
 │  │                                                      │  │
 │  │  在职状态                                             │  │
-│  │  ( )在职  ( )离职  ( )休假                            │  │
+│  │  [ 在职 | 离职 | 休假 ]                               │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                                                             │
 │                                    [取消]  [保存]           │
@@ -1010,7 +1065,7 @@
 | 照片标题 | "学员照片" | "教练照片" |
 | 分组标题 | "基本信息" / "课务信息" | "基本信息" / "工作信息" |
 | 课务信息组 | 入学时间 / 剩余课时 / 到期时间 / 在籍状态 | 执教时间 / 个人简介 / 在职状态 |
-| 个人简介 | 无 | `<textarea>` 多行文本框，`h-24 resize-none`，placeholder "填写个人简介、工作经历..." |
+| 个人简介 | 无 | `<textarea>` 多行文本框，`h-24 resize-none bg-black/[0.06] border-0 rounded-[10px] px-3.5 py-2.5 text-[15px] placeholder:text-[#A1A1A6] focus:ring-2 focus:ring-accent/20 focus:bg-white`，placeholder "填写个人简介、工作经历..." |
 | 状态选项 | 在籍 / 已结业 / 暂停 | 在职 / 离职 / 休假 |
 
 所有表单控件样式与学员表单完全一致，照片采集组件复用 `PhotoCapture`。
@@ -1043,40 +1098,42 @@
 └─────────────────────────────────────────────┘
 ```
 
-**遮罩**：`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center`
-**容器**：`bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden`
-**动画**：`animate-in fade-in zoom-in-95 duration-200`
+**遮罩**：`fixed inset-0 bg-black/25 backdrop-blur-md z-50 flex items-center justify-center`
+**容器**：`bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] max-w-lg w-full mx-4 overflow-hidden`
+**动画**：`animate-in fade-in zoom-in-[0.98] duration-200`
 
-**头部**：`px-6 py-4 border-b border-slate-100 flex items-center gap-3`
-- `Camera` 图标 `w-5 h-5 text-red-600`
-- 标题 `text-lg font-semibold text-slate-800` "拍照"
-- 关闭按钮：`X w-5 h-5 text-slate-400 hover:text-slate-600 ml-auto`
+**头部**：`px-6 py-5 flex items-center gap-3`
+- `Camera` 图标 `w-5 h-5 text-accent`
+- 标题 `text-[17px] font-semibold text-[#1D1D1F]` "拍照"
+- 关闭按钮：`X w-5 h-5 text-[#A1A1A6] hover:text-[#1D1D1F] ml-auto rounded-full hover:bg-black/[0.06] w-8 h-8 flex items-center justify-center`
+
+> 头部与内容区之间**不设置 border-b**。
 
 **视频区域**：`relative bg-black aspect-[4/3]`
-- `<video>` 元素 `w-full h-full object-cover`
+- `<video>` 元素 `w-full h-full object-cover rounded-b-[20px]`
 - **权限请求状态**：居中显示
-  - `Camera w-12 h-12 text-slate-400 mb-3`
-  - `text-sm text-slate-500` "请允许使用摄像头进行拍照"
-  - "请求权限" 按钮：`bg-red-600 text-white px-4 py-2 rounded-lg text-sm mt-3`
+  - `Camera w-12 h-12 text-[#A1A1A6] mb-3`
+  - `text-[14px] text-[#6E6E73]` "请允许使用摄像头进行拍照"
+  - "请求权限" 按钮：`bg-accent text-white px-5 py-2.5 rounded-full text-[14px] font-medium hover:opacity-90 mt-3`
 - **加载状态**：`Loader2 w-8 h-8 text-white animate-spin mx-auto`
 - **错误状态**：
   - `AlertCircle w-12 h-12 text-red-500 mb-3`
-  - `text-sm text-red-600` "无法访问摄像头"
-  - `text-xs text-slate-500 mt-1` "请检查摄像头连接和权限设置"
+  - `text-[14px] text-red-500` "无法访问摄像头"
+  - `text-[12px] text-[#6E6E73] mt-1` "请检查摄像头连接和权限设置"
 
-**操作栏**：`px-6 py-4 border-t border-slate-100 flex justify-center gap-4`
+**操作栏**：`px-6 py-5 flex justify-center gap-4`
 
 **状态 1 —— 实时预览中**：
 - 快门按钮（居中突出）：
-  - `w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg transition-all hover:scale-105`
+  - `w-16 h-16 rounded-full bg-accent hover:opacity-90 text-white flex items-center justify-center transition-opacity`
   - 内部：`Camera w-7 h-7`
-- 取消按钮：`text-slate-500 hover:text-slate-700 text-sm px-4 py-2`
+- 取消按钮：`text-[#6E6E73] hover:text-[#1D1D1F] text-[14px] px-4 py-2 rounded-full hover:bg-black/[0.06]`
 
 **状态 2 —— 已拍照，待确认**：
 - 视频暂停，显示定格画面
-- "重拍" 按钮：`border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm flex items-center gap-1`
+- "重拍" 按钮：`bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] px-4 py-2 rounded-full text-[14px] font-medium flex items-center gap-1`
   - `RotateCcw w-4 h-4` + "重拍"
-- "确认使用" 按钮：`bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-medium flex items-center gap-1`
+- "确认使用" 按钮：`bg-accent text-white px-5 py-2.5 rounded-full text-[14px] font-medium hover:opacity-90 flex items-center gap-1`
   - `Check w-4 h-4` + "确认使用"
 
 **视频帧转图片后的处理**：
@@ -1090,159 +1147,163 @@
 
 ### 5.1 按钮（Button）
 
+全面采用 pill 形状（`rounded-full`）或大圆角，废除小圆角方形按钮。
+
 | 变体 | 默认 | Hover | 禁用 |
 |------|------|-------|------|
-| **Primary** | `bg-red-600 text-white` | `bg-red-700 -translate-y-0.5 shadow-md` | `opacity-50 cursor-not-allowed` |
-| **Secondary** | `bg-white border border-slate-200 text-slate-700` | `bg-slate-50 border-slate-300` | `opacity-50 cursor-not-allowed` |
-| **Ghost** | `bg-transparent text-slate-600` | `bg-slate-100 text-slate-800` | `opacity-50 cursor-not-allowed` |
-| **Danger** | `bg-white border border-red-200 text-red-600` | `bg-red-50 border-red-300` | `opacity-50 cursor-not-allowed` |
-| **Icon** | `bg-transparent text-slate-400 p-2 rounded-lg` | `bg-slate-100 text-slate-600` | `opacity-50 cursor-not-allowed` |
+| **Primary** | `bg-accent text-white rounded-full px-5 py-2.5 text-[14px] font-medium` | `opacity-90` | `opacity-50 cursor-not-allowed` |
+| **Secondary** | `bg-black/[0.06] text-[#1D1D1F] rounded-full px-5 py-2.5 text-[14px] font-medium` | `bg-black/[0.1]` | `opacity-50 cursor-not-allowed` |
+| **Ghost** | `bg-transparent text-accent rounded-full px-4 py-2 text-[14px] font-medium` | `bg-accent/10` | `opacity-50 cursor-not-allowed` |
+| **Danger** | `bg-red-500/10 text-red-500 rounded-full px-5 py-2.5 text-[14px] font-medium` | `bg-red-500/20` | `opacity-50 cursor-not-allowed` |
+| **Icon** | `w-9 h-9 rounded-full bg-transparent flex items-center justify-center` | `bg-black/[0.06]` | `opacity-50 cursor-not-allowed` |
 
-**尺寸**：
-
-| 尺寸 | Padding | 字号 | 用途 |
-|------|---------|------|------|
-| **sm** | `px-3 py-1.5` | `text-xs` | 表格操作、标签按钮 |
-| **md** | `px-4 py-2` | `text-sm` | 表单提交、常规操作 |
-| **lg** | `px-6 py-3` | `text-base` | 重要操作、CTA |
-
-**统一圆角**：`rounded-lg`
-**过渡**：`transition-all duration-150`
+**统一特征**：
+- 过渡：`transition-all duration-150`
+- **去除** `hover:-translate-y-0.5` 上浮效果（Apple 不使用位移反馈）
+- **去除** shadow 变化作为 hover 反馈
 
 ### 5.2 卡片（Card）
 
 **基础卡片**：
 ```
-bg-white rounded-xl shadow-sm border border-slate-100
+bg-white rounded-[20px]
 ```
+- **废除** `shadow-sm`！在 `bg-[#F5F5F7]` 页面上，纯白卡片自然形成层级
+- **废除** `border`，除非在纯白背景上需要边界
 
 **卡片变体**：
 
 | 变体 | 样式 | 用途 |
 |------|------|------|
-| **默认** | `bg-white rounded-xl shadow-sm` | 一般内容容器 |
-| **hoverable** | + `hover:shadow-md transition-shadow duration-200` | 可点击卡片 |
-| **bordered** | `bg-white rounded-xl border border-slate-200` | 强调边界 |
-| **colored-header** | 顶部 `4px` 色条 + 白色主体 | 带类型标识的卡片 |
-| **stats** | `bg-white rounded-xl shadow-sm p-6` | 统计数字卡片 |
+| **默认** | `bg-white rounded-[20px]` | 一般内容容器 |
+| **hoverable** | + `hover:bg-black/[0.04] transition-colors duration-150` | 可点击列表项 |
+| **分组卡片** | `bg-white rounded-[20px] p-5` | 表单分组、信息面板 |
+| **毛玻璃卡片** | `backdrop-blur-xl bg-white/70 rounded-[20px] border border-white/20` | 悬浮提示、特殊面板 |
 
 ### 5.3 表格（Table）
 
-**容器**：`bg-white rounded-xl shadow-sm overflow-hidden`
+**容器**：`bg-white rounded-[20px] overflow-hidden`
 
-**表头**：`bg-slate-50 border-b border-slate-200`
-- 文字：`text-xs font-semibold text-slate-500 uppercase tracking-wider`
-- padding：`px-6 py-3`
+**表头**：`px-5 py-3`
+- 文字：`text-[13px] font-medium text-[#6E6E73]`
+- **去除** `uppercase tracking-wider`
 
-**数据行**：
-- 默认：`border-b border-slate-50`
-- hover：`bg-slate-50/50 transition-colors`
-- padding：`px-6 py-4`
-- 文字：`text-sm text-slate-700`
+**数据行**：`px-5 py-3.5`
+- 默认：`border-b border-black/[0.04] last:border-0`
+- hover：`bg-black/[0.04] transition-colors duration-150`
+- 文字：`text-[15px] text-[#1D1D1F]`
 
 **空状态**：
-- 居中图标 + 文字 `py-12`
-- 图标：`w-12 h-12 text-slate-300 mx-auto mb-3`
-- 主文字：`text-sm text-slate-500`
-- 次文字（可选）：`text-xs text-slate-400 mt-1`
+- 居中 `text-center py-12`
+- 图标：`w-12 h-12 text-[#A1A1A6] mx-auto mb-3`
+- 主文字：`text-[14px] text-[#6E6E73]`
+- 次文字（可选）：`text-[12px] text-[#A1A1A6] mt-1`
 
 **加载状态**：
 - 骨架屏：5 行灰色脉冲条 `animate-pulse`
-- 每行：`h-12 bg-slate-100 rounded mb-2`
+- 每行：`h-12 bg-black/[0.06] rounded-[10px] mb-2`
 
 ### 5.4 模态框（Modal）
 
-**遮罩**：`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center`
-**容器**：`bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 overflow-hidden`
+- 遮罩：`fixed inset-0 bg-black/25 backdrop-blur-md z-50 flex items-center justify-center`
+- 容器：`bg-white rounded-[20px] max-w-lg w-full mx-4 shadow-[0_20px_60px_rgba(0,0,0,0.12)]`
 
 **结构**：
-- 头部：`px-6 py-4 border-b border-slate-100 flex items-center justify-between`
-  - 标题 `text-lg font-semibold` + 关闭按钮 `X w-5 h-5 text-slate-400 hover:text-slate-600`
+- 头部：`px-6 py-5`，**去除 border-b**，标题 `text-[17px] font-semibold text-[#1D1D1F]` + 关闭按钮
 - 内容：`px-6 py-4 max-h-[60vh] overflow-auto`
-- 底部：`px-6 py-4 border-t border-slate-100 flex justify-end gap-3`
+- 底部：`px-6 py-5`，**去除 border-t**
 
-**动画**：`animate-in fade-in zoom-in-95 duration-200`
+**动画**：`animate-in fade-in zoom-in-[0.98] duration-200`
 
 ### 5.5 抽屉（Drawer）
 
-**遮罩**：同模态框
-**容器**：`fixed right-0 top-0 h-full bg-white shadow-xl z-50 w-96 flex flex-col`
-**动画**：`animate-in slide-in-from-right duration-300`
-
-**结构**：
-- 头部：`px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0`
-- 内容：`flex-1 overflow-auto px-6 py-4`
-- 底部：`px-6 py-4 border-t border-slate-100 shrink-0`
+- 遮罩同模态框
+- 容器：`fixed right-0 top-0 h-full bg-white w-[420px] flex flex-col rounded-l-[20px] shadow-[-8px_0_40px_rgba(0,0,0,0.08)]`
+- 头部：`px-5 py-5`，**去除 border-b**
+- 内容：`flex-1 overflow-auto p-5`
+- 底部：`px-5 py-5`，**去除 border-t**
 
 ### 5.6 徽章（Badge）
 
-| 变体 | 样式 | 用途 |
-|------|------|------|
-| **default** | `bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-medium` | 默认标签 |
-| **success** | `bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-medium` | 成功/在籍 |
-| **warning** | `bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded text-xs font-medium` | 警告/暂停 |
-| **danger** | `bg-red-50 text-red-700 px-2 py-0.5 rounded text-xs font-medium` | 危险/过期 |
-| **info** | `bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-medium` | 信息/请假 |
-| **accent** | `bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-xs font-medium` | 强调/成就 |
+全部改为 **pill 形状（胶囊形）**：
+
+| 变体 | 样式 |
+|------|------|
+| **default** | `bg-black/[0.06] text-[#6E6E73] px-2.5 py-1 rounded-full text-[12px] font-medium` |
+| **success** | `bg-green-500/10 text-green-600 px-2.5 py-1 rounded-full text-[12px] font-medium` |
+| **warning** | `bg-orange-500/10 text-orange-600 px-2.5 py-1 rounded-full text-[12px] font-medium` |
+| **danger** | `bg-red-500/10 text-red-500 px-2.5 py-1 rounded-full text-[12px] font-medium` |
+| **info** | `bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full text-[12px] font-medium` |
+| **accent** | `bg-accent/10 text-accent px-2.5 py-1 rounded-full text-[12px] font-medium` |
 
 ### 5.7 Toast 通知
 
-**位置**：右上角，`fixed top-4 right-4 z-50`
+从侧边彩色边框改为**顶部居中毛玻璃悬浮卡片**：
 
-**成功 Toast**：
-- `bg-white border-l-4 border-green-500 shadow-lg rounded-lg p-4 flex items-start gap-3 max-w-sm`
-- 图标：`CheckCircle w-5 h-5 text-green-500`
-- 标题：`text-sm font-medium text-slate-800`
-- 描述：`text-xs text-slate-500 mt-0.5`
-
-**错误 Toast**：
-- 边框 `border-red-500`，图标 `XCircle text-red-500`
-
-**动画**：`animate-in slide-in-from-right duration-300`
-**自动消失**：3 秒后淡出 `animate-out fade-out slide-out-to-right duration-300`
+- 位置：`fixed top-4 left-1/2 -translate-x-1/2 z-50`
+- 容器：`backdrop-blur-xl bg-white/80 border border-white/20 rounded-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] px-5 py-3 flex items-center gap-3`
+- 成功图标：`CheckCircle w-5 h-5 text-green-500`
+- 错误图标：`XCircle w-5 h-5 text-red-500`
+- 标题：`text-[14px] font-medium text-[#1D1D1F]`
+- 动画：`animate-in fade-in slide-in-from-top-2 duration-200`
+- 自动消失：3 秒后淡出 `animate-out fade-out slide-out-to-top-2 duration-200`
 
 ### 5.8 输入框（Input）
 
 **基础样式**：
 ```
-w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-800
-placeholder:text-slate-400
-focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500
-disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed
-transition-all duration-150
+w-full bg-black/[0.06] rounded-[10px] px-4 py-3 text-[15px] text-[#1D1D1F]
+placeholder:text-[#A1A1A6] border-0
+focus:outline-none focus:ring-2 focus:ring-accent/20 focus:bg-white
+disabled:opacity-50 disabled:cursor-not-allowed
+transition-all duration-200
 ```
 
-**前置图标**：`relative` 容器，图标 `absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4`，输入框 `pl-10`
+**前置图标**：`relative` 容器，图标 `absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1A6] w-4 h-4`，输入框 `pl-10`
 
-**错误状态**：`border-red-500 focus:ring-red-500/30 focus:border-red-500`
+**错误状态**：`ring-2 ring-red-500/30 bg-red-500/5`
 
 ### 5.9 下拉选择（Select）
 
-**触发器**：同输入框样式，右侧下拉箭头 `ChevronDown w-4 h-4 text-slate-400 absolute right-3`
+**触发器**：同输入框样式，右侧 `ChevronDown w-4 h-4 text-[#A1A1A6]`
 
 **下拉面板**：
-- `absolute mt-1 w-full bg-white rounded-lg shadow-lg border border-slate-200 z-50 py-1`
-- 动画：`animate-in fade-in zoom-in-95 duration-100`
+- `absolute mt-1 w-full bg-white rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-black/[0.04] py-2 z-50`
+- 动画：`animate-in fade-in zoom-in-[0.98] duration-100`
 
 **选项**：
-- 默认：`px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 cursor-pointer`
-- 选中：`bg-red-50 text-red-700 font-medium`
-- 分隔线：`border-t border-slate-100 my-1`
+- 默认：`px-4 py-2.5 text-[15px] text-[#1D1D1F] hover:bg-black/[0.06] cursor-pointer`
+- 选中：`bg-accent/10 text-accent font-medium`
+- 分隔线：`border-t border-black/[0.04] my-1`
 
 ### 5.10 日期时间选择器
 
-**输入框**：同基础输入框，右侧日历图标 `Calendar w-4 h-4`
+**输入框**：同基础输入框，右侧日历图标 `Calendar w-4 h-4 text-[#A1A1A6]`
 
 **弹出面板**：
-- `bg-white rounded-xl shadow-xl border border-slate-200 p-4 absolute z-50`
-- 日历网格：7 列，日期单元格 `w-9 h-9 rounded-lg text-sm flex items-center justify-center`
-  - 默认：`text-slate-700 hover:bg-slate-100`
-  - 今天：`border border-red-500 text-red-600 font-medium`
-  - 选中：`bg-red-600 text-white`
-  - 其他月份：`text-slate-400`
+- `bg-white rounded-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-black/[0.04] p-5 absolute z-50`
+- 日历网格：7 列，日期单元格 `w-10 h-10 rounded-full text-[14px] flex items-center justify-center`
+  - 默认：`text-[#1D1D1F] hover:bg-black/[0.06]`
+  - 今天：`text-accent font-semibold`
+  - 选中：`bg-accent text-white`
+  - 其他月份：`text-[#A1A1A6]`
 - 时间选择：底部并排小时/分钟下拉
 
-### 5.11 头像组件（Avatar）
+### 5.11 Segmented Control（新增组件）
+
+替代传统的 radio button 组（学员状态、教练状态等），Apple 标志性控件：
+
+- 容器：`bg-black/[0.06] rounded-[10px] p-1 flex`
+- 选项：`flex-1 py-2 text-[14px] font-medium text-[#6E6E73] text-center rounded-lg transition-all duration-200`
+- 选中：`bg-white text-[#1D1D1F] shadow-sm`
+- 悬停未选中：`text-[#1D1D1F]`
+
+**使用场景**：
+- 学员状态：在籍 / 已结业 / 暂停
+- 教练状态：在职 / 离职 / 休假
+- 性别选择：男 / 女
+
+### 5.12 头像组件（Avatar）
 
 头像在系统中多处使用（学员列表、详情页、点名模态框），统一设计规范：
 
@@ -1257,20 +1318,20 @@ transition-all duration-150
 | **xl** | 144px | `w-36 h-36 text-4xl` | 学员详情页大头像 |
 
 **有照片状态**：
-- `<img>` `w-full h-full object-cover rounded-full`
+- `<img>` `w-full h-full object-cover rounded-xl`（圆角方形）
 - 外层容器 `overflow-hidden` 保证圆角裁切
 
 **无照片状态（占位头像）**：
-- 背景 `bg-slate-100`
-- 显示姓名首字母 `font-bold text-slate-400 uppercase`
-- 或显示 `User` 图标 `text-slate-300`
+- 背景 `bg-black/[0.06]`
+- 显示姓名首字母 `font-bold text-[#A1A1A6] uppercase`
+- 或显示 `User` 图标 `text-[#A1A1A6]`
 
 **圆角规则**：
-- 表格/列表中：`rounded-full`（圆形）
-- 详情页大头像：`rounded-2xl`（大圆角方形，更具展示感）
-- 卡片式布局中：`rounded-xl`（中圆角）
+- 表格/列表中：`rounded-xl`（圆角方形，Apple 现代审美）
+- 详情页大头像：`rounded-[20px]`（大圆角方形）
+- 极小头像（xs）：`rounded-lg`
 
-### 5.12 照片采集组件（PhotoCapture）
+### 5.13 照片采集组件（PhotoCapture）
 
 照片采集组件是系统特色组件，嵌入学员表单中，提供摄像头拍照和文件上传两种方式。
 
@@ -1281,9 +1342,9 @@ transition-all duration-150
   │     ├── 有照片 → <img> + 悬停遮罩
   │     └── 无照片 → 占位图标 + 提示文字
   ├── 操作按钮组（ActionButtons）
-  │     ├── 打开摄像头按钮
-  │     ├── 选择文件按钮
-  │     └── 清除照片按钮（有条件显示）
+  │     ├── 打开摄像头按钮（Primary pill）
+  │     ├── 选择文件按钮（Secondary pill）
+  │     └── 清除照片按钮（Ghost icon）
   └── 摄像头模态框（CameraModal）
         ├── 视频预览区
         ├── 权限请求状态
@@ -1307,11 +1368,11 @@ transition-all duration-150
 ### 6.1 页面导航
 
 **侧边栏导航**：
-- 点击菜单项：立即切换路由，当前项高亮
+- 点击菜单项：立即切换路由，当前项高亮（`bg-accent/10 text-accent` + 左侧竖条）
 - 页面切换过渡：内容区域淡入 `animate-in fade-in duration-200`
 
 **面包屑导航**：
-- 可点击项 hover：`text-red-600 underline cursor-pointer`
+- 可点击项 hover：`text-accent cursor-pointer`
 - 点击后跳转对应页面
 
 ### 6.2 数据操作反馈
@@ -1334,12 +1395,12 @@ transition-all duration-150
 
 | 场景 | 加载方式 | 样式 |
 |------|----------|------|
-| **页面初始加载** | 骨架屏 | 灰色脉冲块占位 |
-| **表格数据加载** | 骨架行 | 5 行 `h-12 bg-slate-100 rounded animate-pulse` |
+| **页面初始加载** | 骨架屏 | 灰色脉冲块占位 `bg-black/[0.06] rounded-[10px]` |
+| **表格数据加载** | 骨架行 | 5 行 `h-12 bg-black/[0.06] rounded-[10px] mb-2 animate-pulse` |
 | **表单提交中** | 按钮加载态 | 按钮文字替换为 `Loader2 w-4 h-4 animate-spin mr-2` + "提交中..." |
 | **AI 响应中** | 输入框加载态 | 发送按钮变为旋转图标，输入框 disabled |
-| **日历事件加载** | 全屏遮罩 | `absolute inset-0 bg-white/80 flex items-center justify-center` + Spinner |
-| **照片上传中** | 预览区遮罩 | `absolute inset-0 bg-black/30 flex items-center justify-center` + `Loader2 animate-spin text-white` |
+| **日历事件加载** | 全屏遮罩 | `absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center` + Spinner |
+| **照片上传中** | 预览区遮罩 | `absolute inset-0 bg-black/30 flex items-center justify-center rounded-[20px]` + `Loader2 animate-spin text-white` |
 | **摄像头初始化** | 视频区加载 | `Loader2 w-8 h-8 text-white animate-spin mx-auto` |
 
 ### 6.4 空状态
@@ -1360,20 +1421,20 @@ transition-all duration-150
 
 **空状态样式**：
 - 居中 `text-center py-16`
-- 图标：`w-12 h-12 text-slate-300 mx-auto mb-4`
-- 主文字：`text-sm text-slate-500 font-medium`
-- 次文字：`text-xs text-slate-400 mt-2`
-- 操作按钮（可选）：`mt-4 bg-red-600 text-white px-4 py-2 rounded-lg text-sm`
+- 图标：`w-12 h-12 text-[#A1A1A6] mx-auto mb-4`
+- 主文字：`text-[14px] text-[#6E6E73] font-medium`
+- 次文字：`text-[12px] text-[#A1A1A6] mt-2`
+- 操作按钮（可选）：`mt-4 bg-accent text-white px-5 py-2.5 rounded-full text-[14px] font-medium hover:opacity-90`
 
 ### 6.5 确认对话框
 
 **删除确认**：
-- 模态框标题：`text-lg font-semibold text-slate-800`
-- 警告图标：`AlertTriangle w-10 h-10 text-yellow-500 mx-auto mb-3`
-- 内容：`text-sm text-slate-600 text-center`
+- 模态框标题：`text-[17px] font-semibold text-[#1D1D1F]`
+- 警告图标：`AlertTriangle w-10 h-10 text-orange-500 mx-auto mb-3`
+- 内容：`text-[14px] text-[#6E6E73] text-center`
 - 操作：`flex gap-3 justify-center mt-6`
-  - "取消"：Secondary 按钮
-  - "确认删除"：Danger 按钮 `bg-red-600 text-white`
+  - "取消"：Secondary pill 按钮
+  - "确认删除"：Danger pill 按钮
 
 ---
 
@@ -1411,10 +1472,10 @@ transition-all duration-150
 - 表单照片区：预览 `w-36 h-36`
 
 **< 768px（移动端）**：
-- 侧边栏：完全隐藏，通过汉堡菜单触发抽屉
+- 侧边栏：完全隐藏，通过汉堡菜单触发 **Bottom Sheet**（从底部滑上，大圆角顶部 `rounded-t-[20px]`，带拖拽指示条 `w-10 h-1 bg-black/20 rounded-full mx-auto mt-2`）
 - 顶部栏：显示汉堡菜单按钮
 - 仪表盘统计卡片：`grid-cols-1`
-- 学员列表：卡片式布局替代表格（每学员一张卡片，含头像、姓名、状态）
+- 学员列表：卡片式布局替代表格（每学员一张卡片，`bg-white rounded-[20px] p-4`，无阴影）
 - 点名模态框：全屏 `max-w-none h-full rounded-none`
 - 摄像头拍照模态框：全屏 `max-w-none rounded-none`
 - AI 对话页：全屏，快捷指令栏可横向滚动
@@ -1424,15 +1485,15 @@ transition-all duration-150
 
 **学员列表（移动端）**：
 表格转为卡片列表，每张卡片包含：
-- 左侧头像（有照片则显示，无照片则占位）
-- 姓名 + 状态徽章
+- 左侧头像（圆角方形 `rounded-xl`，有照片则显示，无照片则占位）
+- 姓名 + 状态 pill 徽章
 - 信息行：性别、入学时间、剩余课时
 - 操作按钮组（底部）
 
 **日历页（移动端）**：
 - 默认显示日视图而非月视图
 - 左右滑动切换日期
-- 课程详情为底部 sheet 弹出（从底部滑上）
+- 课程详情为底部 sheet 弹出（从底部滑上，`rounded-t-[20px]`）
 
 **点名页（移动端）**：
 - 全屏模态框
@@ -1449,7 +1510,7 @@ transition-all duration-150
 
 ## 8. 图标系统
 
-统一使用 **Lucide React** 图标库，按功能场景分类：
+统一使用 **Lucide React** 图标库，按功能场景分类。Apple 风格偏好简洁、线条均匀的图标，Lucide 天然契合。
 
 ### 8.1 导航图标
 
@@ -1536,27 +1597,37 @@ transition-all duration-150
 
 ---
 
-## 9. 暗黑模式（可选扩展）
+## 9. 暗黑模式
 
-为未来扩展预留的暗黑模式配色方案：
+为未来扩展预留的暗黑模式配色方案，采用 Apple 暗黑模式规范：
 
 | 元素 | 亮色模式 | 暗黑模式 |
 |------|----------|----------|
-| 页面背景 | `bg-slate-50` | `bg-slate-950` |
-| 卡片背景 | `bg-white` | `bg-slate-900` |
-| 侧边栏 | `bg-white` | `bg-slate-900 border-slate-800` |
-| 顶部栏 | `bg-white` | `bg-slate-900 border-slate-800` |
-| 主文字 | `text-slate-700` | `text-slate-200` |
-| 次要文字 | `text-slate-500` | `text-slate-400` |
-| 边框 | `border-slate-200` | `border-slate-700` |
-| 输入框背景 | `bg-white` | `bg-slate-800` |
-| 表格交替行 | `bg-slate-50/50` | `bg-slate-800/50` |
+| 页面背景 | `#F5F5F7` | `#1C1C1E` |
+| 卡片背景 | `#FFFFFF` | `#2C2C2E` |
+| 系统填充 | `rgba(120,120,128,0.12)` | `rgba(120,120,128,0.24)` |
+| 分隔线 | `rgba(60,60,67,0.15)` | `rgba(84,84,88,0.3)` |
+| 主文字 | `#1D1D1F` | `#FFFFFF` |
+| 次要文字 | `#6E6E73` | `#8E8E93` |
+| 三级文字 | `#A1A1A6` | `#636366` |
+| 强调色 | `#D9264A` | `#FF375F`（更亮的红） |
+| 成功 | `#34C759` | `#32D74B` |
+| 警告 | `#FF9500` | `#FF9F0A` |
+| 危险 | `#FF3B30` | `#FF453A` |
+| 信息 | `#007AFF` | `#0A84FF` |
+
+**暗黑模式下的材质调整**：
+- 侧边栏/Header：`backdrop-blur-xl bg-[#1C1C1E]/80 border-r border-white/[0.06]`
+- 模态框遮罩：`bg-black/50 backdrop-blur-md`
+- 输入框：`bg-white/[0.08] text-white focus:bg-white/[0.12]`
+- 系统填充：`bg-white/[0.12]`
 
 ---
 
-**文档版本**：v3.0  
-**编写日期**：2026-05-22  
+**文档版本**：v4.0  
+**编写日期**：2026-05-23  
 **关联文档**：《跆拳道馆 CRM 系统_PRD.md》  
 **变更记录**：
+- v4.0 全面重构为 Apple Human Interface Guidelines 设计语言：通透层级、毛玻璃材质、充裕留白、大圆角与 pill 形状、System Background 层级、废除厚重阴影、增大字号、圆角方形头像、Segmented Control、顶部居中 Toast 等
 - v3.0 新增教练管理（教练列表页、教练详情页、教练表单页）、课程教练下拉选择、教练相关图标
 - v2.0 新增学员照片采集组件（摄像头拍照 + 文件上传）、头像组件规范、点名列表头像展示

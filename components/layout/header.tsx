@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 
-
 const breadcrumbMap: Record<string, string> = {
   "/": "仪表盘",
   "/students": "学员管理",
@@ -18,8 +17,8 @@ export function Header() {
   const title = breadcrumbMap[pathname] || "";
 
   return (
-    <header className="h-14 border-b border-slate-200 bg-white flex items-center px-6 sticky top-0 z-30">
-      <h1 className="text-lg font-semibold text-slate-800">{title}</h1>
+    <header className="h-14 border-b border-black/[0.08] backdrop-blur-xl bg-white/70 flex items-center px-8 sticky top-0 z-30">
+      <h1 className="text-[22px] font-semibold text-[#1D1D1F]">{title}</h1>
     </header>
   );
 }

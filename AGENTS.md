@@ -8,7 +8,7 @@
 
 本项目是一个为跆拳道馆量身打造的客户关系管理（CRM）平台，覆盖学员全生命周期管理——从个人基本资料的录入，到课务与时间的精细化管理，再到成长与活动的完整记录，以及课表排期与考勤点名的一体化操作。系统深度集成 AI Agent 能力，用户可通过自然语言对话完成学员与课程的增删改查、课程点名等核心操作。
 
-**当前状态**：项目处于规划/文档阶段，已实现详细的产品需求文档（PRD）和 UI 设计文档，但尚未开始编码。代码目录结构、配置文件、依赖安装等均待初始化。
+**当前状态**：项目已完成核心功能编码，包括数据库 Schema、REST API、前端页面、AI 对话流、照片上传、数据备份与恢复，以及完整的测试基础设施。`docs/` 目录下保留有产品需求文档（PRD）和 UI 设计文档作为参考。
 
 ---
 
@@ -16,18 +16,20 @@
 
 | 层级 | 技术方案 |
 |------|----------|
-| **前端框架** | Next.js 15 + App Router + React 19 |
+| **前端框架** | Next.js 16 + App Router + React 19 |
 | **语言** | TypeScript 5 |
-| **样式** | Tailwind CSS 3 + shadcn/ui |
+| **样式** | Tailwind CSS 4 + shadcn/ui（base-nova 风格） |
 | **日历组件** | @fullcalendar/react |
-| **数据库** | PostgreSQL 14+ |
+| **数据库** | PostgreSQL 16 |
 | **ORM** | Prisma 6 |
-| **AI SDK** | Vercel AI SDK 4 + Provider Registry |
+| **AI SDK** | Vercel AI SDK 6 + Provider Registry |
 | **数据表格** | TanStack Table |
 | **图表** | Recharts |
 | **图标** | Lucide React |
 | **容器化** | Docker + Docker Compose |
 | **校验** | Zod |
+| **测试** | Vitest + jsdom + @testing-library/react + next-test-api-route-handler |
+| **构建工具** | Turbopack（开发模式） |
 
 ### 支持的 LLM 提供商
 
@@ -39,16 +41,14 @@
 - DeepSeek (`@ai-sdk/deepseek`)
 - Groq (`@ai-sdk/groq`)
 
-模型通过环境变量 `MODEL=provider:model-id` 格式指定，例如 `openai:gpt-4o`。
+模型通过环境变量 `MODEL=provider:model-id` 格式指定，例如 `openai:gpt-4o`。额外支持 `custom:` 前缀，通过 `CUSTOM_OPENAI_BASE_URL` 和 `CUSTOM_OPENAI_API_KEY` 接入自定义 OpenAI 兼容端点。
 
 ---
 
-## 项目文件结构（目标）
-
-项目文档中规划了以下文件结构，实际编码阶段需要逐步实现：
+## 项目文件结构
 
 ```
-taekwondo-crm/
+tkd-crm/
 ├── app/                            # Next.js App Router
 │   ├── api/                        # API 路由
 │   │   ├── students/route.ts
@@ -58,50 +58,55 @@ taekwondo-crm/
 │   │   ├── courses/route.ts
 │   │   ├── courses/[id]/route.ts
 │   │   ├── attendance/route.ts
-│   │   ├── attendance/batch/route.ts
+│   │   ├── attendance/batch/route.ts   # 批量点名（事务扣减课时）
 │   │   ├── grading/route.ts
 │   │   ├── competition/route.ts
 │   │   ├── camp/route.ts
 │   │   ├── chat/route.ts           # AI 对话流式接口
 │   │   ├── upload/route.ts         # 照片上传/删除
-│   │   └── backup/route.ts         # 数据备份/恢复
-│   ├── page.tsx                    # 仪表盘首页
-│   ├── layout.tsx                  # 根布局（侧边栏导航）
-│   ├── globals.css
-│   ├── students/
-│   ├── coaches/
-│   ├── calendar/
-│   ├── attendance/
-│   ├── ai/
-│   └── backup/
+│   │   └── backup/route.ts         # 数据备份/恢复（ZIP + pg_dump/psql）
+│   ├── page.tsx                    # 仪表盘首页（Server Component，直接查 Prisma）
+│   ├── layout.tsx                  # 根布局（侧边栏导航 + Header）
+│   ├── globals.css                 # Tailwind CSS 入口 + CSS 变量主题
+│   ├── students/                   # 学员列表、新增、详情、编辑页面
+│   ├── coaches/                    # 教练列表、新增、详情、编辑页面
+│   ├── calendar/                   # 课表日历页面
+│   ├── attendance/                 # 考勤查询页面
+│   ├── ai/                         # AI 助手对话页面
+│   └── backup/                     # 数据备份页面
 ├── components/                     # 可复用组件
-│   ├── ui/                         # shadcn/ui 组件
+│   ├── ui/                         # shadcn/ui 组件（button, card, dialog, input 等）
 │   ├── layout/                     # sidebar.tsx, header.tsx
-│   ├── students/
-│   ├── coaches/
-│   ├── calendar/
-│   └── ai/
+│   ├── students/                   # student-form.tsx
+│   └── coaches/                    # coach-form.tsx
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
-│   ├── ai-model.ts                 # AI 模型路由（Provider Registry）
-│   ├── ai-tools.ts                 # AI 工具函数封装
-│   └── utils.ts
+│   ├── ai-model.ts                 # AI Provider Registry + getModel()
+│   ├── ai-tools.ts                 # AI 工具函数封装（供 chat route 调用）
+│   └── utils.ts                    # cn() 工具（clsx + tailwind-merge）
+├── __tests__/                      # 测试文件
+│   ├── api/                        # API 路由测试
+│   ├── components/                 # 组件测试
+│   ├── lib/                        # 工具函数测试
+│   ├── helpers.ts                  # 测试辅助函数（cleanupTestData, createTestStudent 等）
+│   └── setup.ts                    # Vitest 全局 setup（mock next/navigation）
+├── tests/                          # 额外的测试辅助（与 __tests__/helpers.ts 部分重复）
+│   └── helpers.ts
 ├── prisma/
 │   ├── schema.prisma               # 数据库 Schema
-│   └── migrations/
-├── hooks/                          # 自定义 React Hooks
-├── types/                          # TypeScript 类型定义
+│   └── migrations/                 # Prisma 迁移文件
 ├── public/
 │   └── uploads/                    # 照片本地存储（students/ + coaches/）
-├── docker-compose.yml              # PostgreSQL 容器配置
-├── .env.local                      # 环境变量
-├── next.config.js
-├── tailwind.config.ts
-├── tsconfig.json
+├── docker-compose.yml              # PostgreSQL 16 + pgAdmin 容器配置
+├── .env.local                      # 本地环境变量（不提交 Git）
+├── .env                            # 默认环境变量模板
+├── next.config.mjs                 # Next.js 配置（standalone 输出由 DOCKER_DEPLOY 控制）
+├── vitest.config.ts                # Vitest 配置（jsdom + @vitejs/plugin-react）
+├── eslint.config.mjs               # ESLint 配置（next/core-web-vitals + next/typescript）
+├── postcss.config.mjs              # PostCSS 配置（@tailwindcss/postcss）
+├── components.json                 # shadcn/ui 配置
 └── package.json
 ```
-
-**注意**：当前项目中以上代码文件均不存在，仅有 `docs/` 目录下的 PRD 和 UI 设计文档作为开发依据。
 
 ---
 
@@ -161,38 +166,18 @@ OPENAI_API_KEY=sk-your-openai-api-key-here
 # GROQ_API_KEY=gsk-your-groq-key
 
 # 兼容 OpenAI API 的自定义端点（可选）
-# OPENAI_BASE_URL=http://localhost:1234/v1
+# CUSTOM_OPENAI_BASE_URL=http://localhost:1234/v1
+# CUSTOM_OPENAI_API_KEY=your-custom-key
 ```
 
 ---
 
 ## 构建与启动命令
 
-### 初始化（首次）
-
-```bash
-# 1. 使用 shadcn 初始化 Next.js 项目
-echo "my-app" | npx shadcn@latest init --yes --template next --base-color slate
-
-# 2. 安装核心依赖
-npm install @prisma/client ai @ai-sdk/openai zod
-npm install -D prisma
-
-# 3. 按需安装其他 LLM Provider
-npm install @ai-sdk/anthropic @ai-sdk/google @ai-sdk/deepseek @ai-sdk/groq
-
-# 4. 安装 UI 依赖
-npm install @fullcalendar/react @fullcalendar/daygrid @fullcalendar/timegrid \
-  @fullcalendar/interaction @tanstack/react-table recharts lucide-react
-
-# 5. 安装备份相关依赖
-npm install archiver decompress
-```
-
 ### 数据库启动
 
 ```bash
-# 启动 PostgreSQL 容器
+# 启动 PostgreSQL + pgAdmin 容器
 docker-compose up -d
 
 # 查看状态
@@ -211,13 +196,16 @@ docker-compose down -v
 ### 开发与运行
 
 ```bash
+# 安装依赖
+npm install
+
 # 数据库迁移
 npx prisma migrate dev --name init
 
 # 生成 Prisma Client 类型
 npx prisma generate
 
-# 启动开发服务器
+# 启动开发服务器（Turbopack）
 npm run dev
 
 # 构建生产版本
@@ -225,7 +213,36 @@ npm run build
 
 # 启动生产服务器
 npm start
+
+# 类型检查
+npm run typecheck
+
+# 代码格式化
+npm run format
+
+# 代码检查
+npm run lint
 ```
+
+### 测试命令
+
+```bash
+# 运行所有测试（单次）
+npm test
+
+# 监听模式
+npm run test:watch
+
+# UI 模式
+npm run test:ui
+```
+
+测试配置在 `vitest.config.ts` 中：
+- 环境：`jsdom`
+- 全局模式：开启
+- 并行：`fileParallelism: false`（避免数据库并发冲突）
+- 包含路径：`__tests__/**/*.test.ts` 和 `__tests__/**/*.test.tsx`
+- Setup 文件：`__tests__/setup.ts`（mock `next/navigation`）
 
 ---
 
@@ -253,45 +270,95 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 - 学员照片：`public/uploads/students/{studentId}.jpg`
 - 教练照片：`public/uploads/coaches/{coachId}.jpg`
 - 数据库只存相对路径（如 `/uploads/students/abc123.jpg`）
+- 上传 API 校验文件类型（仅 `image/*`）和大小（最大 5MB）
 - Docker 部署时必须挂载 `uploads` 目录到宿主机持久化存储
+
+### API 路由风格
+
+- 列表查询：`GET /api/students?search=xxx&status=xxx&page=1&pageSize=20`
+- 详情/更新/删除：`GET/PUT/DELETE /api/students/[id]`
+- 批量操作：`POST /api/attendance/batch`
+- 使用 Zod 进行请求体验证
 
 ### 事务处理
 
-点名操作需要保证原子性：
+点名操作需要保证原子性，并避免重复扣减课时：
 
 ```typescript
-await prisma.$transaction([
-  // 1. 批量创建/更新考勤记录
-  prisma.attendance.upsert({ ... }),
-  // 2. 扣减课时（present/late 的学员）
-  prisma.student.updateMany({
-    where: { id: { in: presentIds }, remainingSessions: { gt: 0 } },
-    data: { remainingSessions: { decrement: 1 } }
-  })
-]);
+await prisma.$transaction(async (tx) => {
+  for (const record of records) {
+    // 1. 查询现有记录，判断旧状态是否已扣减
+    const existing = await tx.attendance.findUnique({ ... });
+    const oldCounted = existing?.status === "present" || existing?.status === "late";
+    const newCounted = record.status === "present" || record.status === "late";
+
+    // 2. upsert 考勤记录
+    await tx.attendance.upsert({ ... });
+
+    // 3. 仅在状态变化导致需要扣减/加回课时时操作
+    if (!oldCounted && newCounted) {
+      await tx.student.update({ where: { id }, data: { remainingSessions: { decrement: 1 } } });
+    } else if (oldCounted && !newCounted) {
+      await tx.student.update({ where: { id }, data: { remainingSessions: { increment: 1 } } });
+    }
+  }
+});
 ```
 
 ### AI 流式响应
 
-服务端必须返回流式响应：
+服务端使用 `streamText` + `toUIMessageStreamResponse`：
 
 ```typescript
-return result.toDataStreamResponse();
+const result = streamText({
+  model: getModel(),
+  system: SYSTEM_PROMPT,
+  messages: modelMessages,
+  tools: { searchStudents, createStudent, ... },
+});
+return result.toUIMessageStreamResponse();
 ```
 
-客户端使用 `useChat` hook 自动处理流式消费。
+客户端使用 `useChat` + `DefaultChatTransport` 消费流式消息：
+
+```typescript
+const { messages, sendMessage, status } = useChat({
+  transport: new DefaultChatTransport({ api: "/api/chat" }),
+});
+```
 
 ---
 
 ## 测试策略
 
-当前项目尚未建立测试基础设施。建议按以下顺序补充：
+测试基础设施已建立，使用 Vitest + jsdom + `@testing-library/react` + `next-test-api-route-handler`。
 
-1. **Prisma 单元测试**：使用 `@faker-js/faker` 生成测试数据，验证 CRUD 和关联查询
-2. **API 路由测试**：使用 Vitest + `next-test-api-route-handler` 测试 API 端点
-3. **AI 工具测试**：模拟 LLM 工具调用，验证参数解析和数据库操作正确性
-4. **照片上传测试**：验证文件类型、大小限制，以及上传后的文件存在性
-5. **备份恢复测试**：验证 ZIP 打包结构、manifest 校验、SQL 导入正确性
+### 测试目录结构
+
+- `__tests__/api/` —— API 路由测试（students, coaches, courses, attendance）
+- `__tests__/components/` —— 组件测试（sidebar, student-form）
+- `__tests__/lib/` —— 工具函数测试（prisma 单例, utils）
+- `__tests__/setup.ts` —— 全局 setup，mock `next/navigation` 和 `next/head`
+- `__tests__/helpers.ts` —— 测试辅助函数
+
+### 测试规范
+
+- API 测试使用真实数据库连接，通过 `cleanupTestData()` 在每个测试前清理数据
+- 测试并行已关闭（`fileParallelism: false`），避免数据库冲突
+- 使用 `@faker-js/faker` 生成测试数据（已安装）
+- 组件测试使用 `@testing-library/react`，需在 `__tests__/setup.ts` 中 mock Next.js 路由相关模块
+
+### 持续集成
+
+GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
+
+1. 启动 PostgreSQL 16 服务容器
+2. 安装依赖：`npm ci`
+3. 生成 Prisma Client：`npx prisma generate`
+4. 执行数据库迁移：`npx prisma migrate deploy`
+5. 运行测试：`npm test`
+6. 类型检查：`npm run typecheck`
+7. 代码检查：`npm run lint`
 
 ---
 
@@ -303,12 +370,14 @@ return result.toDataStreamResponse();
 - 在 Vercel Dashboard 中配置环境变量：`DATABASE_URL`、`MODEL`、`OPENAI_API_KEY` 等
 - 执行 `vercel --prod` 部署
 
-### Docker 部署（推荐用于数据备份功能）
+### Docker 部署
+
+`next.config.mjs` 中已配置：当 `DOCKER_DEPLOY=true` 时使用 `output: "standalone"`。
 
 由于备份功能依赖 `pg_dump` 和 `psql` 命令，Docker 镜像需要内置 PostgreSQL 客户端：
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:22-alpine
 RUN apk add --no-cache postgresql-client
 ```
 
@@ -318,11 +387,12 @@ RUN apk add --no-cache postgresql-client
 
 ## 安全考虑
 
-1. **身份证加密存储**：身份证号等敏感数据需要使用对称加密（Node.js `crypto` 模块）存储，数据库中不存明文
-2. **照片文件安全**：上传 API 需校验文件类型（仅 `image/*`）和大小（最大 5MB），防止恶意文件上传
-3. **备份导入安全**：导入前自动备份当前数据；SQL 导入先 `DROP SCHEMA public CASCADE` 再重建；导入失败自动回滚
-4. **并发控制**：点名扣减课时使用 PostgreSQL 事务保证原子性，避免并发导致数据不一致
-5. **环境变量隔离**：`.env.local` 不提交到版本控制；生产环境 API Key 通过 Vercel Dashboard 管理
+1. **照片文件安全**：上传 API 已校验文件类型（仅 `image/*`）和大小（最大 5MB），防止恶意文件上传
+2. **备份导入安全**：导入前自动创建当前数据快照（SQL 导出）；恢复后快照路径在响应中返回；ZIP 内含 `backup-manifest.json` 用于校验完整性
+3. **并发控制**：批量点名扣减课时使用 PostgreSQL 事务保证原子性，并通过状态比对避免重复扣减
+4. **软删除**：学员和教练删除时执行软删除（将状态设为 `inactive`），不实际删除数据库记录
+5. **环境变量隔离**：`.env.local` 不提交到版本控制（已在 `.gitignore` 中）；生产环境 API Key 通过 Vercel Dashboard 管理
+6. **身份证存储**：当前实现中身份证号以明文存储，如需加密请使用 Node.js `crypto` 模块进行对称加密后再存入数据库
 
 ---
 
@@ -333,6 +403,6 @@ RUN apk add --no-cache postgresql-client
 | 文档 | 路径 | 内容 |
 |------|------|------|
 | **产品需求文档（PRD）** | `docs/跆拳道馆CRM系统_PRD.md` | 功能需求、数据库设计、API 设计、AI Agent 架构、核心代码示例、安装部署指南 |
-| **UI 设计文档** | `docs/跆拳道馆CRM系统_UI设计文档.md` | 设计系统（色彩/字体/间距/圆角/阴影）、全局布局、各页面详细 UI 设计、组件规范、交互设计、响应式适配、图标系统 |
+| **UI 设计文档** | `docs/跆拳道馆CRM系统_UI设计文档.md` | 设计系统（色彩/字体/间距/圆角/材质深度）、全局布局、各页面详细 UI 设计、组件规范、交互设计、响应式适配、图标系统 |
 
 两份文档使用**中文**编写，是本项目开发的核心依据。
