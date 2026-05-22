@@ -213,7 +213,7 @@ export default async function DashboardPage() {
  <p className="text-3xl font-bold text-[#1D1D1F]">{totalStudents}</p>
  </div>
  <div className="w-12 h-12 rounded-[10px] bg-black/[0.06] flex items-center justify-center">
- <Users className="w-6 h-6 text-blue-500" />
+ <Users className="w-6 h-6 text-[#1D1D1F]" />
  </div>
  </CardContent>
  </Card>
@@ -226,7 +226,7 @@ export default async function DashboardPage() {
  <p className="text-3xl font-bold text-[#1D1D1F]">{todayCoursesCount}</p>
  </div>
  <div className="w-12 h-12 rounded-[10px] bg-black/[0.06] flex items-center justify-center">
- <CalendarDays className="w-6 h-6 text-emerald-500" />
+ <CalendarDays className="w-6 h-6 text-[#1D1D1F]" />
  </div>
  </CardContent>
  </Card>
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
  <p className="text-3xl font-bold text-[#1D1D1F]">{attendanceRate}%</p>
  </div>
  <div className="w-12 h-12 rounded-[10px] bg-black/[0.06] flex items-center justify-center">
- <TrendingUp className="w-6 h-6 text-amber-500" />
+ <TrendingUp className="w-6 h-6 text-[#1D1D1F]" />
  </div>
  </CardContent>
  </Card>
@@ -252,7 +252,7 @@ export default async function DashboardPage() {
  <p className="text-3xl font-bold text-[#1D1D1F]">{expiringSoonCount}</p>
  </div>
  <div className="w-12 h-12 rounded-[10px] bg-black/[0.06] flex items-center justify-center">
- <AlertCircle className="w-6 h-6 text-[#D9264A]" />
+ <AlertCircle className="w-6 h-6 text-[#1D1D1F]" />
  </div>
  </CardContent>
  </Card>
@@ -299,7 +299,7 @@ export default async function DashboardPage() {
  className="flex items-center gap-4 rounded-[10px] border border-black/[0.04] p-4 hover:bg-black/[0.06] transition-colors"
 >
  {/* 时间色块 */}
- <div className="shrink-0 w-16 h-14 rounded-[10px] bg-black/[0.06] flex flex-col items-center justify-center text-[#D9264A]">
+ <div className="shrink-0 w-16 h-14 rounded-[10px] bg-black/[0.06] flex flex-col items-center justify-center text-[#1D1D1F]">
  <Clock className="w-4 h-4 mb-0.5" />
  <span className="text-xs font-semibold">{timeStr}</span>
  </div>

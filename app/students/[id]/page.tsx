@@ -229,7 +229,7 @@ export default function StudentDetailPage() {
  <Card className="p-6">
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <Trophy className="w-5 h-5 text-amber-500" />
+ <Trophy className="w-5 h-5 text-[#1D1D1F]" />
  <h3 className="text-lg font-semibold">成长时间线</h3>
  </div>
  <Button variant="outline" size="sm" onClick={() => setGradingOpen(true)}>
@@ -241,7 +241,7 @@ export default function StudentDetailPage() {
  <div className="space-y-4">
  {student.gradings.map((g, idx) => (
  <div key={g.id} className="flex items-center gap-4">
- <div className={`w-5 h-5 rounded-full ${idx === 0 ? 'bg-[#D9264A]' : 'bg-white border-2 border-black/[0.12]'}`} />
+ <div className={`w-5 h-5 rounded-full ${idx === 0 ? 'bg-[#1D1D1F]' : 'bg-white border-2 border-black/[0.12]'}`} />
  <span className="text-[12px] text-[#A1A1A6]">{new Date(g.examDate).toLocaleDateString("zh-CN")}</span>
  <span className="text-[17px] font-semibold">{beltLabelMap[g.beltLevel] || g.beltLevel}</span>
  {g.certificateNo && <span className="text-xs text-[#A1A1A6]">证书: {g.certificateNo}</span>}
@@ -257,7 +257,7 @@ export default function StudentDetailPage() {
  <Card className="p-6">
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <Award className="w-5 h-5 text-amber-500" />
+ <Award className="w-5 h-5 text-[#1D1D1F]" />
  <h3 className="text-lg font-semibold">比赛记录</h3>
  </div>
  <Button variant="outline" size="sm" onClick={() => setCompetitionOpen(true)}>
@@ -272,7 +272,7 @@ export default function StudentDetailPage() {
  <p className="font-semibold">{c.competitionName}</p>
  <p className="text-sm text-[#6E6E73]">{new Date(c.competitionDate).toLocaleDateString("zh-CN")}</p>
  {c.result && <p className="text-sm text-[#6E6E73]">成绩: {c.result}</p>}
- {c.award && <p className="text-sm text-amber-500">获奖: {c.award}</p>}
+ {c.award && <p className="text-sm text-[#6E6E73]">获奖: {c.award}</p>}
  </div>
  ))}
  </div>
@@ -285,7 +285,7 @@ export default function StudentDetailPage() {
  <Card className="p-6">
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <MapPin className="w-5 h-5 text-amber-500" />
+ <MapPin className="w-5 h-5 text-[#1D1D1F]" />
  <h3 className="text-lg font-semibold">集训与拓展记录</h3>
  </div>
  <Button variant="outline" size="sm" onClick={() => setCampOpen(true)}>
@@ -312,7 +312,7 @@ export default function StudentDetailPage() {
  {/* 考勤统计 */}
  <Card className="p-6">
  <div className="flex items-center gap-2 mb-4">
- <BarChart3 className="w-5 h-5 text-amber-500" />
+ <BarChart3 className="w-5 h-5 text-[#1D1D1F]" />
  <h3 className="text-lg font-semibold">考勤统计</h3>
  </div>
  {student.attendances?.length> 0 ? (

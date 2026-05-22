@@ -69,7 +69,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
       {/* 照片预览 */}
       <div className="bg-white rounded-[20px] p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+          <div className="w-1 h-5 bg-[#1D1D1F] rounded-full" />
           <h3 className="text-lg font-semibold">照片</h3>
         </div>
         <div className="flex items-center gap-6">
@@ -108,7 +108,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
       {/* 基本信息 */}
       <div className="bg-white rounded-[20px] p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+          <div className="w-1 h-5 bg-[#1D1D1F] rounded-full" />
           <h3 className="text-lg font-semibold">基本信息</h3>
         </div>
         <div className="grid grid-cols-2 gap-4">
