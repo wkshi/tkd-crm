@@ -137,14 +137,14 @@ export default async function DashboardPage() {
  text: `学员 "${s.name}" 信息已更新`,
  time: s.updatedAt,
  icon: <Users className="w-4 h-4" />,
- color: "bg-blue-100 text-blue-500",
+ color: "bg-black/[0.06] text-[#6E6E73]",
  })),
  ...recentCourses.map((c) => ({
  id: `course-${c.id}`,
  text: `课程 "${c.title}" 已更新`,
  time: c.updatedAt,
  icon: <CalendarDays className="w-4 h-4" />,
- color: "bg-emerald-100 text-emerald-500",
+ color: "bg-black/[0.06] text-[#6E6E73]",
  })),
  ...recentAttendances
  .filter((a) => a.checkedAt)
@@ -155,7 +155,7 @@ export default async function DashboardPage() {
  }`,
  time: a.checkedAt!,
  icon: <ClipboardCheck className="w-4 h-4" />,
- color: "bg-amber-100 text-amber-500",
+ color: "bg-black/[0.06] text-[#6E6E73]",
  })),
  ]
  .sort((a, b) => b.time.getTime() - a.time.getTime())
@@ -167,31 +167,31 @@ export default async function DashboardPage() {
  label: "新增学员",
  href: "/students/new",
  icon: UserPlus,
- color: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
+ color: "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]",
  },
  {
  label: "查看日历",
  href: "/calendar",
  icon: Calendar,
- color: "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20",
+ color: "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]",
  },
  {
  label: "考勤查询",
  href: "/attendance",
  icon: ClipboardCheck,
- color: "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20",
+ color: "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]",
  },
  {
  label: "考级录入",
  href: "/grading",
  icon: Award,
- color: "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20",
+ color: "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]",
  },
  {
  label: "比赛录入",
  href: "/competition",
  icon: Trophy,
- color: "bg-pink-500/10 text-pink-500 hover:bg-pink-500/20",
+ color: "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]",
  },
  {
  label: "AI 助手",
@@ -212,7 +212,7 @@ export default async function DashboardPage() {
  <p className="text-sm text-[#6E6E73]">在籍学员总数</p>
  <p className="text-3xl font-bold text-[#1D1D1F]">{totalStudents}</p>
  </div>
- <div className="w-12 h-12 rounded-[10px] bg-blue-500/10 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-[10px] bg-black/[0.06] flex items-center justify-center">
  <Users className="w-6 h-6 text-blue-500" />
  </div>
  </CardContent>
@@ -225,7 +225,7 @@ export default async function DashboardPage() {
  <p className="text-sm text-[#6E6E73]">今日课程数</p>
  <p className="text-3xl font-bold text-[#1D1D1F]">{todayCoursesCount}</p>
  </div>
- <div className="w-12 h-12 rounded-[10px] bg-emerald-500/10 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-[10px] bg-black/[0.06] flex items-center justify-center">
  <CalendarDays className="w-6 h-6 text-emerald-500" />
  </div>
  </CardContent>
@@ -238,7 +238,7 @@ export default async function DashboardPage() {
  <p className="text-sm text-[#6E6E73]">本月出勤率</p>
  <p className="text-3xl font-bold text-[#1D1D1F]">{attendanceRate}%</p>
  </div>
- <div className="w-12 h-12 rounded-[10px] bg-amber-500/10 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-[10px] bg-black/[0.06] flex items-center justify-center">
  <TrendingUp className="w-6 h-6 text-amber-500" />
  </div>
  </CardContent>
@@ -251,7 +251,7 @@ export default async function DashboardPage() {
  <p className="text-sm text-[#6E6E73]">即将到期学员</p>
  <p className="text-3xl font-bold text-[#1D1D1F]">{expiringSoonCount}</p>
  </div>
- <div className="w-12 h-12 rounded-[10px] bg-red-500/10 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-[10px] bg-black/[0.06] flex items-center justify-center">
  <AlertCircle className="w-6 h-6 text-[#D9264A]" />
  </div>
  </CardContent>
@@ -299,7 +299,7 @@ export default async function DashboardPage() {
  className="flex items-center gap-4 rounded-[10px] border border-black/[0.04] p-4 hover:bg-black/[0.06] transition-colors"
 >
  {/* 时间色块 */}
- <div className="shrink-0 w-16 h-14 rounded-[10px] bg-red-500/10 flex flex-col items-center justify-center text-[#D9264A]">
+ <div className="shrink-0 w-16 h-14 rounded-[10px] bg-black/[0.06] flex flex-col items-center justify-center text-[#D9264A]">
  <Clock className="w-4 h-4 mb-0.5" />
  <span className="text-xs font-semibold">{timeStr}</span>
  </div>
@@ -320,7 +320,7 @@ export default async function DashboardPage() {
  {allChecked ? (
  <Badge
  variant="secondary"
- className="bg-emerald-500/10 text-emerald-500 border-emerald-100"
+ className="bg-black/[0.06] text-[#1D1D1F] border-black/[0.04]"
 >
  <CheckCircle2 className="w-3 h-3 mr-1" />
  已点名

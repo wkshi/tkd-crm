@@ -100,7 +100,7 @@ export default function CoachesPage() {
             setStatusFilter(e.target.value);
             setPage(1);
           }}
-          className="bg-black/[0.06] rounded-full px-4 py-2 text-sm border-0"
+          className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
         >
           <option value="">全部状态</option>
           <option value="active">在职</option>

@@ -242,8 +242,8 @@ export default function StudentDetailPage() {
  {student.gradings.map((g, idx) => (
  <div key={g.id} className="flex items-center gap-4">
  <div className={`w-5 h-5 rounded-full ${idx === 0 ? 'bg-[#D9264A]' : 'bg-white border-2 border-black/[0.12]'}`} />
- <span className="text-sm text-[#6E6E73]">{new Date(g.examDate).toLocaleDateString("zh-CN")}</span>
- <span className="font-semibold">{beltLabelMap[g.beltLevel] || g.beltLevel}</span>
+ <span className="text-[12px] text-[#A1A1A6]">{new Date(g.examDate).toLocaleDateString("zh-CN")}</span>
+ <span className="text-[17px] font-semibold">{beltLabelMap[g.beltLevel] || g.beltLevel}</span>
  {g.certificateNo && <span className="text-xs text-[#A1A1A6]">证书: {g.certificateNo}</span>}
  </div>
  ))}
@@ -354,7 +354,7 @@ export default function StudentDetailPage() {
  required
  value={gradingForm.beltLevel}
  onChange={(e) => setGradingForm({ ...gradingForm, beltLevel: e.target.value })}
- className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-sm focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
+ className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
 >
  <option value="white">白带</option>
  <option value="white_yellow">白黄带</option>

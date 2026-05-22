@@ -97,7 +97,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
               type="button"
               variant="ghost"
               size="sm"
-              className="text-[#A1A1A6] hover:text-red-500 hover:bg-red-500/10 rounded-full w-fit"
+              className="text-[#A1A1A6] hover:text-[#1D1D1F] hover:bg-black/[0.06] rounded-full w-fit"
             >
               清除照片
             </Button>

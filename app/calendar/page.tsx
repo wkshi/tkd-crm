@@ -221,7 +221,7 @@ export default function CalendarPage() {
  return (
  <form onSubmit={onSubmit} className="space-y-3">
  <div className="space-y-1">
- <Label className="text-xs">课程名称 *</Label>
+ <Label className="text-[13px]">课程名称 *</Label>
  <Input
  required
  value={form.title}
@@ -230,13 +230,13 @@ export default function CalendarPage() {
  />
  </div>
  <div className="space-y-1">
- <Label className="text-xs">课程类型</Label>
+ <Label className="text-[13px]">课程类型</Label>
  <select
  value={form.type}
  onChange={(e) =>
  setForm({ ...form, type: e.target.value as Course["type"] })
  }
- className="w-full bg-black/[0.06] border-0 rounded-[10px] px-2 py-1.5 text-sm focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
 >
  <option value="regular">常规课</option>
  <option value="exam_prep">考前集训</option>
@@ -245,7 +245,7 @@ export default function CalendarPage() {
  </select>
  </div>
  <div className="space-y-1">
- <Label className="text-xs">开始时间 *</Label>
+ <Label className="text-[13px]">开始时间 *</Label>
  <Input
  type="datetime-local"
  required
@@ -257,7 +257,7 @@ export default function CalendarPage() {
  />
  </div>
  <div className="space-y-1">
- <Label className="text-xs">结束时间 *</Label>
+ <Label className="text-[13px]">结束时间 *</Label>
  <Input
  type="datetime-local"
  required
@@ -267,13 +267,13 @@ export default function CalendarPage() {
  />
  </div>
  <div className="space-y-1">
- <Label className="text-xs">教练</Label>
+ <Label className="text-[13px]">教练</Label>
  <select
  value={form.coachId}
  onChange={(e) =>
  setForm({ ...form, coachId: e.target.value })
  }
- className="w-full bg-black/[0.06] border-0 rounded-[10px] px-2 py-1.5 text-sm focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
 >
  <option value="">请选择教练</option>
  {coaches.map((coach) => (
@@ -284,7 +284,7 @@ export default function CalendarPage() {
  </select>
  </div>
  <div className="space-y-1">
- <Label className="text-xs">地点</Label>
+ <Label className="text-[13px]">地点</Label>
  <Input
  value={form.location}
  onChange={(e) =>
@@ -294,7 +294,7 @@ export default function CalendarPage() {
  />
  </div>
  <div className="space-y-1">
- <Label className="text-xs">人数上限</Label>
+ <Label className="text-[13px]">人数上限</Label>
  <Input
  type="number"
  value={form.maxStudents}
@@ -308,7 +308,7 @@ export default function CalendarPage() {
  />
  </div>
  <div className="space-y-1">
- <Label className="text-xs">备注</Label>
+ <Label className="text-[13px]">备注</Label>
  <textarea
  value={form.description}
  onChange={(e) =>
