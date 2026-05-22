@@ -42,7 +42,23 @@ export async function POST(req: NextRequest) {
 
   await prisma.$transaction(async (tx) => {
     for (const record of records) {
-      // upsert 考勤记录，复合唯一索引防止重复
+      // 查询现有记录，避免重复扣减课时
+      const existing = await tx.attendance.findUnique({
+        where: {
+          courseId_studentId_attendanceDate: {
+            courseId,
+            studentId: record.studentId,
+            attendanceDate,
+          },
+        },
+      });
+
+      const oldStatus = existing?.status;
+      const newStatus = record.status;
+      const oldCounted = oldStatus === "present" || oldStatus === "late";
+      const newCounted = newStatus === "present" || newStatus === "late";
+
+      // upsert 考勤记录
       await tx.attendance.upsert({
         where: {
           courseId_studentId_attendanceDate: {
@@ -52,27 +68,30 @@ export async function POST(req: NextRequest) {
           },
         },
         update: {
-          status: record.status,
+          status: newStatus,
           checkedAt: new Date(),
         },
         create: {
           courseId,
           studentId: record.studentId,
           attendanceDate,
-          status: record.status,
+          status: newStatus,
           checkedAt: new Date(),
         },
       });
 
-      // 出勤或迟到时扣减课时
-      if (record.status === "present" || record.status === "late") {
+      // 仅在状态变化导致需要扣减/加回课时时操作
+      if (!oldCounted && newCounted) {
+        // 新状态需要扣减
         await tx.student.update({
           where: { id: record.studentId },
-          data: {
-            remainingSessions: {
-              decrement: 1,
-            },
-          },
+          data: { remainingSessions: { decrement: 1 } },
+        });
+      } else if (oldCounted && !newCounted) {
+        // 旧状态已扣减，新状态不需要，加回
+        await tx.student.update({
+          where: { id: record.studentId },
+          data: { remainingSessions: { increment: 1 } },
         });
       }
     }
