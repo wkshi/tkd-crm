@@ -175,4 +175,45 @@ describe("考勤 API", () => {
       },
     });
   });
+
+  it("POST /api/attendance 单条考勤 upsert", async () => {
+    const student = await createTestStudent({});
+    const course = await createTestCourse({});
+
+    await testApiHandler({
+      appHandler: attendanceHandler,
+      test: async ({ fetch }) => {
+        const res = await fetch({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: course.id,
+            studentId: student.id,
+            attendanceDate: "2024-06-01",
+            status: "present",
+          }),
+        });
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        expect(json.courseId).toBe(course.id);
+        expect(json.studentId).toBe(student.id);
+        expect(json.status).toBe("present");
+
+        // 再次提交同一组合应更新而非创建新记录
+        const res2 = await fetch({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: course.id,
+            studentId: student.id,
+            attendanceDate: "2024-06-01",
+            status: "absent",
+          }),
+        });
+        const json2 = await res2.json();
+        expect(json2.status).toBe("absent");
+        expect(json2.id).toBe(json.id);
+      },
+    });
+  });
 });

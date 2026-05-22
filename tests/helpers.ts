@@ -68,3 +68,61 @@ export async function createTestCourse(data: Partial<{
     },
   });
 }
+
+export async function createTestGrading(data: Partial<{
+  studentId: string;
+  examDate: Date;
+  beltLevel: string;
+  certificateNo: string;
+  notes: string;
+}>) {
+  return prisma.grading.create({
+    data: {
+      studentId: data.studentId!,
+      examDate: data.examDate ?? new Date(),
+      beltLevel: (data.beltLevel as any) ?? "white",
+      certificateNo: data.certificateNo,
+      notes: data.notes,
+    },
+  });
+}
+
+export async function createTestCompetition(data: Partial<{
+  studentId: string;
+  competitionDate: Date;
+  competitionName: string;
+  category: string;
+  result: string;
+  award: string;
+}>) {
+  return prisma.competition.create({
+    data: {
+      studentId: data.studentId!,
+      competitionDate: data.competitionDate ?? new Date(),
+      competitionName: data.competitionName ?? "测试比赛",
+      category: data.category,
+      result: data.result,
+      award: data.award,
+    },
+  });
+}
+
+export async function createTestCamp(data: Partial<{
+  studentId: string;
+  activityDate: Date;
+  activityName: string;
+  location: string;
+  duration: number;
+  notes: string;
+}>) {
+  return prisma.camp.create({
+    data: {
+      studentId: data.studentId!,
+      activityDate: data.activityDate ?? new Date(),
+      activityName: data.activityName ?? "测试集训",
+      location: data.location,
+      duration: data.duration,
+      notes: data.notes,
+    },
+  });
+}
