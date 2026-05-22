@@ -55,7 +55,7 @@ export default function AIPage() {
 
   const { messages, sendMessage, status, stop, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
-    initialMessages: loadMessages(),
+    messages: loadMessages(),
   });
 
   const isLoading = status === "submitted" || status === "streaming";
