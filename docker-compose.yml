@@ -32,5 +32,25 @@ services:
       postgres:
         condition: service_healthy
 
+  # 本地生产环境数据库（与开发环境完全隔离）
+  postgres-prod:
+    image: postgres:16-alpine
+    container_name: taekwondo-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taekwondo
+      POSTGRES_PASSWORD: taekwondo123
+      POSTGRES_DB: taekwondo_crm_prod
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taekwondo -d taekwondo_crm_prod"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
+  postgres_data_prod:
