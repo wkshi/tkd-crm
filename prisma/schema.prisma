@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id                String     @id @default(uuid())
+  name              String
+  gender            Gender
+  birthDate         DateTime?  @db.Date
+  idCard            String?    @map("id_card")
+  phone             String?
+  photoUrl          String?    @map("photo_url")
+  enrollmentDate    DateTime   @default(now()) @map("enrollment_date") @db.Date
+  remainingSessions Int        @default(0) @map("remaining_sessions")
+  expiryDate        DateTime?  @map("expiry_date") @db.Date
+  status            Status     @default(active)
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+
+  gradings     Grading[]
+  competitions Competition[]
+  camps        Camp[]
+  attendances  Attendance[]
+
+  @@index([name])
+  @@index([status])
+  @@map("students")
+}
+
+model Coach {
+  id         String      @id @default(uuid())
+  name       String
+  gender     Gender
+  birthDate  DateTime?   @db.Date
+  idCard     String?     @map("id_card")
+  phone      String?
+  photoUrl   String?     @map("photo_url")
+  joinDate   DateTime    @default(now()) @map("join_date") @db.Date
+  bio        String?
+  status     CoachStatus @default(active)
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  courses Course[]
+
+  @@index([name])
+  @@index([status])
+  @@map("coaches")
+}
+
+model Course {
+  id          String     @id @default(uuid())
+  title       String
+  type        CourseType @default(regular)
+  startTime   DateTime   @map("start_time")
+  endTime     DateTime   @map("end_time")
+  coachId     String?    @map("coach_id")
+  location    String?
+  maxStudents Int        @default(30) @map("max_students")
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  coach       Coach?       @relation(fields: [coachId], references: [id], onDelete: SetNull)
+  attendances Attendance[]
+
+  @@index([startTime])
+  @@index([coachId])
+  @@map("courses")
+}
+
+model Attendance {
+  id             String           @id @default(uuid())
+  courseId       String           @map("course_id")
+  studentId      String           @map("student_id")
+  attendanceDate DateTime         @map("attendance_date") @db.Date
+  status         AttendanceStatus @default(unmarked)
+  checkedAt      DateTime?        @map("checked_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, studentId, attendanceDate])
+  @@index([studentId])
+  @@index([courseId])
+  @@map("attendances")
+}
+
+model Grading {
+  id            String    @id @default(uuid())
+  studentId     String    @map("student_id")
+  examDate      DateTime  @map("exam_date") @db.Date
+  beltLevel     BeltLevel @map("belt_level")
+  certificateNo String?   @map("certificate_no")
+  notes         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, examDate])
+  @@map("gradings")
+}
+
+model Competition {
+  id              String   @id @default(uuid())
+  studentId       String   @map("student_id")
+  competitionDate DateTime @map("competition_date") @db.Date
+  competitionName String   @map("competition_name")
+  category        String?
+  result          String?
+  award           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@map("competitions")
+}
+
+model Camp {
+  id           String   @id @default(uuid())
+  studentId    String   @map("student_id")
+  activityDate DateTime @map("activity_date") @db.Date
+  activityName String   @map("activity_name")
+  location     String?
+  duration     Int?
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@map("camps")
+}
+
+enum Gender {
+  male
+  female
+}
+
+enum Status {
+  active
+  inactive
+  suspended
+}
+
+enum CoachStatus {
+  active
+  inactive
+  on_leave
+}
+
+enum CourseType {
+  regular
+  exam_prep
+  camp
+  competition
+}
+
+enum AttendanceStatus {
+  present
+  absent
+  late
+  leave
+  unmarked
+}
+
+enum BeltLevel {
+  white
+  white_yellow   @map("white-yellow")
+  yellow
+  yellow_green   @map("yellow-green")
+  green
+  green_blue     @map("green-blue")
+  blue
+  blue_red       @map("blue-red")
+  red
+  red_black      @map("red-black")
+  black
+}
