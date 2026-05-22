@@ -63,6 +63,7 @@ tkd-crm/
 │   │   ├── competition/route.ts
 │   │   ├── camp/route.ts
 │   │   ├── chat/route.ts           # AI 对话流式接口
+│   │   ├── config/route.ts         # 返回客户端可用的系统配置（如当前模型名）
 │   │   ├── upload/route.ts         # 照片上传/删除
 │   │   └── backup/route.ts         # 数据备份/恢复（ZIP + pg_dump/psql）
 │   ├── page.tsx                    # 仪表盘首页（Server Component，直接查 Prisma）
@@ -75,10 +76,11 @@ tkd-crm/
 │   ├── ai/                         # AI 助手对话页面
 │   └── backup/                     # 数据备份页面
 ├── components/                     # 可复用组件
-│   ├── ui/                         # shadcn/ui 组件（button, card, dialog, input 等）
+│   ├── ui/                         # shadcn/ui 组件（badge, button, card, dialog, input, label, select, table）
 │   ├── layout/                     # sidebar.tsx, header.tsx
 │   ├── students/                   # student-form.tsx
-│   └── coaches/                    # coach-form.tsx
+│   ├── coaches/                    # coach-form.tsx
+│   └── theme-provider.tsx          # Next Themes 提供者（强制 light mode）
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
 │   ├── ai-model.ts                 # AI Provider Registry + getModel()
@@ -97,7 +99,9 @@ tkd-crm/
 │   └── migrations/                 # Prisma 迁移文件
 ├── public/
 │   └── uploads/                    # 照片本地存储（students/ + coaches/）
-├── docker-compose.yml              # PostgreSQL 16 + pgAdmin 容器配置
+├── scripts/
+│   └── start-local-prod.sh         # 本地生产环境启动脚本（自动启动独立数据库）
+├── docker-compose.yml              # PostgreSQL 16 + pgAdmin + 本地生产数据库容器配置
 ├── .env.local                      # 本地环境变量（不提交 Git）
 ├── .env                            # 默认环境变量模板
 ├── next.config.mjs                 # Next.js 配置（standalone 输出由 DOCKER_DEPLOY 控制）
@@ -177,21 +181,33 @@ OPENAI_API_KEY=sk-your-openai-api-key-here
 ### 数据库启动
 
 ```bash
-# 启动 PostgreSQL + pgAdmin 容器
-docker-compose up -d
+# 启动开发环境数据库（PostgreSQL + pgAdmin）
+docker compose up -d postgres pgadmin
 
 # 查看状态
-docker-compose ps
+docker compose ps
 
 # 查看日志
-docker-compose logs -f postgres
+docker compose logs -f postgres
 
 # 停止
-docker-compose down
+docker compose down
 
 # 完全重置（删除数据卷）
-docker-compose down -v
+docker compose down -v
 ```
+
+**本地生产环境数据库**（与开发环境完全隔离）：
+
+| 属性 | 开发环境 | 本地生产环境 |
+|------|---------|------------|
+| 服务名 | `postgres` | `postgres-prod` |
+| 容器名 | `taekwondo-db` | `taekwondo-db-prod` |
+| 端口 | `5432` | `5433` |
+| 数据库名 | `taekwondo_crm` | `taekwondo_crm_prod` |
+| 数据卷 | `postgres_data` | `postgres_data_prod` |
+
+生产数据库由 `scripts/start-local-prod.sh` 自动管理，无需手动操作。
 
 ### 开发与运行
 
@@ -223,6 +239,26 @@ npm run format
 # 代码检查
 npm run lint
 ```
+
+### 本地生产环境启动
+
+```bash
+# 一键启动本地生产环境（自动启动独立数据库、迁移、构建、启动服务器）
+./scripts/start-local-prod.sh [端口]
+
+# 默认端口 3000
+./scripts/start-local-prod.sh
+```
+
+脚本行为：
+1. 启动 `postgres-prod` 容器（端口 5433）
+2. 等待数据库就绪（`pg_isready` 轮询）
+3. 设置 `DATABASE_URL` 指向生产数据库
+4. 执行 `prisma migrate deploy`
+5. 生成 Prisma Client
+6. `NODE_ENV=production npm run build`
+7. `NODE_ENV=production npx next start`
+8. **退出时自动停止**生产数据库容器（`trap EXIT/INT/TERM`）
 
 ### 测试命令
 
@@ -273,6 +309,19 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 - 上传 API 校验文件类型（仅 `image/*`）和大小（最大 5MB）
 - Docker 部署时必须挂载 `uploads` 目录到宿主机持久化存储
 
+### UI 风格（Apple HIG）
+
+前端设计遵循 Apple Human Interface Guidelines，特点如下：
+
+- **强制 Light Mode**：系统通过 `ThemeProvider` 强制 `light` 主题，不使用深色模式
+- **主按钮颜色**：`bg-[#1D1D1F]`（深黑），hover `bg-black/80`
+- **危险操作**：仅破坏性操作使用 `bg-[#D9264A]`（红），如删除确认
+- **次要按钮**：`bg-black/[0.06]` 灰色背景，hover `bg-black/[0.1]`
+- **圆角风格**：大圆角为主，如消息气泡 `rounded-[18px]`、卡片 `rounded-[14px]`
+- **阴影层次**：极轻阴影或无边框，使用 `border-0 shadow-none`
+- **输入框样式**：`bg-black/[0.06] rounded-full border-0`，无 focus ring
+- **选择高亮**：`selection:bg-[#1D1D1F] selection:text-white`
+
 ### API 路由风格
 
 - 列表查询：`GET /api/students?search=xxx&status=xxx&page=1&pageSize=20`
@@ -305,27 +354,39 @@ await prisma.$transaction(async (tx) => {
 });
 ```
 
-### AI 流式响应
+### AI 流式响应（AI SDK 6）
 
-服务端使用 `streamText` + `toUIMessageStreamResponse`：
+**服务端**使用 `streamText` + `convertToModelMessages()` + `toUIMessageStreamResponse()`：
 
 ```typescript
+const { messages }: { messages: UIMessage[] } = await req.json();
+const modelMessages = await convertToModelMessages(messages);
+
 const result = streamText({
   model: getModel(),
   system: SYSTEM_PROMPT,
   messages: modelMessages,
+  stopWhen: stepCountIs(10),  // 允许最多 10 步多步推理
   tools: { searchStudents, createStudent, ... },
 });
 return result.toUIMessageStreamResponse();
 ```
 
-客户端使用 `useChat` + `DefaultChatTransport` 消费流式消息：
+**客户端**使用 `useChat` + `DefaultChatTransport` + `messages`（初始状态）：
 
 ```typescript
-const { messages, sendMessage, status } = useChat({
+const { messages, sendMessage, setMessages, status } = useChat({
   transport: new DefaultChatTransport({ api: "/api/chat" }),
+  messages: loadMessages(),  // 从 localStorage 加载历史（不是 initialMessages）
 });
 ```
+
+**关键 API 差异**（AI SDK 6）：
+- `streamText` 使用 `stopWhen` 控制多步推理（默认 `stepCountIs(1)`），**不是** `maxSteps`
+- `useChat` 使用 `messages` 传递初始状态，**不是** `initialMessages`
+- `sendAutomaticallyWhen` 会导致循环问题，**不要使用**
+- 服务端必须用 `convertToModelMessages()` 将 `UIMessage[]` 转为模型消息
+- 服务端返回 `result.toUIMessageStreamResponse()` 供前端消费
 
 ### 提交前检查流程（强制）
 
@@ -340,8 +401,6 @@ const { messages, sendMessage, status } = useChat({
    - 如测试失败，先修复代码或更新测试
 
 3. **Commit**：`git commit`
-   - 项目配置了 pre-commit hook，会自动执行 `npm test`
-   - 测试未通过时 commit 会被阻止
 
 4. **推送**：`git push origin main`
    - 仅在 lint 和测试全部通过后推送
@@ -354,7 +413,7 @@ const { messages, sendMessage, status } = useChat({
 
 ### 测试目录结构
 
-- `__tests__/api/` —— API 路由测试（students, coaches, courses, attendance）
+- `__tests__/api/` —— API 路由测试（students, coaches, courses, attendance, grading, competition, camp, config）
 - `__tests__/components/` —— 组件测试（sidebar, student-form）
 - `__tests__/lib/` —— 工具函数测试（prisma 单例, utils）
 - `__tests__/setup.ts` —— 全局 setup，mock `next/navigation` 和 `next/head`
