@@ -420,3 +420,20 @@ export const getAttendance = tool({
     return { attendances, total, page, pageSize };
   },
 });
+
+export const getCurrentTime = tool({
+  description: "获取当前系统时间，包括日期、时间、星期和时区信息。当用户询问今天日期、当前时间或涉及时间计算时调用此工具。",
+  inputSchema: zodSchema(z.object({})),
+  execute: async () => {
+    const now = new Date();
+    const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+    return {
+      iso: now.toISOString(),
+      date: now.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }),
+      time: now.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+      weekday: weekdays[now.getDay()],
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timestamp: now.getTime(),
+    };
+  },
+});

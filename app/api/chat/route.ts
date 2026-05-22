@@ -17,6 +17,7 @@ import {
   deleteCourse,
   takeAttendance,
   getAttendance,
+  getCurrentTime,
 } from "@/lib/ai-tools";
 
 // 系统提示词，定义 AI 助手的角色和行为边界
@@ -31,7 +32,8 @@ const SYSTEM_PROMPT = `你是跆拳道馆 CRM 系统的 AI 助手，可以帮助
 注意事项：
 - 所有日期请使用 ISO 8601 格式
 - 删除学员和教练时执行软删除（将状态设为 inactive）
-- 回复使用中文，保持专业、简洁、友好`;
+- 回复使用中文，保持专业、简洁、友好
+- 当你需要知道当前日期或时间时，调用 getCurrentTime 工具获取`;
 
 export async function POST(req: NextRequest) {
   const { messages }: { messages: UIMessage[] } = await req.json();
@@ -60,6 +62,7 @@ export async function POST(req: NextRequest) {
       deleteCourse,
       takeAttendance,
       getAttendance,
+      getCurrentTime,
     },
   });
 
