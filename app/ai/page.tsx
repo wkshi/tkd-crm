@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useSyncExternalStore } from "react";
 import { useChat } from "@ai-sdk/react";
 import { UIMessage, isTextUIPart, isToolUIPart, DefaultChatTransport } from "ai";
 import { Button } from "@/components/ui/button";
@@ -93,10 +93,19 @@ export default function AIPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // 检查浏览器是否支持语音输入
-  const isSpeechSupported =
-    typeof window !== "undefined" &&
-    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+  // 使用 useSyncExternalStore 避免 hydration 不匹配
+  // 服务端快照恒为 false/[]，客户端快照在 hydration 后与真实值同步
+  const isSpeechSupported = useSyncExternalStore(
+    () => () => {},
+    () => "SpeechRecognition" in window || "webkitSpeechRecognition" in window,
+    () => false
+  );
+
+  const initialMessages = useSyncExternalStore(
+    () => () => {},
+    loadMessages,
+    () => []
+  );
 
   // 从服务端获取当前模型配置（客户端无法直接读取 process.env）
   useEffect(() => {
@@ -108,7 +117,7 @@ export default function AIPage() {
 
   const { messages, sendMessage, setMessages, status, stop, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
-    messages: loadMessages(),
+    messages: initialMessages,
   });
 
   const isLoading = status === "submitted" || status === "streaming";
