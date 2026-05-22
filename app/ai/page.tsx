@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Send, Loader2, Bot, User, Wrench, Sparkles } from "lucide-react";
+import { Send, Loader2, Bot, User, Wrench, Sparkles, RotateCcw } from "lucide-react";
 
 const STORAGE_KEY = "tkd-crm-ai-chat-history";
 
@@ -53,7 +53,7 @@ export default function AIPage() {
       .catch(() => setModelName(""));
   }, []);
 
-  const { messages, sendMessage, status, stop, error } = useChat({
+  const { messages, sendMessage, setMessages, status, stop, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     messages: loadMessages(),
   });
@@ -64,6 +64,14 @@ export default function AIPage() {
   useEffect(() => {
     saveMessages(messages);
   }, [messages]);
+
+  // 清除对话历史，重新开始
+  function handleReset() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+    setMessages([]);
+  }
 
   // 自动滚动到底部
   useEffect(() => {
@@ -90,10 +98,23 @@ export default function AIPage() {
     <div className="flex flex-col h-[calc(100vh-7rem)]">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-[#1D1D1F]">AI 助手</h2>
-        <Badge className="gap-1 bg-black/[0.06] text-[#6E6E73] hover:bg-black/[0.06] border-0">
-          <Sparkles className="w-3 h-3" />
-          {modelName || "AI 助手"}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            disabled={isLoading || messages.length === 0}
+            className="rounded-full text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/[0.06] h-8 px-3"
+          >
+            <RotateCcw className="w-4 h-4 mr-1.5" />
+            新对话
+          </Button>
+          <Badge className="gap-1 bg-black/[0.06] text-[#6E6E73] hover:bg-black/[0.06] border-0">
+            <Sparkles className="w-3 h-3" />
+            {modelName || "AI 助手"}
+          </Badge>
+        </div>
       </div>
 
       {/* 快捷指令栏 */}
