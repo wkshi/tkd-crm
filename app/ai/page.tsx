@@ -19,7 +19,16 @@ const quickCommands = [
 
 export default function AIPage() {
   const [input, setInput] = useState("");
+  const [modelName, setModelName] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 从服务端获取当前模型配置（客户端无法直接读取 process.env）
+  useEffect(() => {
+    fetch("/api/config")
+      .then((res) => res.json())
+      .then((data) => setModelName(data.model || ""))
+      .catch(() => setModelName(""));
+  }, []);
 
   const { messages, sendMessage, status, stop, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -54,7 +63,7 @@ export default function AIPage() {
         <h2 className="text-2xl font-bold text-[#1D1D1F]">AI 助手</h2>
         <Badge className="gap-1 bg-black/[0.06] text-[#6E6E73] hover:bg-black/[0.06] border-0">
           <Sparkles className="w-3 h-3" />
-          {process.env.MODEL || "openai:gpt-4o"}
+          {modelName || "AI 助手"}
         </Badge>
       </div>
 
