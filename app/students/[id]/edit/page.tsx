@@ -6,7 +6,7 @@ import { StudentForm } from "@/components/students/student-form";
 
 export default function EditStudentPage() {
  const { id } = useParams();
- const [student, setStudent] = useState<(Partial<import("@/components/students/student-form").StudentFormData> & { id?: string }) | null>(null);
+ const [student, setStudent] = useState<(Partial<import("@/components/students/student-form").StudentFormData> & { id?: string; photoUrl?: string | null }) | null>(null);
  const [loading, setLoading] = useState(true);
 
  useEffect(() => {

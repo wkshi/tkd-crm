@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,13 +19,20 @@ export interface StudentFormData {
 }
 
 interface StudentFormProps {
-  initialData?: Partial<StudentFormData>;
+  initialData?: Partial<StudentFormData & { photoUrl?: string | null }>;
   studentId?: string;
 }
 
 export function StudentForm({ initialData, studentId }: StudentFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const existingPhotoUrl = initialData?.photoUrl || null;
+
   const [form, setForm] = useState<StudentFormData>({
     name: initialData?.name || "",
     gender: initialData?.gender || "male",
@@ -44,28 +51,96 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
     status: initialData?.status || "active",
   });
 
+  // 处理文件选择（拍照或选择文件共用）
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("仅支持图片文件");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("文件大小不能超过 5MB");
+      return;
+    }
+
+    // 释放之前的预览 URL
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
+    }
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  }
+
+  // 清除已选照片
+  function handleClearPhoto() {
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
+    }
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
-    const url = studentId ? `/api/students/${studentId}` : "/api/students";
-    const method = studentId ? "PUT" : "POST";
+    try {
+      // 1. 创建/更新学员
+      const url = studentId ? `/api/students/${studentId}` : "/api/students";
+      const method = studentId ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    const data = await res.json();
-    setLoading(false);
+      const data = await res.json();
 
-    if (res.ok) {
-      router.push(studentId ? `/students/${studentId}` : `/students/${data.id}`);
-    } else {
-      alert(data.error || "操作失败");
+      if (!res.ok) {
+        alert(data.error || "操作失败");
+        setLoading(false);
+        return;
+      }
+
+      const newStudentId = studentId || data.id;
+
+      // 2. 上传照片（如果有新选择的文件）
+      if (photoFile && newStudentId) {
+        const formData = new FormData();
+        formData.append("file", photoFile);
+        formData.append("id", newStudentId);
+        formData.append("type", "student");
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          alert(uploadData.error || "照片上传失败，学员信息已保存");
+          // 学员已创建/更新成功，仍然跳转
+        }
+      }
+
+      router.push(
+        studentId ? `/students/${studentId}` : `/students/${newStudentId}`
+      );
+    } catch (err) {
+      console.error(err);
+      alert("操作失败");
+      setLoading(false);
     }
   }
+
+  // 照片预览显示优先级：本地预览 > 已有照片 URL > 首字母占位符
+  const previewSrc = photoPreview || existingPhotoUrl;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
@@ -77,33 +152,63 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
         </div>
         <div className="flex items-center gap-6">
           <div className="w-32 h-32 rounded-[20px] border-2 border-dashed border-black/[0.12] bg-black/[0.04] flex items-center justify-center overflow-hidden">
-            <span className="text-3xl font-bold text-[#A1A1A6]">
-              {form.name?.[0] || "?"}
-            </span>
+            {previewSrc ? (
+              <img
+                src={previewSrc}
+                alt="照片预览"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-3xl font-bold text-[#A1A1A6]">
+                {form.name?.[0] || "?"}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex gap-3">
+              {/* 拍照 input（移动端调用相机） */}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                ref={cameraInputRef}
+                onChange={handleFileSelect}
+              />
+              {/* 选择文件 input */}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+              />
               <Button
                 type="button"
+                onClick={() => cameraInputRef.current?.click()}
                 className="rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
               >
                 拍照
               </Button>
               <Button
                 type="button"
+                onClick={() => fileInputRef.current?.click()}
                 className="rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
               >
                 选择文件
               </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="text-[#A1A1A6] hover:text-[#1D1D1F] hover:bg-black/[0.06] rounded-full w-fit"
-            >
-              清除照片
-            </Button>
+            {photoFile && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleClearPhoto}
+                className="text-[#A1A1A6] hover:text-[#1D1D1F] hover:bg-black/[0.06] rounded-full w-fit"
+              >
+                清除照片
+              </Button>
+            )}
           </div>
         </div>
       </div>

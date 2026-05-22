@@ -36,7 +36,7 @@ describe("StudentForm 学员表单", () => {
     );
 
     // 查找所有 text input，第一个是姓名
-    const textInputs = container.querySelectorAll('input:not([type="number"]):not([type="date"])');
+    const textInputs = container.querySelectorAll('input:not([type="number"]):not([type="date"]):not([type="file"])');
     const nameInput = textInputs[0] as HTMLInputElement;
     expect(nameInput.value).toBe("编辑学员");
   });
@@ -51,7 +51,7 @@ describe("StudentForm 学员表单", () => {
     const { container } = render(<StudentForm />);
 
     // 第一个 input 是姓名
-    const textInputs = container.querySelectorAll('input:not([type="number"]):not([type="date"])');
+    const textInputs = container.querySelectorAll('input:not([type="number"]):not([type="date"]):not([type="file"])');
     const nameInput = textInputs[0] as HTMLInputElement;
     fireEvent.change(nameInput, { target: { value: "新学员" } });
 
