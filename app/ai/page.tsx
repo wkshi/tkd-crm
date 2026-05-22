@@ -9,6 +9,29 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Send, Loader2, Bot, User, Wrench, Sparkles } from "lucide-react";
 
+const STORAGE_KEY = "tkd-crm-ai-chat-history";
+
+// 从 localStorage 加载历史消息
+function loadMessages(): UIMessage[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as UIMessage[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+// 保存消息到 localStorage
+function saveMessages(msgs: UIMessage[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+  } catch {
+    // storage full or serialization error — ignore
+  }
+}
+
 // 快捷指令列表
 const quickCommands = [
   { label: "查找学员", text: "帮我查找所有在籍学员" },
@@ -32,9 +55,15 @@ export default function AIPage() {
 
   const { messages, sendMessage, status, stop, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
+    initialMessages: loadMessages(),
   });
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  // 消息变化时自动保存到 localStorage
+  useEffect(() => {
+    saveMessages(messages);
+  }, [messages]);
 
   // 自动滚动到底部
   useEffect(() => {
