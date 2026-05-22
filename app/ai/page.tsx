@@ -74,7 +74,7 @@ export default function AIPage() {
             key={cmd.label}
             onClick={() => handleQuickCommand(cmd.text)}
             disabled={isLoading}
-            className="bg-black/[0.06] hover:bg-[#D9264A]/10 hover:text-[#D9264A] text-[#6E6E73] px-3.5 py-1.5 rounded-full text-[12px] font-medium h-auto border-0 shadow-none"
+            className="bg-black/[0.06] hover:bg-black/[0.1] hover:text-[#1D1D1F] text-[#6E6E73] px-3.5 py-1.5 rounded-full text-[12px] font-medium h-auto border-0 shadow-none"
           >
             {cmd.label}
           </Button>
@@ -104,7 +104,7 @@ export default function AIPage() {
                 className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${
                   msg.role === "user"
                     ? "bg-black/[0.06] text-[#1D1D1F]"
-                    : "bg-[#D9264A] text-white"
+                    : "bg-black/[0.06] text-[#6E6E73]"
                 }`}
               >
                 {msg.role === "user" ? (
@@ -123,7 +123,7 @@ export default function AIPage() {
                         key={idx}
                         className={`px-4 py-3 text-sm leading-relaxed border-0 shadow-none ${
                           msg.role === "user"
-                            ? "bg-[#D9264A] text-white rounded-[18px] rounded-tr-sm"
+                            ? "bg-[#1D1D1F] text-white rounded-[18px] rounded-tr-sm"
                             : "bg-white rounded-[18px] rounded-tl-sm"
                         }`}
                       >
@@ -201,7 +201,7 @@ export default function AIPage() {
             停止
           </Button>
         ) : (
-          <Button type="submit" disabled={!input.trim()} className="w-9 h-9 rounded-full bg-[#D9264A] hover:bg-[#D9264A] p-0 flex items-center justify-center border-0 shadow-none">
+          <Button type="submit" disabled={!input.trim()} className="w-9 h-9 rounded-full bg-[#1D1D1F] hover:bg-black/80 p-0 flex items-center justify-center border-0 shadow-none">
             <Send className="w-4 h-4" />
           </Button>
         )}
