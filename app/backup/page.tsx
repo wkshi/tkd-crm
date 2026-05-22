@@ -148,7 +148,7 @@ export default function BackupPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+              <div className="w-1 h-5 bg-[#1D1D1F] rounded-full" />
               <h3 className="text-lg font-semibold text-[#1D1D1F]">数据备份</h3>
             </div>
             <p className="text-sm text-[#6E6E73] mt-1">
@@ -158,7 +158,7 @@ export default function BackupPage() {
           <Button
             onClick={handleBackup}
             disabled={isBackingUp}
-            className="rounded-full bg-[#D9264A] text-white hover:opacity-90"
+            className="rounded-full bg-[#1D1D1F] text-white hover:bg-black/80"
           >
             {isBackingUp ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -173,7 +173,7 @@ export default function BackupPage() {
       {/* 恢复区域 */}
       <Card className="p-6 rounded-[20px] shadow-none">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-5 bg-[#D9264A] rounded-full" />
+          <div className="w-1 h-5 bg-[#1D1D1F] rounded-full" />
           <h3 className="text-lg font-semibold text-[#1D1D1F]">数据恢复</h3>
         </div>
         <p className="text-sm text-[#6E6E73] mb-4">
@@ -187,8 +187,8 @@ export default function BackupPage() {
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-[20px] p-8 text-center cursor-pointer transition-colors ${
             dragOver
-              ? "border-[#D9264A]/40 bg-[#D9264A]/[0.02]"
-              : "border-black/[0.12] hover:border-[#D9264A]/40 hover:bg-[#D9264A]/[0.02]"
+              ? "border-black/[0.3] bg-black/[0.02]"
+              : "border-black/[0.12] hover:border-black/[0.3] hover:bg-black/[0.02]"
           }`}
         >
           <Upload className="w-8 h-8 mx-auto text-[#A1A1A6] mb-3" />
