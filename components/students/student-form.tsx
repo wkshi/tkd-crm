@@ -262,7 +262,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
         </Button>
         <Button
           type="submit"
-          className="rounded-full bg-[#D9264A] text-white hover:opacity-90"
+          className="rounded-full bg-[#1D1D1F] text-white hover:bg-black/80"
           disabled={loading}
         >
           {loading ? "保存中..." : "保存"}

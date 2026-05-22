@@ -385,7 +385,7 @@ export default function StudentDetailPage() {
  </div>
  <DialogFooter>
  <Button type="button" variant="outline" onClick={() => setGradingOpen(false)} className="bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] rounded-full border-0">取消</Button>
- <Button type="submit" className="bg-[#D9264A] hover:opacity-90 rounded-full">保存</Button>
+ <Button type="submit" className="bg-[#1D1D1F] hover:bg-black/80 rounded-full text-white">保存</Button>
  </DialogFooter>
  </form>
  </DialogContent>
@@ -438,7 +438,7 @@ export default function StudentDetailPage() {
  </div>
  <DialogFooter>
  <Button type="button" variant="outline" onClick={() => setCompetitionOpen(false)} className="bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] rounded-full border-0">取消</Button>
- <Button type="submit" className="bg-[#D9264A] hover:opacity-90 rounded-full">保存</Button>
+ <Button type="submit" className="bg-[#1D1D1F] hover:bg-black/80 rounded-full text-white">保存</Button>
  </DialogFooter>
  </form>
  </DialogContent>
@@ -492,7 +492,7 @@ export default function StudentDetailPage() {
  </div>
  <DialogFooter>
  <Button type="button" variant="outline" onClick={() => setCampOpen(false)} className="bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] rounded-full border-0">取消</Button>
- <Button type="submit" className="bg-[#D9264A] hover:opacity-90 rounded-full">保存</Button>
+ <Button type="submit" className="bg-[#1D1D1F] hover:bg-black/80 rounded-full text-white">保存</Button>
  </DialogFooter>
  </form>
  </DialogContent>
