@@ -222,11 +222,15 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
         <div className="flex items-center gap-6">
           <div className="w-32 h-32 rounded-[20px] border-2 border-dashed border-black/[0.12] bg-black/[0.04] flex items-center justify-center overflow-hidden">
             {previewSrc ? (
-              <img
-                src={previewSrc}
-                alt="照片预览"
-                className="w-full h-full object-cover"
-              />
+              <>
+                {/* eslint-disable @next/next/no-img-element */}
+                <img
+                  src={previewSrc}
+                  alt="照片预览"
+                  className="w-full h-full object-cover"
+                />
+                {/* eslint-enable @next/next/no-img-element */}
+              </>
             ) : (
               <span className="text-3xl font-bold text-[#A1A1A6]">
                 {form.name?.[0] || "?"}

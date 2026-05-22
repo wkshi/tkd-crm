@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Gender, Status, CoachStatus } from "@prisma/client";
+import { Gender, Status, CoachStatus, BeltLevel } from "@prisma/client";
 
 export async function cleanupTestData() {
   // 清理所有测试数据（按依赖顺序反向删除）
@@ -80,7 +80,7 @@ export async function createTestGrading(data: Partial<{
     data: {
       studentId: data.studentId!,
       examDate: data.examDate ?? new Date(),
-      beltLevel: (data.beltLevel as any) ?? "white",
+      beltLevel: (data.beltLevel as BeltLevel) ?? BeltLevel.white,
       certificateNo: data.certificateNo,
       notes: data.notes,
     },

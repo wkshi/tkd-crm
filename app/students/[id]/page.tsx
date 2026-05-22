@@ -188,7 +188,11 @@ export default function StudentDetailPage() {
  <div className="flex flex-col items-center">
  <div className="w-36 h-36 rounded-[20px] overflow-hidden bg-black/[0.06] flex items-center justify-center">
  {student.photoUrl ? (
- <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
+<>
+{/* eslint-disable @next/next/no-img-element */}
+<img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
+{/* eslint-enable @next/next/no-img-element */}
+</>
  ) : (
  <span className="text-4xl font-bold text-[#A1A1A6]">{student.name[0]}</span>
  )}
