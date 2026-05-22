@@ -176,7 +176,7 @@ export default function StudentDetailPage() {
  返回
  </Button>
  </div>
- <Button size="sm" onClick={() => router.push(`/students/${id}/edit`)}>
+ <Button size="sm" onClick={() => router.push(`/students/${id}/edit`)} className="rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]">
  <Pencil className="w-4 h-4 mr-2" />
  编辑
  </Button>
@@ -211,7 +211,7 @@ export default function StudentDetailPage() {
  </div>
  <div className="flex gap-8 mt-4">
  <div>
- <p className="text-3xl font-bold text-[#D9264A]">{student.remainingSessions}</p>
+ <p className="text-3xl font-bold text-[#1D1D1F]">{student.remainingSessions}</p>
  <p className="text-sm text-[#6E6E73]">剩余课时</p>
  </div>
  {student.expiryDate && (
