@@ -73,7 +73,7 @@ export default function CoachesPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-[#1D1D1F]">教练管理</h2>
         <Link href="/coaches/new">
-          <Button className="rounded-full bg-[#D9264A] text-white px-5 py-2.5 hover:opacity-90">
+          <Button className="rounded-full bg-black/[0.06] text-[#1D1D1F] px-5 py-2.5 hover:bg-black/[0.1]">
             <Plus className="w-4 h-4 mr-2" />
             新增教练
           </Button>
@@ -213,7 +213,7 @@ export default function CoachesPage() {
             >
               上一页
             </Button>
-            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D9264A] text-white text-sm font-medium">
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D9264A]/10 text-[#D9264A] text-sm font-medium">
               {page}
             </span>
             <Button

@@ -82,7 +82,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
             <div className="flex gap-3">
               <Button
                 type="button"
-                className="rounded-full bg-[#D9264A] text-white hover:opacity-90"
+                className="rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
               >
                 拍照
               </Button>

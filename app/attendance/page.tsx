@@ -81,7 +81,7 @@ export default function AttendancePage() {
  </div>
  <Button
  onClick={fetchAttendances}
- className="rounded-full bg-[#D9264A] text-white hover:opacity-90"
+ className="rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
  disabled={loading}
 >
  <Search className="w-4 h-4 mr-2" />

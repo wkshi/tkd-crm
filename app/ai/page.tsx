@@ -103,7 +103,7 @@ export default function AIPage() {
               <div
                 className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${
                   msg.role === "user"
-                    ? "bg-[#D9264A] text-white"
+                    ? "bg-black/[0.06] text-[#1D1D1F]"
                     : "bg-[#D9264A] text-white"
                 }`}
               >

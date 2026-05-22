@@ -321,7 +321,7 @@ export default function CalendarPage() {
  <div className="flex gap-2">
  <Button
  type="submit"
- className="flex-1 rounded-full bg-[#D9264A] text-white hover:opacity-90 h-8 text-sm"
+ className="flex-1 rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] h-8 text-sm"
 >
  {submitLabel}
  </Button>
