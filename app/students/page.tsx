@@ -118,7 +118,7 @@ export default function StudentsPage() {
  {students.map((student) => (
  <TableRow key={student.id} className="hover:bg-black/[0.04] border-b border-black/[0.04]">
  <TableCell>
- <Link href={`/students/${student.id}`} className="font-medium text-[#1D1D1F] hover:text-[#D9264A]">
+ <Link href={`/students/${student.id}`} className="font-medium text-[#1D1D1F] hover:text-[#6E6E73]">
  {student.name}
  </Link>
  </TableCell>

@@ -143,7 +143,7 @@ export default function CoachesPage() {
                 <TableCell>
                   <Link
                     href={`/coaches/${coach.id}`}
-                    className="font-medium text-[#1D1D1F] hover:text-[#D9264A]"
+                    className="font-medium text-[#1D1D1F] hover:text-[#6E6E73]"
                   >
                     {coach.name}
                   </Link>
