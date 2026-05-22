@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -37,11 +37,7 @@ export default function CoachesPage() {
   const pageSize = 20;
 
   // 加载教练列表
-  useEffect(() => {
-    fetchCoaches();
-  }, [search, page, statusFilter]);
-
-  async function fetchCoaches() {
+  const fetchCoaches = useCallback(async () => {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
@@ -52,7 +48,12 @@ export default function CoachesPage() {
     const data = await res.json();
     setCoaches(data.coaches || []);
     setTotal(data.total || 0);
-  }
+  }, [search, page, statusFilter]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchCoaches();
+  }, [fetchCoaches]);
 
   // 软删除教练
   async function handleDelete(id: string) {

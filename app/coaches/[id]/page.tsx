@@ -37,15 +37,14 @@ export default function CoachDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchCoach() {
+      const res = await fetch(`/api/coaches/${id}`);
+      const data = await res.json();
+      setCoach(data);
+      setLoading(false);
+    }
     fetchCoach();
   }, [id]);
-
-  async function fetchCoach() {
-    const res = await fetch(`/api/coaches/${id}`);
-    const data = await res.json();
-    setCoach(data);
-    setLoading(false);
-  }
 
   if (loading)
     return <div className="p-8 text-center text-slate-400">加载中...</div>;

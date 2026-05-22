@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -37,11 +37,7 @@ export default function StudentsPage() {
 
   const pageSize = 20;
 
-  useEffect(() => {
-    fetchStudents();
-  }, [search, page, statusFilter]);
-
-  async function fetchStudents() {
+  const fetchStudents = useCallback(async () => {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
@@ -52,7 +48,12 @@ export default function StudentsPage() {
     const data = await res.json();
     setStudents(data.students || []);
     setTotal(data.total || 0);
-  }
+  }, [search, page, statusFilter]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchStudents();
+  }, [fetchStudents]);
 
   async function handleDelete(id: string) {
     if (!confirm("确定删除该学员吗？此操作将软删除学员记录。")) return;

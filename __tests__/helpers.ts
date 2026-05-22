@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 /**
  * 清理测试数据
@@ -17,7 +18,7 @@ export async function cleanupTestData() {
 /**
  * 创建测试学员
  */
-export async function createTestStudent(data?: Partial<any>) {
+export async function createTestStudent(data?: Partial<Prisma.StudentCreateInput>) {
   return prisma.student.create({
     data: {
       name: "测试学员",
@@ -33,7 +34,7 @@ export async function createTestStudent(data?: Partial<any>) {
 /**
  * 创建测试教练
  */
-export async function createTestCoach(data?: Partial<any>) {
+export async function createTestCoach(data?: Partial<Prisma.CoachCreateInput>) {
   return prisma.coach.create({
     data: {
       name: "测试教练",
@@ -48,7 +49,7 @@ export async function createTestCoach(data?: Partial<any>) {
 /**
  * 创建测试课程
  */
-export async function createTestCourse(data?: Partial<any>) {
+export async function createTestCourse(data?: Partial<Prisma.CourseCreateInput>) {
   return prisma.course.create({
     data: {
       title: "测试课程",

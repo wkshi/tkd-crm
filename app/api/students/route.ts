@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma, Status } from "@prisma/client";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -21,12 +22,12 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("pageSize") || "20");
 
-  const where: any = {};
+  const where: Prisma.StudentWhereInput = {};
   if (search) {
     where.name = { contains: search, mode: "insensitive" };
   }
   if (status) {
-    where.status = status;
+    where.status = status as Status;
   }
 
   const [students, total] = await Promise.all([

@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { createWriteStream, createReadStream, mkdirSync, existsSync } from "fs";
-import { mkdtemp, writeFile, readFile, copyFile, rm } from "fs/promises";
+import { createWriteStream, mkdirSync, existsSync } from "fs";
+import { mkdtemp, writeFile, readFile, rm } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
-// @ts-ignore — archiver 无类型声明
+// @ts-expect-error — archiver 无类型声明
 import { ZipArchive } from "archiver";
-// @ts-ignore — decompress 为 CommonJS 模块
+// @ts-expect-error — decompress 为 CommonJS 模块
 import decompress from "decompress";
 
 const execAsync = promisify(exec);
@@ -99,7 +99,7 @@ export async function GET() {
     await new Promise<void>((resolve, reject) => {
       output.on("close", resolve);
       archive.on("error", reject);
-      archive.on("warning", (err: any) => {
+      archive.on("warning", (err: Error & { code?: string }) => {
         if (err.code !== "ENOENT") reject(err);
       });
       archive.pipe(output);
@@ -122,10 +122,11 @@ export async function GET() {
         "Content-Disposition": `attachment; filename="tkd-crm-backup-${timestamp}.zip"`,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
     console.error("备份失败:", err);
-    return Response.json({ error: err.message || "备份失败" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "备份失败";
+    return Response.json({ error: message }, { status: 500 });
   }
 }
 
@@ -211,8 +212,9 @@ export async function POST(req: NextRequest) {
       snapshot: snapshotPath,
       message: "数据恢复成功",
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("恢复失败:", err);
-    return Response.json({ error: err.message || "恢复失败" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "恢复失败";
+    return Response.json({ error: message }, { status: 500 });
   }
 }

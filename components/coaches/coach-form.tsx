@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 // 教练表单数据结构
-interface CoachFormData {
+export interface CoachFormData {
   name: string;
   gender: "male" | "female";
   birthDate: string;

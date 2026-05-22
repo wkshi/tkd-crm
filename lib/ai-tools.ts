@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { tool, zodSchema } from "ai";
 import { z } from "zod";
 
@@ -15,7 +16,7 @@ export const searchStudents = tool({
     })
   ),
   execute: async ({ search, status, page, pageSize }) => {
-    const where: any = {};
+    const where: Prisma.StudentWhereInput = {};
     if (search) {
       where.name = { contains: search, mode: "insensitive" };
     }
@@ -150,7 +151,7 @@ export const searchCoaches = tool({
     })
   ),
   execute: async ({ search, status, page, pageSize }) => {
-    const where: any = {};
+    const where: Prisma.CoachWhereInput = {};
     if (search) {
       where.name = { contains: search, mode: "insensitive" };
     }
@@ -259,7 +260,7 @@ export const listCourses = tool({
     })
   ),
   execute: async ({ type, coachId, start, end, page, pageSize }) => {
-    const where: any = {};
+    const where: Prisma.CourseWhereInput = {};
     if (type) where.type = type;
     if (coachId) where.coachId = coachId;
     if (start && end) {
@@ -397,7 +398,7 @@ export const getAttendance = tool({
     })
   ),
   execute: async ({ courseId, studentId, date, page, pageSize }) => {
-    const where: any = {};
+    const where: Prisma.AttendanceWhereInput = {};
     if (courseId) where.courseId = courseId;
     if (studentId) where.studentId = studentId;
     if (date) {

@@ -6,19 +6,18 @@ import { StudentForm } from "@/components/students/student-form";
 
 export default function EditStudentPage() {
   const { id } = useParams();
-  const [student, setStudent] = useState<any>(null);
+  const [student, setStudent] = useState<(Partial<import("@/components/students/student-form").StudentFormData> & { id?: string }) | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchStudent() {
+      const res = await fetch(`/api/students/${id}`);
+      const data = await res.json();
+      setStudent(data);
+      setLoading(false);
+    }
     fetchStudent();
   }, [id]);
-
-  async function fetchStudent() {
-    const res = await fetch(`/api/students/${id}`);
-    const data = await res.json();
-    setStudent(data);
-    setLoading(false);
-  }
 
   if (loading) return <div className="p-8 text-center text-slate-400">加载中...</div>;
   if (!student) return <div className="p-8 text-center text-slate-400">学员不存在</div>;

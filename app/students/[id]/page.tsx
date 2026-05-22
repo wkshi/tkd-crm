@@ -1,8 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+
+interface StudentWithRecords {
+  id: string;
+  name: string;
+  gender: string;
+  birthDate: string;
+  phone?: string;
+  photoUrl?: string;
+  enrollmentDate: string;
+  remainingSessions: number;
+  expiryDate?: string;
+  status: string;
+  gradings: Array<{ id: string; examDate: string; beltLevel: string; certificateNo?: string }>;
+  competitions: Array<{ id: string; competitionDate: string; competitionName: string; result?: string; award?: string }>;
+  camps: Array<{ id: string; activityDate: string; activityName: string; location?: string; duration?: number }>;
+  attendances: Array<{ id: string; attendanceDate: string; status: string; course?: { title: string } }>;
+}
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,7 +46,7 @@ import {
 export default function StudentDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [student, setStudent] = useState<any>(null);
+  const [student, setStudent] = useState<StudentWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
 
   // 成长记录弹窗状态
@@ -223,7 +239,7 @@ export default function StudentDetailPage() {
         </div>
         {student.gradings?.length > 0 ? (
           <div className="space-y-4">
-            {student.gradings.map((g: any) => (
+            {student.gradings.map((g) => (
               <div key={g.id} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-red-600" />
                 <span className="text-sm text-slate-500">{new Date(g.examDate).toLocaleDateString("zh-CN")}</span>
@@ -251,7 +267,7 @@ export default function StudentDetailPage() {
         </div>
         {student.competitions?.length > 0 ? (
           <div className="grid grid-cols-2 gap-4">
-            {student.competitions.map((c: any) => (
+            {student.competitions.map((c) => (
               <div key={c.id} className="bg-slate-50 rounded-lg p-4">
                 <p className="font-semibold">{c.competitionName}</p>
                 <p className="text-sm text-slate-500">{new Date(c.competitionDate).toLocaleDateString("zh-CN")}</p>
@@ -279,7 +295,7 @@ export default function StudentDetailPage() {
         </div>
         {student.camps?.length > 0 ? (
           <div className="grid grid-cols-3 gap-4">
-            {student.camps.map((c: any) => (
+            {student.camps.map((c) => (
               <div key={c.id} className="bg-slate-50 rounded-lg p-4 border border-slate-100">
                 <p className="text-xs text-slate-500">{new Date(c.activityDate).toLocaleDateString("zh-CN")}</p>
                 <p className="text-sm font-semibold mt-1">{c.activityName}</p>
@@ -301,7 +317,7 @@ export default function StudentDetailPage() {
         </div>
         {student.attendances?.length > 0 ? (
           <div className="space-y-2">
-            {student.attendances.map((a: any) => (
+            {student.attendances.map((a) => (
               <div key={a.id} className="flex items-center justify-between py-2 border-b border-slate-50">
                 <span className="text-sm text-slate-600">{new Date(a.attendanceDate).toLocaleDateString("zh-CN")}</span>
                 <span className="text-sm font-medium">{a.course?.title || "课程"}</span>

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma, CoachStatus } from "@prisma/client";
 import { z } from "zod";
 
 // 创建教练的验证模式
@@ -22,12 +23,12 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("pageSize") || "20");
 
-  const where: any = {};
+  const where: Prisma.CoachWhereInput = {};
   if (search) {
     where.name = { contains: search, mode: "insensitive" };
   }
   if (status) {
-    where.status = status;
+    where.status = status as CoachStatus;
   }
 
   const [coaches, total] = await Promise.all([

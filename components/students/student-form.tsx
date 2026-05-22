@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-interface StudentFormData {
+export interface StudentFormData {
   name: string;
   gender: "male" | "female";
   birthDate: string;
@@ -150,7 +150,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
             <Label>在籍状态</Label>
             <select
               value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as any })}
+              onChange={(e) => setForm({ ...form, status: e.target.value as "active" | "inactive" | "suspended" })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
             >
               <option value="active">在籍</option>

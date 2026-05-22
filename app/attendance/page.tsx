@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,7 +36,7 @@ export default function AttendancePage() {
   const [courseId, setCourseId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function fetchAttendances() {
+  const fetchAttendances = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
     if (studentId.trim()) params.set("studentId", studentId.trim());
@@ -46,12 +46,12 @@ export default function AttendancePage() {
     const data = await res.json();
     setAttendances(data.attendances || []);
     setLoading(false);
-  }
+  }, [studentId, courseId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAttendances();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchAttendances]);
 
   return (
     <div className="space-y-6">

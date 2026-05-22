@@ -79,7 +79,6 @@ export async function DELETE(req: NextRequest) {
       return Response.json({ error: "缺少ID" }, { status: 400 });
     }
 
-    const config = UPLOAD_CONFIG[type];
     const filename = `${id}.jpg`;
     const filepath = join(getUploadDir(type), filename);
 
@@ -96,7 +95,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     return Response.json({ success: true });
-  } catch (err) {
+  } catch {
     return Response.json({ error: "删除失败" }, { status: 500 });
   }
 }

@@ -123,6 +123,7 @@ export default function CalendarPage() {
     }));
 
   // 点击课程事件
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleEventClick(info: any) {
     setSelectedCourse(info.event.extendedProps.course);
     setEditMode(false);
@@ -212,14 +213,11 @@ export default function CalendarPage() {
     });
   }
 
-  // 课程表单 JSX（复用）
-  function CourseForm({
-    onSubmit,
-    submitLabel,
-  }: {
-    onSubmit: (e: React.FormEvent) => void;
-    submitLabel: string;
-  }) {
+  // 课程表单 JSX（复用）- 使用渲染函数避免 static-components 警告
+  function renderCourseForm(
+    onSubmit: (e: React.FormEvent) => void,
+    submitLabel: string
+  ) {
     return (
       <form onSubmit={onSubmit} className="space-y-3">
         <div className="space-y-1">
@@ -358,12 +356,7 @@ export default function CalendarPage() {
               {showForm ? "收起" : "展开"}
             </Button>
           </div>
-          {showForm && (
-            <CourseForm
-              onSubmit={handleCreateCourse}
-              submitLabel="创建课程"
-            />
-          )}
+          {showForm && renderCourseForm(handleCreateCourse, "创建课程")}
         </Card>
 
         {/* 课程类型筛选 */}
@@ -428,10 +421,7 @@ export default function CalendarPage() {
               <DialogHeader>
                 <DialogTitle>编辑课程</DialogTitle>
               </DialogHeader>
-              <CourseForm
-                onSubmit={handleUpdateCourse}
-                submitLabel="保存修改"
-              />
+              {renderCourseForm(handleUpdateCourse, "保存修改")}
             </>
           ) : (
             <>

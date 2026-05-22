@@ -126,9 +126,9 @@ export default function AIPage() {
 
                   if (isToolUIPart(part)) {
                     const toolName = part.type.replace("tool-", "");
-                    const toolState = (part as any).state;
-                    const toolInput = (part as any).input;
-                    const toolOutput = (part as any).output;
+                    const toolState = (part as Record<string, unknown>).state as string;
+                    const toolInput = (part as Record<string, unknown>).input as Record<string, unknown>;
+                    const toolOutput = (part as Record<string, unknown>).output as Record<string, unknown>;
 
                     return (
                       <Card

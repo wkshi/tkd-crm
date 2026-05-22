@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
   const studentId = searchParams.get("studentId") || undefined;
   const courseId = searchParams.get("courseId") || undefined;
 
-  const where: any = {};
+  const where: Prisma.AttendanceWhereInput = {};
   if (studentId) where.studentId = studentId;
   if (courseId) where.courseId = courseId;
 

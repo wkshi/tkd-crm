@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma, CourseType } from "@prisma/client";
 import { z } from "zod";
 
 // 创建课程的验证模式
@@ -24,9 +25,9 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("pageSize") || "100");
 
-  const where: any = {};
+  const where: Prisma.CourseWhereInput = {};
   if (type) {
-    where.type = type;
+    where.type = type as CourseType;
   }
   if (coachId) {
     where.coachId = coachId;

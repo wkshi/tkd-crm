@@ -43,8 +43,9 @@ export default function BackupPage() {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
       setMessage({ type: "success", text: "备份下载成功" });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "备份失败" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "备份失败";
+      setMessage({ type: "error", text: message });
     } finally {
       setIsBackingUp(false);
     }
@@ -108,8 +109,9 @@ export default function BackupPage() {
       }
       setMessage({ type: "success", text: "数据恢复成功，页面将刷新..." });
       setTimeout(() => window.location.reload(), 2000);
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "恢复失败" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "恢复失败";
+      setMessage({ type: "error", text: message });
     } finally {
       setIsRestoring(false);
       setRestoreFile(null);
