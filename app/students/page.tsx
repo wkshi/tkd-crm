@@ -178,7 +178,7 @@ export default function StudentsPage() {
 >
  上一页
  </Button>
- <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D9264A]/10 text-[#D9264A] text-sm font-medium">{page}</span>
+ <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-black/[0.06] text-[#1D1D1F] text-sm font-medium">{page}</span>
  <Button
  variant="outline"
  size="sm"
