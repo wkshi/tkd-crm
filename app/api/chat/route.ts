@@ -42,10 +42,12 @@ export async function POST(req: NextRequest) {
   const modelMessages = await convertToModelMessages(messages);
 
   // 使用 streamText 进行流式对话，并绑定所有工具
+  // maxSteps 设为 10 支持多步推理（工具调用 → 观察 → 再次调用工具）
   const result = streamText({
     model: getModel(),
     system: SYSTEM_PROMPT,
     messages: modelMessages,
+    maxSteps: 10,
     tools: {
       searchStudents,
       getStudentDetail,
