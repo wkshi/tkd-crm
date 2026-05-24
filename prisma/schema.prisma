@@ -26,7 +26,7 @@ model Student {
   competitions Competition[]
   camps        Camp[]
   attendances  Attendance[]
-  courses      Course[]     @relation("CourseToStudent")
+  classes      Class[]      @relation("ClassToStudent")
 
   @@index([name])
   @@index([status])
@@ -54,25 +54,44 @@ model Coach {
   @@map("coaches")
 }
 
-model Course {
-  id          String     @id @default(uuid())
-  title       String
-  type        CourseType @default(regular)
-  startTime   DateTime   @map("start_time")
-  endTime     DateTime   @map("end_time")
-  coachId     String?    @map("coach_id")
-  location    String?
-  maxStudents Int        @default(30) @map("max_students")
+model Class {
+  id          String   @id @default(uuid())
+  name        String
+  level       String?  // 段位/级别，如"白带","黄带"
   description String?
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
+  maxStudents Int      @default(30) @map("max_students")
+  status      Status   @default(active)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  students Student[] @relation("ClassToStudent")
+  courses  Course[]
+
+  @@index([name])
+  @@index([status])
+  @@map("classes")
+}
+
+model Course {
+  id          String   @id @default(uuid())
+  title       String?
+  startTime   DateTime @map("start_time")
+  endTime     DateTime @map("end_time")
+  coachId     String?  @map("coach_id")
+  classId     String   @map("class_id")
+  location    String?
+  maxStudents Int      @default(30) @map("max_students")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   coach       Coach?       @relation(fields: [coachId], references: [id], onDelete: SetNull)
-  students    Student[]    @relation("CourseToStudent")
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   attendances Attendance[]
 
   @@index([startTime])
   @@index([coachId])
+  @@index([classId])
   @@map("courses")
 }
 
@@ -160,13 +179,6 @@ enum CoachStatus {
   active
   inactive
   on_leave
-}
-
-enum CourseType {
-  regular
-  exam_prep
-  camp
-  competition
 }
 
 enum AttendanceStatus {
