@@ -1,3 +1,4 @@
+<!-- From: /Users/wkshi/git/github/wkshi/tkd-crm/AGENTS.md -->
 # 跆拳道馆 CRM 系统 —— AI 代理指南
 
 > 本文档供 AI 编码代理阅读。如果你正在阅读此文件，说明你对本项目一无所知——本文档将告诉你需要了解的一切。
@@ -19,7 +20,8 @@
 | **前端框架** | Next.js 16 + App Router + React 19 |
 | **语言** | TypeScript 5 |
 | **样式** | Tailwind CSS 4 + shadcn/ui（base-nova 风格） |
-| **日历组件** | @fullcalendar/react |
+| **UI 底层** | `@base-ui/react`（shadcn/ui 组件基于此构建） |
+| **日历组件** | `@fullcalendar/react` |
 | **数据库** | PostgreSQL 16 |
 | **ORM** | Prisma 6 |
 | **AI SDK** | Vercel AI SDK 6 + Provider Registry |
@@ -63,6 +65,7 @@ tkd-crm/
 │   │   ├── competition/route.ts
 │   │   ├── camp/route.ts
 │   │   ├── chat/route.ts           # AI 对话流式接口
+│   │   ├── correct/route.ts        # 语音输入文本矫正
 │   │   ├── config/route.ts         # 返回客户端可用的系统配置（如当前模型名）
 │   │   ├── upload/route.ts         # 照片上传/删除
 │   │   └── backup/route.ts         # 数据备份/恢复（ZIP + pg_dump/psql）
@@ -80,7 +83,7 @@ tkd-crm/
 │   ├── layout/                     # sidebar.tsx, header.tsx
 │   ├── students/                   # student-form.tsx
 │   ├── coaches/                    # coach-form.tsx
-│   └── theme-provider.tsx          # Next Themes 提供者（强制 light mode）
+│   └── theme-provider.tsx          # Next Themes 提供者（默认 light，支持 D 键切换）
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
 │   ├── ai-model.ts                 # AI Provider Registry + getModel()
@@ -90,10 +93,10 @@ tkd-crm/
 │   ├── api/                        # API 路由测试
 │   ├── components/                 # 组件测试
 │   ├── lib/                        # 工具函数测试
-│   ├── helpers.ts                  # 测试辅助函数（cleanupTestData, createTestStudent 等）
+│   ├── helpers.ts                  # 测试辅助函数（部分函数，不推荐使用）
 │   └── setup.ts                    # Vitest 全局 setup（mock next/navigation）
-├── tests/                          # 额外的测试辅助（与 __tests__/helpers.ts 部分重复）
-│   └── helpers.ts
+├── tests/                          # 主要测试辅助函数
+│   └── helpers.ts                  # 测试辅助函数（cleanupTestData, createTestStudent 等，API 测试从此导入）
 ├── prisma/
 │   ├── schema.prisma               # 数据库 Schema
 │   └── migrations/                 # Prisma 迁移文件
@@ -313,7 +316,7 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 前端设计遵循 Apple Human Interface Guidelines，特点如下：
 
-- **强制 Light Mode**：系统通过 `ThemeProvider` 强制 `light` 主题，不使用深色模式
+- **默认 Light Mode**：系统通过 `ThemeProvider` 默认 `light` 主题，同时支持按 `D` 键切换 dark/light 主题
 - **主按钮颜色**：`bg-[#1D1D1F]`（深黑），hover `bg-black/80`
 - **危险操作**：仅破坏性操作使用 `bg-[#D9264A]`（红），如删除确认
 - **次要按钮**：`bg-black/[0.06]` 灰色背景，hover `bg-black/[0.1]`
@@ -422,7 +425,8 @@ const { messages, sendMessage, setMessages, status } = useChat({
 - `__tests__/components/` —— 组件测试（sidebar, student-form）
 - `__tests__/lib/` —— 工具函数测试（prisma 单例, utils）
 - `__tests__/setup.ts` —— 全局 setup，mock `next/navigation` 和 `next/head`
-- `__tests__/helpers.ts` —— 测试辅助函数
+- `tests/helpers.ts` —— 主要测试辅助函数（API 测试从此文件导入）
+- `__tests__/helpers.ts` —— 备用测试辅助函数（部分函数，与 tests/helpers.ts 有重叠）
 
 ### 测试规范
 

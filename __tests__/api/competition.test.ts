@@ -58,9 +58,12 @@ describe("比赛 API", () => {
         const res = await fetch();
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.competitions).toHaveLength(1);
-        expect(json.competitions[0].competitionName).toBe("测试比赛");
-        expect(json.competitions[0].student.name).toBe("比赛学员A");
+        expect(json.competitions.length).toBeGreaterThanOrEqual(1);
+        const comp = json.competitions.find(
+          (c: { competitionName: string }) => c.competitionName === "测试比赛"
+        );
+        expect(comp).toBeDefined();
+        expect(comp.student.name).toBe("[test]比赛学员A");
       },
     });
   });

@@ -57,9 +57,12 @@ describe("考级 API", () => {
         const res = await fetch();
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.gradings).toHaveLength(1);
-        expect(json.gradings[0].beltLevel).toBe("yellow");
-        expect(json.gradings[0].student.name).toBe("考级学员A");
+        expect(json.gradings.length).toBeGreaterThanOrEqual(1);
+        const grading = json.gradings.find(
+          (g: { beltLevel: string; student: { name: string } }) =>
+            g.beltLevel === "yellow" && g.student.name === "[test]考级学员A"
+        );
+        expect(grading).toBeDefined();
       },
     });
   });

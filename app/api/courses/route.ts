@@ -13,6 +13,7 @@ const createSchema = z.object({
   location: z.string().optional(),
   maxStudents: z.number().default(30),
   description: z.string().optional(),
+  studentIds: z.array(z.string()).optional(),
 });
 
 // 获取课程列表（支持类型筛选、教练筛选和时间范围）
@@ -47,6 +48,8 @@ export async function GET(req: NextRequest) {
       take: pageSize,
       include: {
         coach: { select: { id: true, name: true } },
+        students: { select: { id: true, name: true } },
+        _count: { select: { students: true } },
       },
     }),
     prisma.course.count({ where }),
@@ -66,6 +69,13 @@ export async function POST(req: Request) {
       startTime: new Date(data.startTime),
       endTime: new Date(data.endTime),
       coachId: data.coachId || null,
+      students: data.studentIds?.length
+        ? { connect: data.studentIds.map((id) => ({ id })) }
+        : undefined,
+    },
+    include: {
+      coach: { select: { id: true, name: true } },
+      students: { select: { id: true, name: true } },
     },
   });
 

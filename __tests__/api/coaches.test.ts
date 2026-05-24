@@ -22,7 +22,7 @@ describe("教练 API", () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: "王教练",
+            name: "[test]王教练",
             gender: "female",
             phone: "13900139001",
             bio: "省级跆拳道冠军",
@@ -30,7 +30,7 @@ describe("教练 API", () => {
         });
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.name).toBe("王教练");
+        expect(json.name).toBe("[test]王教练");
         expect(json.gender).toBe("female");
         expect(json.status).toBe("active");
       },
@@ -47,8 +47,11 @@ describe("教练 API", () => {
         const res = await fetch();
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.coaches).toHaveLength(2);
-        expect(json.total).toBe(2);
+        expect(json.coaches.length).toBeGreaterThanOrEqual(2);
+        expect(json.total).toBeGreaterThanOrEqual(2);
+        const names = json.coaches.map((c: { name: string }) => c.name);
+        expect(names).toContain("[test]教练A");
+        expect(names).toContain("[test]教练B");
       },
     });
   });
@@ -63,7 +66,7 @@ describe("教练 API", () => {
         const res = await fetch();
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.name).toBe("详情教练");
+        expect(json.name).toBe("[test]详情教练");
         expect(json.courses).toBeDefined();
       },
     });

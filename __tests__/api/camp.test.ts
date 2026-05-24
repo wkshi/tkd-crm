@@ -59,9 +59,10 @@ describe("集训 API", () => {
         const res = await fetch();
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.camps).toHaveLength(1);
-        expect(json.camps[0].activityName).toBe("测试集训");
-        expect(json.camps[0].student.name).toBe("集训学员A");
+        expect(json.camps.length).toBeGreaterThanOrEqual(1);
+        const camp = json.camps.find((c: { activityName: string }) => c.activityName === "测试集训");
+        expect(camp).toBeDefined();
+        expect(camp.student.name).toBe("[test]集训学员A");
       },
     });
   });

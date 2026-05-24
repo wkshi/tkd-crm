@@ -22,7 +22,7 @@ describe("课程 API", () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            title: "少儿基础班",
+            title: "[test]少儿基础班",
             type: "regular",
             startTime: new Date(Date.now() + 86400000).toISOString(),
             endTime: new Date(Date.now() + 90000000).toISOString(),
@@ -32,7 +32,7 @@ describe("课程 API", () => {
         });
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.title).toBe("少儿基础班");
+        expect(json.title).toBe("[test]少儿基础班");
         expect(json.type).toBe("regular");
       },
     });
@@ -88,9 +88,9 @@ describe("课程 API", () => {
         const res = await fetch();
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.title).toBe("详情课程");
+        expect(json.title).toBe("[test]详情课程");
         expect(json.coach).toBeDefined();
-        expect(json.coach?.name).toBe("李教练");
+        expect(json.coach?.name).toBe("[test]李教练");
       },
     });
   });

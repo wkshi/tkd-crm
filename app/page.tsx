@@ -87,11 +87,12 @@ export default async function DashboardPage() {
  },
  include: {
  coach: true,
+ students: { select: { id: true, name: true } },
  attendances: {
  where: {
  attendanceDate: { gte: startOfToday, lte: endOfToday },
  },
- select: { status: true },
+ select: { status: true, studentId: true },
  },
  },
  orderBy: { startTime: "asc" },
@@ -290,8 +291,12 @@ export default async function DashboardPage() {
  .padStart(2, "0")}`;
 
  const allChecked =
- course.attendances.length> 0 &&
- course.attendances.every((a) => a.status !== "unmarked");
+ course.students.length > 0 &&
+ course.students.every((s) =>
+ course.attendances.some(
+ (a) => a.studentId === s.id && a.status !== "unmarked"
+ )
+ );
 
  return (
  <div
@@ -326,7 +331,7 @@ export default async function DashboardPage() {
  已点名
  </Badge>
  ) : (
- <Link href={`/attendance?courseId=${course.id}`}>
+ <Link href={`/attendance/rollcall?courseId=${course.id}`}>
  <Button size="sm" variant="outline" className="text-xs">
  点名
  </Button>

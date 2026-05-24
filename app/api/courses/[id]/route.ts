@@ -11,6 +11,7 @@ const updateSchema = z.object({
   location: z.string().optional(),
   maxStudents: z.number().optional(),
   description: z.string().optional(),
+  studentIds: z.array(z.string()).optional(),
 });
 
 // 获取单个课程详情
@@ -23,6 +24,7 @@ export async function GET(
     where: { id },
     include: {
       coach: { select: { id: true, name: true } },
+      students: { select: { id: true, name: true, photoUrl: true } },
       attendances: {
         include: {
           student: { select: { id: true, name: true, photoUrl: true } },
@@ -55,6 +57,14 @@ export async function PUT(
       startTime: data.startTime ? new Date(data.startTime) : undefined,
       endTime: data.endTime ? new Date(data.endTime) : undefined,
       coachId: data.coachId === undefined ? undefined : data.coachId || null,
+      students:
+        data.studentIds !== undefined
+          ? { set: data.studentIds.map((sid) => ({ id: sid })) }
+          : undefined,
+    },
+    include: {
+      coach: { select: { id: true, name: true } },
+      students: { select: { id: true, name: true, photoUrl: true } },
     },
   });
 

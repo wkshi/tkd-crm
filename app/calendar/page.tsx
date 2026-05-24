@@ -49,6 +49,12 @@ interface Coach {
  name: string;
 }
 
+// 学员数据类型
+interface Student {
+ id: string;
+ name: string;
+}
+
 // 课程数据类型
 interface Course {
  id: string;
@@ -61,6 +67,7 @@ interface Course {
  maxStudents: number;
  description: string | null;
  coach?: { name: string } | null;
+ students?: Student[];
 }
 
 export default function CalendarPage() {
@@ -68,6 +75,7 @@ export default function CalendarPage() {
  const calendarRef = useRef<FullCalendar>(null);
  const [courses, setCourses] = useState<Course[]>([]);
  const [coaches, setCoaches] = useState<Coach[]>([]);
+ const [allStudents, setAllStudents] = useState<Student[]>([]);
  const [selectedTypes, setSelectedTypes] = useState<string[]>([
  "regular",
  "exam_prep",
@@ -89,13 +97,21 @@ export default function CalendarPage() {
  location: "",
  maxStudents: 30,
  description: "",
+ studentIds: [] as string[],
  });
 
- // 加载课程和教练数据
+ // 加载课程、教练和学员数据
  useEffect(() => {
  fetchCourses();
  fetchCoaches();
+ fetchAllStudents();
  }, []);
+
+ async function fetchAllStudents() {
+ const res = await fetch("/api/students?pageSize=9999&status=active");
+ const data = await res.json();
+ setAllStudents(data.students || []);
+ }
 
  async function fetchCourses() {
  const res = await fetch("/api/courses?pageSize=9999");
@@ -142,6 +158,7 @@ export default function CalendarPage() {
  location: selectedCourse.location || "",
  maxStudents: selectedCourse.maxStudents,
  description: selectedCourse.description || "",
+ studentIds: selectedCourse.students?.map((s) => s.id) || [],
  });
  setEditMode(true);
  }
@@ -185,6 +202,16 @@ export default function CalendarPage() {
  }
  }
 
+ // 切换学员选择
+ function toggleStudentId(studentId: string) {
+ setForm((prev) => ({
+ ...prev,
+ studentIds: prev.studentIds.includes(studentId)
+ ? prev.studentIds.filter((id) => id !== studentId)
+ : [...prev.studentIds, studentId],
+ }));
+ }
+
  // 删除课程
  async function handleDeleteCourse(id: string) {
  if (!confirm("确定删除该课程吗？此操作不可恢复。")) return;
@@ -210,6 +237,7 @@ export default function CalendarPage() {
  location: "",
  maxStudents: 30,
  description: "",
+ studentIds: [],
  });
  }
 
@@ -317,6 +345,31 @@ export default function CalendarPage() {
  rows={2}
  className="w-full bg-black/[0.06] border-0 rounded-[10px] px-2 py-1.5 text-sm resize-none focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
  />
+ </div>
+ <div className="space-y-1">
+ <Label className="text-[13px]">
+ 报名学员 ({form.studentIds.length} 人)
+ </Label>
+ <div className="max-h-[120px] overflow-y-auto space-y-1 border border-black/[0.04] rounded-[10px] p-2 bg-white">
+ {allStudents.length === 0 ? (
+ <p className="text-xs text-[#A1A1A6]">暂无在籍学员</p>
+ ) : (
+ allStudents.map((student) => (
+ <label
+ key={student.id}
+ className="flex items-center gap-2 text-sm cursor-pointer hover:bg-black/[0.04] rounded-[6px] px-1 py-0.5"
+ >
+ <input
+ type="checkbox"
+ checked={form.studentIds.includes(student.id)}
+ onChange={() => toggleStudentId(student.id)}
+ className="rounded accent-[#1D1D1F]"
+ />
+ <span className="text-[#1D1D1F]">{student.name}</span>
+ </label>
+ ))
+ )}
+ </div>
  </div>
  <div className="flex gap-2">
  <Button
@@ -489,6 +542,23 @@ export default function CalendarPage() {
  {selectedCourse.description}
  </div>
  )}
+ {selectedCourse.students && selectedCourse.students.length > 0 && (
+ <div className="pt-2">
+ <p className="text-xs text-[#6E6E73] mb-1.5">
+ 报名学员 ({selectedCourse.students.length} 人)
+ </p>
+ <div className="flex flex-wrap gap-1.5">
+ {selectedCourse.students.map((s) => (
+ <span
+ key={s.id}
+ className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-black/[0.06] text-[#1D1D1F]"
+ >
+ {s.name}
+ </span>
+ ))}
+ </div>
+ </div>
+ )}
  </div>
  </div>
  )}
@@ -500,7 +570,7 @@ export default function CalendarPage() {
  size="sm"
  onClick={() =>
  router.push(
- `/attendance?courseId=${selectedCourse!.id}`
+ `/attendance/rollcall?courseId=${selectedCourse!.id}`
  )
  }
 >

@@ -11,17 +11,27 @@ const createSchema = z.object({
 });
 
 /**
- * GET /api/attendance?studentId=xxx 或 ?courseId=xxx
- * 查询考勤记录，支持按学员或课程过滤
+ * GET /api/attendance?studentId=xxx&courseId=xxx&attendanceDate=YYYY-MM-DD
+ * 查询考勤记录，支持按学员、课程、日期过滤
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const studentId = searchParams.get("studentId") || undefined;
   const courseId = searchParams.get("courseId") || undefined;
+  const dateStr = searchParams.get("attendanceDate") || undefined;
 
   const where: Prisma.AttendanceWhereInput = {};
   if (studentId) where.studentId = studentId;
   if (courseId) where.courseId = courseId;
+  if (dateStr) {
+    const d = new Date(dateStr);
+    const nextDay = new Date(d);
+    nextDay.setDate(nextDay.getDate() + 1);
+    where.attendanceDate = {
+      gte: d,
+      lt: nextDay,
+    };
+  }
 
   const attendances = await prisma.attendance.findMany({
     where,
