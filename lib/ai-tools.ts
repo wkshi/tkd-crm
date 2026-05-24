@@ -251,7 +251,7 @@ export const listCourses = tool({
   description: "获取课程列表，支持类型筛选、教练筛选、时间范围和分页",
   inputSchema: zodSchema(
     z.object({
-      type: z.enum(["regular", "exam_prep", "camp", "competition"]).optional().describe("课程类型"),
+
       coachId: z.string().optional().describe("教练 ID 筛选"),
       start: z.string().optional().describe("开始时间（ISO 字符串）"),
       end: z.string().optional().describe("结束时间（ISO 字符串）"),
@@ -259,9 +259,8 @@ export const listCourses = tool({
       pageSize: z.number().default(100).describe("每页数量"),
     })
   ),
-  execute: async ({ type, coachId, start, end, page, pageSize }) => {
+  execute: async ({ coachId, start, end, page, pageSize }) => {
     const where: Prisma.CourseWhereInput = {};
-    if (type) where.type = type;
     if (coachId) where.coachId = coachId;
     if (start && end) {
       where.startTime = {
@@ -289,10 +288,11 @@ export const createCourse = tool({
   description: "创建新课程",
   inputSchema: zodSchema(
     z.object({
-      title: z.string().min(1).describe("课程标题"),
-      type: z.enum(["regular", "exam_prep", "camp", "competition"]).default("regular").describe("课程类型"),
+      title: z.string().optional().describe("课程标题"),
+
       startTime: z.string().describe("开始时间（ISO 字符串）"),
       endTime: z.string().describe("结束时间（ISO 字符串）"),
+      classId: z.string().describe("班级 ID"),
       coachId: z.string().optional().describe("教练 ID"),
       location: z.string().optional().describe("上课地点"),
       maxStudents: z.number().default(30).describe("最大学员数"),
@@ -300,9 +300,25 @@ export const createCourse = tool({
     })
   ),
   execute: async (data) => {
+    // 如果未提供课程名称，自动生成：班级名 + 日期
+    let title = data.title;
+    if (!title) {
+      const cls = await prisma.class.findUnique({
+        where: { id: data.classId },
+        select: { name: true },
+      });
+      const dateStr = new Date(data.startTime).toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+      title = `${cls?.name || "未命名课程"} ${dateStr}`;
+    }
+
     const course = await prisma.course.create({
       data: {
         ...data,
+        title,
         startTime: new Date(data.startTime),
         endTime: new Date(data.endTime),
         coachId: data.coachId || undefined,
@@ -321,6 +337,7 @@ export const updateCourse = tool({
       type: z.enum(["regular", "exam_prep", "camp", "competition"]).optional().describe("课程类型"),
       startTime: z.string().optional().describe("开始时间（ISO 字符串）"),
       endTime: z.string().optional().describe("结束时间（ISO 字符串）"),
+      classId: z.string().optional().describe("班级 ID"),
       coachId: z.string().optional().describe("教练 ID"),
       location: z.string().optional().describe("上课地点"),
       maxStudents: z.number().optional().describe("最大学员数"),
@@ -335,6 +352,7 @@ export const updateCourse = tool({
         startTime: data.startTime ? new Date(data.startTime) : undefined,
         endTime: data.endTime ? new Date(data.endTime) : undefined,
         coachId: data.coachId || undefined,
+        classId: data.classId,
       },
     });
     return course;

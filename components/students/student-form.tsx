@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,12 @@ export interface StudentFormData {
   remainingSessions: number;
   expiryDate: string;
   status: "active" | "inactive" | "suspended";
+  classIds: string[];
+}
+
+interface AvailableClass {
+  id: string;
+  name: string;
 }
 
 interface StudentFormProps {
@@ -36,6 +42,8 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  const [availableClasses, setAvailableClasses] = useState<AvailableClass[]>([]);
+
   const existingPhotoUrl = initialData?.photoUrl || null;
 
   const [form, setForm] = useState<StudentFormData>({
@@ -54,7 +62,18 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
       ? new Date(initialData.expiryDate).toISOString().split("T")[0]
       : "",
     status: initialData?.status || "active",
+    classIds: initialData?.classIds || [],
   });
+
+  // 加载可用班级列表
+  useEffect(() => {
+    async function fetchClasses() {
+      const res = await fetch("/api/classes?pageSize=999&status=active");
+      const data = await res.json();
+      setAvailableClasses(data.classes || []);
+    }
+    fetchClasses();
+  }, []);
 
   // 处理文件选择（拍照或选择文件共用）
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -152,6 +171,16 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
     }
     setShowCamera(false);
     setCameraReady(false);
+  }
+
+  // 切换班级选择
+  function toggleClassId(classId: string) {
+    setForm((prev) => ({
+      ...prev,
+      classIds: prev.classIds.includes(classId)
+        ? prev.classIds.filter((id) => id !== classId)
+        : [...prev.classIds, classId],
+    }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -428,6 +457,34 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 所属班级 */}
+      <div className="bg-white rounded-[20px] p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 bg-[#1D1D1F] rounded-full" />
+          <h3 className="text-lg font-semibold">所属班级</h3>
+        </div>
+        {availableClasses.length === 0 ? (
+          <p className="text-sm text-[#A1A1A6]">暂无可用班级</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {availableClasses.map((cls) => (
+              <label
+                key={cls.id}
+                className="flex items-center gap-2 text-sm cursor-pointer hover:bg-black/[0.04] rounded-[10px] px-3 py-2"
+              >
+                <input
+                  type="checkbox"
+                  checked={form.classIds.includes(cls.id)}
+                  onChange={() => toggleClassId(cls.id)}
+                  className="rounded accent-[#1D1D1F]"
+                />
+                <span className="text-[#1D1D1F]">{cls.name}</span>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-4">

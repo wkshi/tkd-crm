@@ -11,12 +11,14 @@ import {
   ClipboardCheck,
   HardDrive,
   Sparkles,
+  GraduationCap,
 } from "lucide-react";
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "仪表盘" },
   { href: "/students", icon: Users, label: "学员管理" },
   { href: "/coaches", icon: UserCog, label: "教练管理" },
+  { href: "/classes", icon: GraduationCap, label: "班级管理" },
   { href: "/calendar", icon: CalendarDays, label: "课表日历" },
   { href: "/attendance", icon: ClipboardCheck, label: "考勤查询" },
   { href: "/backup", icon: HardDrive, label: "数据备份" },
