@@ -25,6 +25,12 @@ export async function cleanupTestData() {
   });
   const testCoachIds = testCoaches.map((c) => c.id);
 
+  const testClasses = await prisma.class.findMany({
+    where: { name: { startsWith: "[test]" } },
+    select: { id: true },
+  });
+  const testClassIds = testClasses.map((c) => c.id);
+
   if (testStudentIds.length > 0 || testCourseIds.length > 0) {
     await prisma.attendance.deleteMany({
       where: {
@@ -49,6 +55,9 @@ export async function cleanupTestData() {
   if (testCoachIds.length > 0) {
     await prisma.coach.deleteMany({ where: { id: { in: testCoachIds } } });
   }
+  if (testClassIds.length > 0) {
+    await prisma.class.deleteMany({ where: { id: { in: testClassIds } } });
+  }
 }
 
 /**
@@ -56,16 +65,15 @@ export async function cleanupTestData() {
  */
 export async function createTestStudent(data?: Partial<Prisma.StudentCreateInput>) {
   const prefixedName = data?.name ? `[test]${data.name}` : "[test]学员";
+  const base: Prisma.StudentCreateInput = {
+    name: prefixedName,
+    gender: "male",
+    enrollmentDate: new Date(),
+    remainingSessions: 20,
+    status: "active",
+  };
   return prisma.student.create({
-    data: {
-      name: prefixedName,
-      gender: "male",
-      enrollmentDate: new Date(),
-      remainingSessions: 20,
-      status: "active",
-      ...data,
-      name: prefixedName,
-    },
+    data: { ...base, ...data, name: prefixedName },
   });
 }
 
@@ -74,33 +82,55 @@ export async function createTestStudent(data?: Partial<Prisma.StudentCreateInput
  */
 export async function createTestCoach(data?: Partial<Prisma.CoachCreateInput>) {
   const prefixedName = data?.name ? `[test]${data.name}` : "[test]教练";
+  const base: Prisma.CoachCreateInput = {
+    name: prefixedName,
+    gender: "male",
+    joinDate: new Date(),
+    status: "active",
+  };
   return prisma.coach.create({
-    data: {
-      name: prefixedName,
-      gender: "male",
-      joinDate: new Date(),
-      status: "active",
-      ...data,
-      name: prefixedName,
-    },
+    data: { ...base, ...data, name: prefixedName },
+  });
+}
+
+/**
+ * 创建测试班级
+ */
+export async function createTestClass(data?: Partial<Prisma.ClassCreateInput>) {
+  const prefixedName = data?.name ? `[test]${data.name}` : "[test]班级";
+  const base: Prisma.ClassCreateInput = {
+    name: prefixedName,
+    maxStudents: 30,
+    status: "active",
+  };
+  return prisma.class.create({
+    data: { ...base, ...data, name: prefixedName },
   });
 }
 
 /**
  * 创建测试课程
  */
-export async function createTestCourse(data?: Partial<Prisma.CourseCreateInput>) {
+export async function createTestCourse(data?: Partial<Prisma.CourseUncheckedCreateInput>) {
   const prefixedTitle = data?.title ? `[test]${data.title}` : "[test]课程";
+
+  // 如果没有提供 classId，自动创建一个测试班级
+  let classId = data?.classId;
+  if (!classId) {
+    const testClass = await createTestClass();
+    classId = testClass.id;
+  }
+
+  const base: Prisma.CourseUncheckedCreateInput = {
+    title: prefixedTitle,
+    startTime: new Date(Date.now() + 86400000),
+    endTime: new Date(Date.now() + 90000000),
+    location: "主训练馆",
+    maxStudents: 30,
+    classId,
+  };
+
   return prisma.course.create({
-    data: {
-      title: prefixedTitle,
-      type: "regular",
-      startTime: new Date(Date.now() + 86400000),
-      endTime: new Date(Date.now() + 90000000),
-      location: "主训练馆",
-      maxStudents: 30,
-      ...data,
-      title: prefixedTitle,
-    },
+    data: { ...base, ...data, title: prefixedTitle, classId },
   });
 }

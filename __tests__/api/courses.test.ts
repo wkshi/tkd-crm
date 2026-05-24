@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { testApiHandler } from "next-test-api-route-handler";
 import * as courseListHandler from "@/app/api/courses/route";
 import * as courseDetailHandler from "@/app/api/courses/[id]/route";
-import { cleanupTestData, createTestCourse, createTestCoach } from "@/tests/helpers";
+import { cleanupTestData, createTestCourse, createTestCoach, createTestClass } from "@/tests/helpers";
 
 describe("课程 API", () => {
   beforeEach(async () => {
@@ -15,6 +15,7 @@ describe("课程 API", () => {
   });
 
   it("POST /api/courses 创建课程", async () => {
+    const cls = await createTestClass({ name: "测试班级" });
     await testApiHandler({
       appHandler: courseListHandler,
       test: async ({ fetch }) => {
@@ -23,9 +24,9 @@ describe("课程 API", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title: "[test]少儿基础班",
-            type: "regular",
             startTime: new Date(Date.now() + 86400000).toISOString(),
             endTime: new Date(Date.now() + 90000000).toISOString(),
+            classId: cls.id,
             location: "主训练馆",
             maxStudents: 30,
           }),
@@ -33,7 +34,8 @@ describe("课程 API", () => {
         const json = await res.json();
         expect(res.status).toBe(200);
         expect(json.title).toBe("[test]少儿基础班");
-        expect(json.type).toBe("regular");
+
+        expect(json.classId).toBe(cls.id);
       },
     });
   });

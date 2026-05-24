@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { Gender, Status, CoachStatus, BeltLevel } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
+/**
+ * 清理测试数据
+ */
 export async function cleanupTestData() {
-  // 只清理测试数据（名称/标题以"[test]"开头），保留用户真实数据
   const testStudents = await prisma.student.findMany({
     where: { name: { startsWith: "[test]" } },
     select: { id: true },
@@ -21,7 +23,12 @@ export async function cleanupTestData() {
   });
   const testCoachIds = testCoaches.map((c) => c.id);
 
-  // 按依赖顺序反向删除，只删除关联到测试数据的记录
+  const testClasses = await prisma.class.findMany({
+    where: { name: { startsWith: "[test]" } },
+    select: { id: true },
+  });
+  const testClassIds = testClasses.map((c) => c.id);
+
   if (testStudentIds.length > 0 || testCourseIds.length > 0) {
     await prisma.attendance.deleteMany({
       where: {
@@ -33,9 +40,9 @@ export async function cleanupTestData() {
     });
   }
   if (testStudentIds.length > 0) {
-    await prisma.camp.deleteMany({ where: { studentId: { in: testStudentIds } } });
-    await prisma.competition.deleteMany({ where: { studentId: { in: testStudentIds } } });
     await prisma.grading.deleteMany({ where: { studentId: { in: testStudentIds } } });
+    await prisma.competition.deleteMany({ where: { studentId: { in: testStudentIds } } });
+    await prisma.camp.deleteMany({ where: { studentId: { in: testStudentIds } } });
   }
   if (testCourseIds.length > 0) {
     await prisma.course.deleteMany({ where: { id: { in: testCourseIds } } });
@@ -46,122 +53,69 @@ export async function cleanupTestData() {
   if (testCoachIds.length > 0) {
     await prisma.coach.deleteMany({ where: { id: { in: testCoachIds } } });
   }
+  if (testClassIds.length > 0) {
+    await prisma.class.deleteMany({ where: { id: { in: testClassIds } } });
+  }
 }
 
-export async function createTestStudent(data: Partial<{
-  name: string;
-  gender: Gender;
-  remainingSessions: number;
-  phone: string;
-  status: Status;
-}>) {
-  const prefixedName = data.name ? `[test]${data.name}` : "[test]学员";
+export async function createTestStudent(data?: Partial<Prisma.StudentCreateInput>) {
+  const prefixedName = data?.name ? `[test]${data.name}` : "[test]学员";
+  const base: Prisma.StudentCreateInput = {
+    name: prefixedName,
+    gender: "male",
+    enrollmentDate: new Date(),
+    remainingSessions: 20,
+    status: "active",
+  };
   return prisma.student.create({
-    data: {
-      name: prefixedName,
-      gender: data.gender ?? Gender.male,
-      remainingSessions: data.remainingSessions ?? 20,
-      phone: data.phone ?? "13800138000",
-      status: data.status ?? Status.active,
-    },
+    data: { ...base, ...data, name: prefixedName },
   });
 }
 
-export async function createTestCoach(data: Partial<{
-  name: string;
-  gender: Gender;
-  phone: string;
-  status: CoachStatus;
-}>) {
-  const prefixedName = data.name ? `[test]${data.name}` : "[test]教练";
+export async function createTestCoach(data?: Partial<Prisma.CoachCreateInput>) {
+  const prefixedName = data?.name ? `[test]${data.name}` : "[test]教练";
+  const base: Prisma.CoachCreateInput = {
+    name: prefixedName,
+    gender: "male",
+    joinDate: new Date(),
+    status: "active",
+  };
   return prisma.coach.create({
-    data: {
-      name: prefixedName,
-      gender: data.gender ?? Gender.male,
-      phone: data.phone ?? "13900139000",
-      status: data.status ?? CoachStatus.active,
-    },
+    data: { ...base, ...data, name: prefixedName },
   });
 }
 
-export async function createTestCourse(data: Partial<{
-  title: string;
-  startTime: Date;
-  endTime: Date;
-  location: string;
-  maxStudents: number;
-  coachId?: string;
-}>) {
-  const startTime = data.startTime ?? new Date();
-  const endTime = data.endTime ?? new Date(startTime.getTime() + 60 * 60 * 1000);
-  const prefixedTitle = data.title ? `[test]${data.title}` : "[test]课程";
+export async function createTestClass(data?: Partial<Prisma.ClassCreateInput>) {
+  const prefixedName = data?.name ? `[test]${data.name}` : "[test]班级";
+  const base: Prisma.ClassCreateInput = {
+    name: prefixedName,
+    maxStudents: 30,
+    status: "active",
+  };
+  return prisma.class.create({
+    data: { ...base, ...data, name: prefixedName },
+  });
+}
+
+export async function createTestCourse(data?: Partial<Prisma.CourseUncheckedCreateInput>) {
+  const prefixedTitle = data?.title ? `[test]${data.title}` : "[test]课程";
+
+  let classId = data?.classId;
+  if (!classId) {
+    const testClass = await createTestClass();
+    classId = testClass.id;
+  }
+
+  const base: Prisma.CourseUncheckedCreateInput = {
+    title: prefixedTitle,
+    startTime: new Date(Date.now() + 86400000),
+    endTime: new Date(Date.now() + 90000000),
+    location: "主训练馆",
+    maxStudents: 30,
+    classId,
+  };
 
   return prisma.course.create({
-    data: {
-      title: prefixedTitle,
-      startTime,
-      endTime,
-      location: data.location,
-      maxStudents: data.maxStudents,
-      coachId: data.coachId,
-    },
-  });
-}
-
-export async function createTestGrading(data: Partial<{
-  studentId: string;
-  examDate: Date;
-  beltLevel: string;
-  certificateNo: string;
-  notes: string;
-}>) {
-  return prisma.grading.create({
-    data: {
-      studentId: data.studentId!,
-      examDate: data.examDate ?? new Date(),
-      beltLevel: (data.beltLevel as BeltLevel) ?? BeltLevel.white,
-      certificateNo: data.certificateNo,
-      notes: data.notes,
-    },
-  });
-}
-
-export async function createTestCompetition(data: Partial<{
-  studentId: string;
-  competitionDate: Date;
-  competitionName: string;
-  category: string;
-  result: string;
-  award: string;
-}>) {
-  return prisma.competition.create({
-    data: {
-      studentId: data.studentId!,
-      competitionDate: data.competitionDate ?? new Date(),
-      competitionName: data.competitionName ?? "测试比赛",
-      category: data.category,
-      result: data.result,
-      award: data.award,
-    },
-  });
-}
-
-export async function createTestCamp(data: Partial<{
-  studentId: string;
-  activityDate: Date;
-  activityName: string;
-  location: string;
-  duration: number;
-  notes: string;
-}>) {
-  return prisma.camp.create({
-    data: {
-      studentId: data.studentId!,
-      activityDate: data.activityDate ?? new Date(),
-      activityName: data.activityName ?? "测试集训",
-      location: data.location,
-      duration: data.duration,
-      notes: data.notes,
-    },
+    data: { ...base, ...data, title: prefixedTitle, classId },
   });
 }

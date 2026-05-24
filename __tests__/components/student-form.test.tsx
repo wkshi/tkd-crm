@@ -5,7 +5,10 @@ import { StudentForm } from "@/components/students/student-form";
 describe("StudentForm 学员表单", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    global.fetch = vi.fn();
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ classes: [] }),
+    });
   });
 
   it("渲染所有字段", () => {
