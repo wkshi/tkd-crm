@@ -22,6 +22,13 @@ interface Student {
   photoUrl?: string | null;
 }
 
+// 班级数据类型
+interface ClassData {
+  id: string;
+  name: string;
+  students: Student[];
+}
+
 // 课程数据类型
 interface Course {
   id: string;
@@ -31,10 +38,8 @@ interface Course {
   endTime: string;
   location: string | null;
   coach?: { name: string } | null;
-  students: Student[];
+  class: ClassData;
 }
-
-
 
 type AttendanceStatus = "unmarked" | "present" | "absent" | "late" | "leave";
 
@@ -84,7 +89,6 @@ export default function RollCallPage() {
   const courseId = searchParams.get("courseId");
 
   const [course, setCourse] = useState<Course | null>(null);
-  const [allStudents, setAllStudents] = useState<Student[]>([]);
   const [todayAttendances, setTodayAttendances] = useState<
     Record<string, AttendanceStatus>
   >({});
@@ -101,11 +105,7 @@ export default function RollCallPage() {
     async function loadData() {
       setLoading(true);
       try {
-        // 并行获取课程详情和全部学员
-        const [courseRes, studentsRes] = await Promise.all([
-          fetch(`/api/courses/${courseId}`),
-          fetch("/api/students?pageSize=9999&status=active"),
-        ]);
+        const courseRes = await fetch(`/api/courses/${courseId}`);
 
         if (cancelled) return;
 
@@ -129,11 +129,6 @@ export default function RollCallPage() {
           });
           setTodayAttendances(map);
         }
-
-        if (studentsRes.ok) {
-          const data = await studentsRes.json();
-          setAllStudents(data.students || []);
-        }
       } catch (err) {
         console.error("加载点名数据失败:", err);
       } finally {
@@ -147,11 +142,8 @@ export default function RollCallPage() {
     };
   }, [courseId]);
 
-  // 确定要显示的学员列表
-  const displayStudents =
-    course && course.students.length > 0
-      ? course.students
-      : allStudents;
+  // 确定要显示的学员列表（从班级获取）
+  const displayStudents = course?.class?.students || [];
 
   // 设置学员出勤状态
   function setStudentStatus(studentId: string, status: AttendanceStatus) {
@@ -258,7 +250,7 @@ export default function RollCallPage() {
           <div className="flex items-start justify-between">
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-[#1D1D1F]">
-                {course.title}
+                {course.title || "未命名课程"}
               </h3>
               <div className="flex flex-wrap items-center gap-3 text-sm text-[#6E6E73]">
                 <span className="flex items-center gap-1">
@@ -286,6 +278,11 @@ export default function RollCallPage() {
               {course.coach && (
                 <p className="text-sm text-[#6E6E73]">
                   教练：{course.coach.name}
+                </p>
+              )}
+              {course.class && (
+                <p className="text-sm text-[#6E6E73]">
+                  班级：{course.class.name}（{displayStudents.length} 人）
                 </p>
               )}
             </div>
@@ -330,25 +327,17 @@ export default function RollCallPage() {
       )}
 
       {/* 无学员提示 */}
-      {course && course.students.length === 0 && allStudents.length > 0 && (
+      {course && displayStudents.length === 0 && (
         <Card className="p-4 bg-amber-50 rounded-[14px] shadow-none border-0">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-amber-800">
-                该课程暂无报名学员
+                该课程所属班级暂无学员
               </p>
               <p className="text-xs text-amber-700 mt-0.5">
-                下方显示全部在籍学员，建议先在课程编辑中添加报名学员。
+                请先为班级添加学员，或更换班级。
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2 rounded-full text-xs h-7"
-                onClick={() => router.push(`/calendar?editCourse=${courseId}`)}
-              >
-                去添加学员
-              </Button>
             </div>
           </div>
         </Card>

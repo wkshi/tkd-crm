@@ -14,6 +14,7 @@ interface StudentWithRecords {
  remainingSessions: number;
  expiryDate?: string;
  status: string;
+ classes: Array<{ id: string; name: string }>;
  gradings: Array<{ id: string; examDate: string; beltLevel: string; certificateNo?: string }>;
  competitions: Array<{ id: string; competitionDate: string; competitionName: string; result?: string; award?: string }>;
  camps: Array<{ id: string; activityDate: string; activityName: string; location?: string; duration?: number }>;
@@ -213,6 +214,15 @@ export default function StudentDetailPage() {
  <span className="flex items-center gap-1"><Calendar className="w-4 h-4" />入学 {new Date(student.enrollmentDate).toLocaleDateString("zh-CN")}</span>
  <span>性别: {student.gender === "male" ? "男" : "女"}</span>
  </div>
+ {student.classes && student.classes.length > 0 && (
+ <div className="flex flex-wrap gap-1.5 mt-2">
+ {student.classes.map((cls) => (
+ <span key={cls.id} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-black/[0.06] text-[#1D1D1F]">
+ {cls.name}
+ </span>
+ ))}
+ </div>
+ )}
  <div className="flex gap-8 mt-4">
  <div>
  <p className="text-3xl font-bold text-[#1D1D1F]">{student.remainingSessions}</p>

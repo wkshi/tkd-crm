@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil, Phone, Calendar, MapPin } from "lucide-react";
 
@@ -11,7 +10,6 @@ import { ArrowLeft, Pencil, Phone, Calendar, MapPin } from "lucide-react";
 interface Course {
   id: string;
   title: string;
-  type: string;
   startTime: string;
   endTime: string;
   location: string | null;
@@ -55,20 +53,6 @@ export default function CoachDetailPage() {
     active: { label: "在职", color: "bg-[#34C759]/10 text-[#34C759]" },
     on_leave: { label: "休假中", color: "bg-[#FF9500]/10 text-[#FF9500]" },
     inactive: { label: "已离职", color: "bg-[#8E8E93]/10 text-[#8E8E93]" },
-  };
-
-  const typeMap: Record<string, string> = {
-    regular: "常规课",
-    exam_prep: "考前集训",
-    camp: "集训营",
-    competition: "比赛",
-  };
-
-  const typeColorMap: Record<string, string> = {
-    regular: "bg-blue-500/10 text-blue-700",
-    exam_prep: "bg-purple-500/10 text-purple-700",
-    camp: "bg-orange-500/10 text-orange-700",
-    competition: "bg-red-500/10 text-[#D9264A]",
   };
 
   return (
@@ -153,12 +137,7 @@ export default function CoachDetailPage() {
                 className="bg-black/[0.04] rounded-[14px] p-4"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge
-                    className={typeColorMap[course.type] || "bg-black/[0.06]"}
-                  >
-                    {typeMap[course.type] || course.type}
-                  </Badge>
-                  <span className="font-medium">{course.title}</span>
+                  <span className="font-medium">{course.title || "未命名课程"}</span>
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#6E6E73]">
                   <span>

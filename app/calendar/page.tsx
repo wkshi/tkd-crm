@@ -11,597 +11,487 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
- Dialog,
- DialogContent,
- DialogHeader,
- DialogTitle,
- DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
- CalendarDays,
- MapPin,
- Users,
- Pencil,
- Trash2,
- ClipboardCheck,
+  CalendarDays,
+  MapPin,
+  Pencil,
+  Trash2,
+  ClipboardCheck,
 } from "lucide-react";
-
-// 课程类型颜色映射
-const typeColorMap: Record<string, string> = {
- regular: "#3b82f6", // 蓝色
- exam_prep: "#a855f7", // 紫色
- camp: "#f97316", // 橙色
- competition: "#ef4444", // 红色
-};
-
-const typeLabelMap: Record<string, string> = {
- regular: "常规课",
- exam_prep: "考前集训",
- camp: "集训营",
- competition: "比赛",
-};
 
 // 教练数据类型
 interface Coach {
- id: string;
- name: string;
+  id: string;
+  name: string;
 }
 
-// 学员数据类型
-interface Student {
- id: string;
- name: string;
+// 班级数据类型
+interface ClassItem {
+  id: string;
+  name: string;
 }
 
 // 课程数据类型
 interface Course {
- id: string;
- title: string;
- type: string;
- startTime: string;
- endTime: string;
- coachId: string | null;
- location: string | null;
- maxStudents: number;
- description: string | null;
- coach?: { name: string } | null;
- students?: Student[];
+  id: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  coachId: string | null;
+  classId: string;
+  location: string | null;
+  maxStudents: number;
+  description: string | null;
+  coach?: { name: string } | null;
+  class?: { name: string } | null;
 }
 
 export default function CalendarPage() {
- const router = useRouter();
- const calendarRef = useRef<FullCalendar>(null);
- const [courses, setCourses] = useState<Course[]>([]);
- const [coaches, setCoaches] = useState<Coach[]>([]);
- const [allStudents, setAllStudents] = useState<Student[]>([]);
- const [selectedTypes, setSelectedTypes] = useState<string[]>([
- "regular",
- "exam_prep",
- "camp",
- "competition",
- ]);
- const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
- const [dialogOpen, setDialogOpen] = useState(false);
- const [showForm, setShowForm] = useState(false);
- const [editMode, setEditMode] = useState(false);
+  const router = useRouter();
+  const calendarRef = useRef<FullCalendar>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
- // 新建/编辑课程表单状态
- const [form, setForm] = useState({
- title: "",
- type: "regular" as Course["type"],
- startTime: "",
- endTime: "",
- coachId: "",
- location: "",
- maxStudents: 30,
- description: "",
- studentIds: [] as string[],
- });
+  // 新建/编辑课程表单状态
+  const [form, setForm] = useState({
+    title: "",
+    startTime: "",
+    endTime: "",
+    coachId: "",
+    classId: "",
+    location: "",
+    maxStudents: 30,
+    description: "",
+  });
 
- // 加载课程、教练和学员数据
- useEffect(() => {
- fetchCourses();
- fetchCoaches();
- fetchAllStudents();
- }, []);
+  // 加载课程、教练和班级数据
+  useEffect(() => {
+    fetchCourses();
+    fetchCoaches();
+    fetchClasses();
+  }, []);
 
- async function fetchAllStudents() {
- const res = await fetch("/api/students?pageSize=9999&status=active");
- const data = await res.json();
- setAllStudents(data.students || []);
- }
+  async function fetchClasses() {
+    const res = await fetch("/api/classes?pageSize=9999&status=active");
+    const data = await res.json();
+    setClasses(data.classes || []);
+  }
 
- async function fetchCourses() {
- const res = await fetch("/api/courses?pageSize=9999");
- const data = await res.json();
- setCourses((data.courses || []) as Course[]);
- }
+  async function fetchCourses() {
+    const res = await fetch("/api/courses?pageSize=9999");
+    const data = await res.json();
+    setCourses((data.courses || []) as Course[]);
+  }
 
- async function fetchCoaches() {
- const res = await fetch("/api/coaches?pageSize=9999");
- const data = await res.json();
- setCoaches(data.coaches || []);
- }
+  async function fetchCoaches() {
+    const res = await fetch("/api/coaches?pageSize=9999");
+    const data = await res.json();
+    setCoaches(data.coaches || []);
+  }
 
- // 根据筛选条件生成日历事件
- const events = courses
- .filter((c) => selectedTypes.includes(c.type))
- .map((course) => ({
- id: course.id,
- title: course.title,
- start: course.startTime,
- end: course.endTime,
- backgroundColor: typeColorMap[course.type] || "#3b82f6",
- borderColor: typeColorMap[course.type] || "#3b82f6",
- extendedProps: { course },
- }));
+  // 根据筛选条件生成日历事件
+  const events = courses.map((course) => ({
+    id: course.id,
+    title: course.title || "未命名课程",
+    start: course.startTime,
+    end: course.endTime,
+    backgroundColor: "#3b82f6",
+    borderColor: "#3b82f6",
+    extendedProps: { course },
+  }));
 
- // 点击课程事件
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- function handleEventClick(info: any) {
- setSelectedCourse(info.event.extendedProps.course);
- setEditMode(false);
- setDialogOpen(true);
- }
+  // 点击课程事件
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function handleEventClick(info: any) {
+    setSelectedCourse(info.event.extendedProps.course);
+    setEditMode(false);
+    setDialogOpen(true);
+  }
 
- // 切换到编辑模式
- function openEditMode() {
- if (!selectedCourse) return;
- setForm({
- title: selectedCourse.title,
- type: selectedCourse.type as Course["type"],
- startTime: selectedCourse.startTime.slice(0, 16),
- endTime: selectedCourse.endTime.slice(0, 16),
- coachId: selectedCourse.coachId || "",
- location: selectedCourse.location || "",
- maxStudents: selectedCourse.maxStudents,
- description: selectedCourse.description || "",
- studentIds: selectedCourse.students?.map((s) => s.id) || [],
- });
- setEditMode(true);
- }
+  // 切换到编辑模式
+  function openEditMode() {
+    if (!selectedCourse) return;
+    setForm({
+      title: selectedCourse.title || "",
+      startTime: selectedCourse.startTime.slice(0, 16),
+      endTime: selectedCourse.endTime.slice(0, 16),
+      coachId: selectedCourse.coachId || "",
+      classId: selectedCourse.classId,
+      location: selectedCourse.location || "",
+      maxStudents: selectedCourse.maxStudents,
+      description: selectedCourse.description || "",
+    });
+    setEditMode(true);
+  }
 
- // 新建课程
- async function handleCreateCourse(e: React.FormEvent) {
- e.preventDefault();
- const res = await fetch("/api/courses", {
- method: "POST",
- headers: { "Content-Type": "application/json" },
- body: JSON.stringify(form),
- });
+  // 新建课程
+  async function handleCreateCourse(e: React.FormEvent) {
+    e.preventDefault();
+    const res = await fetch("/api/courses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
 
- if (res.ok) {
- setShowForm(false);
- resetForm();
- fetchCourses();
- } else {
- alert("创建失败");
- }
- }
+    if (res.ok) {
+      setShowForm(false);
+      resetForm();
+      fetchCourses();
+    } else {
+      alert("创建失败");
+    }
+  }
 
- // 更新课程
- async function handleUpdateCourse(e: React.FormEvent) {
- e.preventDefault();
- if (!selectedCourse) return;
+  // 更新课程
+  async function handleUpdateCourse(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedCourse) return;
 
- const res = await fetch(`/api/courses/${selectedCourse.id}`, {
- method: "PUT",
- headers: { "Content-Type": "application/json" },
- body: JSON.stringify(form),
- });
+    const res = await fetch(`/api/courses/${selectedCourse.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
 
- if (res.ok) {
- const updated = await res.json();
- setSelectedCourse(updated);
- setEditMode(false);
- fetchCourses();
- } else {
- alert("更新失败");
- }
- }
+    if (res.ok) {
+      const updated = await res.json();
+      setSelectedCourse(updated);
+      setEditMode(false);
+      fetchCourses();
+    } else {
+      alert("更新失败");
+    }
+  }
 
- // 切换学员选择
- function toggleStudentId(studentId: string) {
- setForm((prev) => ({
- ...prev,
- studentIds: prev.studentIds.includes(studentId)
- ? prev.studentIds.filter((id) => id !== studentId)
- : [...prev.studentIds, studentId],
- }));
- }
+  // 删除课程
+  async function handleDeleteCourse(id: string) {
+    if (!confirm("确定删除该课程吗？此操作不可恢复。")) return;
+    await fetch(`/api/courses/${id}`, { method: "DELETE" });
+    setDialogOpen(false);
+    fetchCourses();
+  }
 
- // 删除课程
- async function handleDeleteCourse(id: string) {
- if (!confirm("确定删除该课程吗？此操作不可恢复。")) return;
- await fetch(`/api/courses/${id}`, { method: "DELETE" });
- setDialogOpen(false);
- fetchCourses();
- }
+  function resetForm() {
+    setForm({
+      title: "",
+      startTime: "",
+      endTime: "",
+      coachId: "",
+      classId: "",
+      location: "",
+      maxStudents: 30,
+      description: "",
+    });
+  }
 
- // 切换课程类型筛选
- function toggleType(type: string) {
- setSelectedTypes((prev) =>
- prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
- );
- }
+  // 课程表单 JSX（复用）- 使用渲染函数避免 static-components 警告
+  function renderCourseForm(
+    onSubmit: (e: React.FormEvent) => void,
+    submitLabel: string
+  ) {
+    return (
+      <form onSubmit={onSubmit} className="space-y-3">
+        <div className="space-y-1">
+          <Label className="text-[13px]">课程名称</Label>
+          <Input
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[13px]">开始时间 *</Label>
+          <Input
+            type="datetime-local"
+            required
+            value={form.startTime}
+            onChange={(e) =>
+              setForm({ ...form, startTime: e.target.value })
+            }
+            className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[13px]">结束时间 *</Label>
+          <Input
+            type="datetime-local"
+            required
+            value={form.endTime}
+            onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+            className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[13px]">所属班级 *</Label>
+          <select
+            required
+            value={form.classId}
+            onChange={(e) =>
+              setForm({ ...form, classId: e.target.value })
+            }
+            className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
+          >
+            <option value="">请选择班级</option>
+            {classes.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.name}
+              </option>
+            ))}
+          </select>
+          {classes.length === 0 && (
+            <p className="text-xs text-[#D9264A]">
+              暂无可选班级，请先创建班级
+            </p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[13px]">教练</Label>
+          <select
+            value={form.coachId}
+            onChange={(e) =>
+              setForm({ ...form, coachId: e.target.value })
+            }
+            className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
+          >
+            <option value="">请选择教练</option>
+            {coaches.map((coach) => (
+              <option key={coach.id} value={coach.id}>
+                {coach.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[13px]">地点</Label>
+          <Input
+            value={form.location}
+            onChange={(e) =>
+              setForm({ ...form, location: e.target.value })
+            }
+            className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[13px]">人数上限</Label>
+          <Input
+            type="number"
+            value={form.maxStudents}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                maxStudents: parseInt(e.target.value) || 0,
+              })
+            }
+            className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[13px]">备注</Label>
+          <textarea
+            value={form.description}
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value })
+            }
+            rows={2}
+            className="w-full bg-black/[0.06] border-0 rounded-[10px] px-2 py-1.5 text-sm resize-none focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            className="flex-1 rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] h-8 text-sm"
+          >
+            {submitLabel}
+          </Button>
+          {editMode && (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-8 text-sm rounded-full"
+              onClick={() => setEditMode(false)}
+            >
+              取消
+            </Button>
+          )}
+        </div>
+      </form>
+    );
+  }
 
- function resetForm() {
- setForm({
- title: "",
- type: "regular",
- startTime: "",
- endTime: "",
- coachId: "",
- location: "",
- maxStudents: 30,
- description: "",
- studentIds: [],
- });
- }
+  return (
+    <div className="flex gap-6 h-[calc(100vh-120px)]">
+      {/* 左侧边栏 */}
+      <div className="w-[280px] shrink-0 space-y-6 overflow-y-auto pr-2">
+        {/* 快速创建课程 */}
+        <Card className="p-4 backdrop-blur-xl bg-white/70">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold">快速创建</h3>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowForm(!showForm)}
+            >
+              {showForm ? "收起" : "展开"}
+            </Button>
+          </div>
+          {showForm && renderCourseForm(handleCreateCourse, "创建课程")}
+        </Card>
 
- // 课程表单 JSX（复用）- 使用渲染函数避免 static-components 警告
- function renderCourseForm(
- onSubmit: (e: React.FormEvent) => void,
- submitLabel: string
- ) {
- return (
- <form onSubmit={onSubmit} className="space-y-3">
- <div className="space-y-1">
- <Label className="text-[13px]">课程名称 *</Label>
- <Input
- required
- value={form.title}
- onChange={(e) => setForm({ ...form, title: e.target.value })}
- className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
- />
- </div>
- <div className="space-y-1">
- <Label className="text-[13px]">课程类型</Label>
- <select
- value={form.type}
- onChange={(e) =>
- setForm({ ...form, type: e.target.value as Course["type"] })
- }
- className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
->
- <option value="regular">常规课</option>
- <option value="exam_prep">考前集训</option>
- <option value="camp">集训营</option>
- <option value="competition">比赛</option>
- </select>
- </div>
- <div className="space-y-1">
- <Label className="text-[13px]">开始时间 *</Label>
- <Input
- type="datetime-local"
- required
- value={form.startTime}
- onChange={(e) =>
- setForm({ ...form, startTime: e.target.value })
- }
- className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
- />
- </div>
- <div className="space-y-1">
- <Label className="text-[13px]">结束时间 *</Label>
- <Input
- type="datetime-local"
- required
- value={form.endTime}
- onChange={(e) => setForm({ ...form, endTime: e.target.value })}
- className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
- />
- </div>
- <div className="space-y-1">
- <Label className="text-[13px]">教练</Label>
- <select
- value={form.coachId}
- onChange={(e) =>
- setForm({ ...form, coachId: e.target.value })
- }
- className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
->
- <option value="">请选择教练</option>
- {coaches.map((coach) => (
- <option key={coach.id} value={coach.id}>
- {coach.name}
- </option>
- ))}
- </select>
- </div>
- <div className="space-y-1">
- <Label className="text-[13px]">地点</Label>
- <Input
- value={form.location}
- onChange={(e) =>
- setForm({ ...form, location: e.target.value })
- }
- className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
- />
- </div>
- <div className="space-y-1">
- <Label className="text-[13px]">人数上限</Label>
- <Input
- type="number"
- value={form.maxStudents}
- onChange={(e) =>
- setForm({
- ...form,
- maxStudents: parseInt(e.target.value) || 0,
- })
- }
- className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
- />
- </div>
- <div className="space-y-1">
- <Label className="text-[13px]">备注</Label>
- <textarea
- value={form.description}
- onChange={(e) =>
- setForm({ ...form, description: e.target.value })
- }
- rows={2}
- className="w-full bg-black/[0.06] border-0 rounded-[10px] px-2 py-1.5 text-sm resize-none focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
- />
- </div>
- <div className="space-y-1">
- <Label className="text-[13px]">
- 报名学员 ({form.studentIds.length} 人)
- </Label>
- <div className="max-h-[120px] overflow-y-auto space-y-1 border border-black/[0.04] rounded-[10px] p-2 bg-white">
- {allStudents.length === 0 ? (
- <p className="text-xs text-[#A1A1A6]">暂无在籍学员</p>
- ) : (
- allStudents.map((student) => (
- <label
- key={student.id}
- className="flex items-center gap-2 text-sm cursor-pointer hover:bg-black/[0.04] rounded-[6px] px-1 py-0.5"
- >
- <input
- type="checkbox"
- checked={form.studentIds.includes(student.id)}
- onChange={() => toggleStudentId(student.id)}
- className="rounded accent-[#1D1D1F]"
- />
- <span className="text-[#1D1D1F]">{student.name}</span>
- </label>
- ))
- )}
- </div>
- </div>
- <div className="flex gap-2">
- <Button
- type="submit"
- className="flex-1 rounded-full bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1] h-8 text-sm"
->
- {submitLabel}
- </Button>
- {editMode && (
- <Button
- type="button"
- variant="outline"
- className="h-8 text-sm rounded-full"
- onClick={() => setEditMode(false)}
->
- 取消
- </Button>
- )}
- </div>
- </form>
- );
- }
 
- return (
- <div className="flex gap-6 h-[calc(100vh-120px)]">
- {/* 左侧边栏 */}
- <div className="w-[280px] shrink-0 space-y-6 overflow-y-auto pr-2">
- {/* 快速创建课程 */}
- <Card className="p-4 backdrop-blur-xl bg-white/70">
- <div className="flex items-center justify-between mb-4">
- <h3 className="font-semibold">快速创建</h3>
- <Button
- size="sm"
- variant="ghost"
- onClick={() => setShowForm(!showForm)}
->
- {showForm ? "收起" : "展开"}
- </Button>
- </div>
- {showForm && renderCourseForm(handleCreateCourse, "创建课程")}
- </Card>
+      </div>
 
- {/* 课程类型筛选 */}
- <Card className="p-4 backdrop-blur-xl bg-white/70">
- <h3 className="font-semibold mb-3">课程筛选</h3>
- <div className="space-y-2">
- {Object.entries(typeLabelMap).map(([type, label]) => (
- <label
- key={type}
- className="flex items-center gap-2 cursor-pointer"
->
- <input
- type="checkbox"
- checked={selectedTypes.includes(type)}
- onChange={() => toggleType(type)}
- className="w-4 h-4 rounded border-black/[0.12]"
- />
- <span
- className="w-3 h-3 rounded-full"
- style={{ backgroundColor: typeColorMap[type] }}
- />
- <span className="text-sm">{label}</span>
- </label>
- ))}
- </div>
- </Card>
- </div>
+      {/* 日历主体 */}
+      <Card className="flex-1 p-4 overflow-hidden">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="timeGridWeek"
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
+          }}
+          locale={zhCnLocale}
+          firstDay={1}
+          slotMinTime="07:00:00"
+          slotMaxTime="22:00:00"
+          allDaySlot={false}
+          events={events}
+          eventClick={handleEventClick}
+          height="100%"
+          buttonText={{
+            today: "今天",
+            month: "月",
+            week: "周",
+            day: "日",
+          }}
+        />
+      </Card>
 
- {/* 日历主体 */}
- <Card className="flex-1 p-4 overflow-hidden">
- <FullCalendar
- ref={calendarRef}
- plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
- initialView="timeGridWeek"
- headerToolbar={{
- left: "prev,next today",
- center: "title",
- right: "dayGridMonth,timeGridWeek,timeGridDay",
- }}
- locale={zhCnLocale}
- firstDay={1}
- slotMinTime="07:00:00"
- slotMaxTime="22:00:00"
- allDaySlot={false}
- events={events}
- eventClick={handleEventClick}
- height="100%"
- buttonText={{
- today: "今天",
- month: "月",
- week: "周",
- day: "日",
- }}
- />
- </Card>
-
- {/* 课程详情/编辑弹窗 */}
- <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
- <DialogContent className="max-w-md rounded-l-[20px] shadow-[-8px_0_40px_rgba(0,0,0,0.08)]">
- {editMode ? (
- <>
- <DialogHeader>
- <DialogTitle>编辑课程</DialogTitle>
- </DialogHeader>
- {renderCourseForm(handleUpdateCourse, "保存修改")}
- </>
- ) : (
- <>
- <DialogHeader>
- <DialogTitle className="flex items-center gap-2">
- {selectedCourse && (
- <>
- <Badge
- style={{
- backgroundColor:
- typeColorMap[selectedCourse.type] || "#3b82f6",
- }}
->
- {typeLabelMap[selectedCourse.type] ||
- selectedCourse.type}
- </Badge>
- <span>{selectedCourse.title}</span>
- </>
- )}
- </DialogTitle>
- </DialogHeader>
- {selectedCourse && (
- <div className="space-y-4 py-2">
- <div className="space-y-2 text-sm">
- <div className="flex items-center gap-2 text-[#6E6E73]">
- <CalendarDays className="w-4 h-4" />
- <span>
- {new Date(
- selectedCourse.startTime
- ).toLocaleDateString("zh-CN")}
- </span>
- <span>
- {new Date(
- selectedCourse.startTime
- ).toLocaleTimeString("zh-CN", {
- hour: "2-digit",
- minute: "2-digit",
- })}
- ~
- {new Date(
- selectedCourse.endTime
- ).toLocaleTimeString("zh-CN", {
- hour: "2-digit",
- minute: "2-digit",
- })}
- </span>
- </div>
- {selectedCourse.location && (
- <div className="flex items-center gap-2 text-[#6E6E73]">
- <MapPin className="w-4 h-4" />
- <span>{selectedCourse.location}</span>
- </div>
- )}
- <div className="flex items-center gap-2 text-[#6E6E73]">
- <Users className="w-4 h-4" />
- <span>人数上限: {selectedCourse.maxStudents} 人</span>
- </div>
- {selectedCourse.coach && (
- <div className="text-[#6E6E73]">
- 教练: {selectedCourse.coach.name}
- </div>
- )}
- {selectedCourse.description && (
- <div className="text-[#6E6E73] bg-black/[0.06] rounded-[10px] p-3 mt-2">
- {selectedCourse.description}
- </div>
- )}
- {selectedCourse.students && selectedCourse.students.length > 0 && (
- <div className="pt-2">
- <p className="text-xs text-[#6E6E73] mb-1.5">
- 报名学员 ({selectedCourse.students.length} 人)
- </p>
- <div className="flex flex-wrap gap-1.5">
- {selectedCourse.students.map((s) => (
- <span
- key={s.id}
- className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-black/[0.06] text-[#1D1D1F]"
- >
- {s.name}
- </span>
- ))}
- </div>
- </div>
- )}
- </div>
- </div>
- )}
- <DialogFooter className="gap-2">
- {selectedCourse && (
- <>
- <Button
- variant="outline"
- size="sm"
- onClick={() =>
- router.push(
- `/attendance/rollcall?courseId=${selectedCourse!.id}`
- )
- }
->
- <ClipboardCheck className="w-4 h-4 mr-1" />
- 开始点名
- </Button>
- <Button
- variant="outline"
- size="sm"
- onClick={openEditMode}
->
- <Pencil className="w-4 h-4 mr-1" />
- 编辑
- </Button>
- <Button
- variant="destructive"
- size="sm"
- onClick={() =>
- handleDeleteCourse(selectedCourse!.id)
- }
->
- <Trash2 className="w-4 h-4 mr-1" />
- 删除
- </Button>
- </>
- )}
- </DialogFooter>
- </>
- )}
- </DialogContent>
- </Dialog>
- </div>
- );
+      {/* 课程详情/编辑弹窗 */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-md rounded-l-[20px] shadow-[-8px_0_40px_rgba(0,0,0,0.08)]">
+          {editMode ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>编辑课程</DialogTitle>
+              </DialogHeader>
+              {renderCourseForm(handleUpdateCourse, "保存修改")}
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {selectedCourse && (
+                    <>
+                      <span>{selectedCourse.title || "未命名课程"}</span>
+                    </>
+                  )}
+                </DialogTitle>
+              </DialogHeader>
+              {selectedCourse && (
+                <div className="space-y-4 py-2">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-[#6E6E73]">
+                      <CalendarDays className="w-4 h-4" />
+                      <span>
+                        {new Date(
+                          selectedCourse.startTime
+                        ).toLocaleDateString("zh-CN")}
+                      </span>
+                      <span>
+                        {new Date(
+                          selectedCourse.startTime
+                        ).toLocaleTimeString("zh-CN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        ~
+                        {new Date(
+                          selectedCourse.endTime
+                        ).toLocaleTimeString("zh-CN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    {selectedCourse.location && (
+                      <div className="flex items-center gap-2 text-[#6E6E73]">
+                        <MapPin className="w-4 h-4" />
+                        <span>{selectedCourse.location}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-[#6E6E73]">
+                      <span>班级: {selectedCourse.class?.name || "未知"}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[#6E6E73]">
+                      <span>人数上限: {selectedCourse.maxStudents} 人</span>
+                    </div>
+                    {selectedCourse.coach && (
+                      <div className="text-[#6E6E73]">
+                        教练: {selectedCourse.coach.name}
+                      </div>
+                    )}
+                    {selectedCourse.description && (
+                      <div className="text-[#6E6E73] bg-black/[0.06] rounded-[10px] p-3 mt-2">
+                        {selectedCourse.description}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              <DialogFooter className="gap-2">
+                {selectedCourse && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        router.push(
+                          `/attendance/rollcall?courseId=${selectedCourse!.id}`
+                        )
+                      }
+                    >
+                      <ClipboardCheck className="w-4 h-4 mr-1" />
+                      开始点名
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={openEditMode}
+                    >
+                      <Pencil className="w-4 h-4 mr-1" />
+                      编辑
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() =>
+                        handleDeleteCourse(selectedCourse!.id)
+                      }
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      删除
+                    </Button>
+                  </>
+                )}
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
