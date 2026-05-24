@@ -57,6 +57,8 @@ tkd-crm/
 │   │   ├── students/[id]/route.ts
 │   │   ├── coaches/route.ts
 │   │   ├── coaches/[id]/route.ts
+│   │   ├── classes/route.ts
+│   │   ├── classes/[id]/route.ts
 │   │   ├── courses/route.ts
 │   │   ├── courses/[id]/route.ts
 │   │   ├── attendance/route.ts
@@ -74,6 +76,7 @@ tkd-crm/
 │   ├── globals.css                 # Tailwind CSS 入口 + CSS 变量主题
 │   ├── students/                   # 学员列表、新增、详情、编辑页面
 │   ├── coaches/                    # 教练列表、新增、详情、编辑页面
+│   ├── classes/                    # 班级列表、新增、详情、编辑页面
 │   ├── calendar/                   # 课表日历页面
 │   ├── attendance/                 # 考勤查询页面
 │   ├── ai/                         # AI 助手对话页面
@@ -83,7 +86,8 @@ tkd-crm/
 │   ├── layout/                     # sidebar.tsx, header.tsx
 │   ├── students/                   # student-form.tsx
 │   ├── coaches/                    # coach-form.tsx
-│   └── theme-provider.tsx          # Next Themes 提供者（默认 light，支持 D 键切换）
+│   ├── classes/                    # class-form.tsx
+│   └── theme-provider.tsx          # Next Themes 提供者（强制 light 主题）
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
 │   ├── ai-model.ts                 # AI Provider Registry + getModel()
@@ -123,7 +127,8 @@ tkd-crm/
 
 - **Student**（学员）：基本信息、课务信息、照片路径
 - **Coach**（教练）：基本信息、工作信息、照片路径
-- **Course**（课程）：名称、类型、时间、关联教练
+- **Class**（班级）：名称、级别、最大人数、关联学员和课程
+- **Course**（课程）：名称（可空，自动生成默认名称）、时间、关联教练和班级
 - **Attendance**（考勤）：课程-学员关联、出勤状态
 - **Grading**（考级晋升记录）
 - **Competition**（比赛记录）
@@ -136,11 +141,15 @@ Student (1) ──────< (N) Grading
 Student (1) ──────< (N) Competition
 Student (1) ──────< (N) Camp
 Student (1) ──────< (N) Attendance
+Student (N) ──────< (M) Class
 Coach   (1) ──────< (N) Course
+Class   (1) ──────< (N) Course
+Class   (1) ──────< (N) Student
 Course  (1) ──────< (N) Attendance
 ```
 
 - Coach 删除时，Course.coachId 自动设为 NULL（`onDelete: SetNull`）
+- Class 删除时，关联 Course 级联删除（`onDelete: Cascade`）
 - Attendance 有复合唯一索引：`@@unique([courseId, studentId, attendanceDate])`
 
 ### 枚举定义
@@ -148,7 +157,6 @@ Course  (1) ──────< (N) Attendance
 - `Gender`: `male` / `female`
 - `Status`（学员）: `active` / `inactive` / `suspended`
 - `CoachStatus`: `active` / `inactive` / `on_leave`
-- `CourseType`: `regular` / `exam_prep` / `camp` / `competition`
 - `AttendanceStatus`: `present` / `absent` / `late` / `leave` / `unmarked`
 - `BeltLevel`: `white` → `white_yellow` → `yellow` → ... → `black`（共 11 级）
 

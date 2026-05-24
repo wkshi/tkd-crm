@@ -50,6 +50,7 @@
 | | `remainingSessions` | Number | 是 | 剩余课时次数，默认 0 |
 | | `expiryDate` | Date | 否 | 课程到期时间 |
 | | `status` | Enum | 是 | 在籍状态：`active`（在籍）/`inactive`（已结业）/`suspended`（暂停） |
+| | `classes` | Class[] | 否 | 所属班级（多对多关联） |
 | **元数据** | `createdAt` / `updatedAt` | Date | 自动 | 创建与更新时间 |
 
 #### 2.1.2 功能操作
@@ -164,31 +165,32 @@
 - **课程事件展示**：日历格中以色块卡片展示课程，显示课程名称、时间段、教练
 - **点击交互**：点击日历空白区域 → 弹出创建课程表单；点击已有课程 → 弹出课程详情与编辑面板
 - **课程拖拽**：支持拖拽调整课程时间（可选）
-- **颜色编码**：不同类型课程用不同颜色区分（常规课/考级辅导/集训营/比赛预备）
 
 #### 2.4.2 课程数据模型
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `_id` | ObjectId | 自动 | 主键 |
-| `title` | String | 是 | 课程名称，如"少儿基础班" |
-| `type` | Enum | 是 | 课程类型：`regular` / `exam_prep` / `camp` / `competition` |
+| `title` | String | 否 | 课程名称，未填写时自动生成：`{班级名} {日期}` |
 | `startTime` | Date | 是 | 课程开始时间 |
 | `endTime` | Date | 是 | 课程结束时间 |
 | `coachId` | ObjectId | 否 | 关联教练（下拉选择），删除教练时自动置空 |
+| `classId` | ObjectId | 是 | 关联班级（下拉选择），删除班级时级联删除课程 |
 | `location` | String | 否 | 上课地点 |
 | `maxStudents` | Number | 否 | 最大人数 |
 | `description` | String | 否 | 课程描述 |
 | `createdAt` / `updatedAt` | Date | 自动 | 时间戳 |
 
-**教练选择**：课程创建/编辑时，教练字段通过下拉选择框从 `Coach` 表中选择（而非手动输入）。下拉框展示教练头像 + 姓名 + 在职状态。所关联的教练删除后，该字段自动置为 `NULL`（`onDelete: SetNull`）。 |
+**班级选择**：课程创建/编辑时，班级字段为必填，通过下拉选择框从 `Class` 表中选择。所关联的班级删除后，该课程级联删除（`onDelete: Cascade`）。
+
+**教练选择**：课程创建/编辑时，教练字段通过下拉选择框从 `Coach` 表中选择（而非手动输入）。下拉框展示教练头像 + 姓名 + 在职状态。所关联的教练删除后，该字段自动置为 `NULL`（`onDelete: SetNull`）。
 
 #### 2.4.3 考勤（点名）功能
 
 每次课程可针对所有在籍学员进行点名操作：
 
 - **点名入口**：课程详情面板中提供"开始点名"按钮
-- **点名页面**：展示该课程的所有在籍学员列表，每行显示：学员姓名、性别、剩余课时、出勤状态选择器
+- **点名页面**：从课程所属班级获取学员名单，展示所有在籍学员列表，每行显示：学员姓名、性别、剩余课时、出勤状态选择器
 - **出勤状态选项**：
   - `present` — 出勤（绿色）
   - `absent` — 缺勤（红色）
@@ -258,7 +260,7 @@ taekwondo-backup-20250115-143052.zip
   "version": "1.0",
   "createdAt": "2025-01-15T14:30:52.000Z",
   "dbEngine": "postgresql",
-  "tables": ["students", "coaches", "courses", "attendances", "gradings", "competitions", "camps"],
+  "tables": ["students", "coaches", "classes", "courses", "attendances", "gradings", "competitions", "camps"],
   "photoCount": 128,
   "appVersion": "1.0.0"
 }
@@ -325,6 +327,10 @@ taekwondo-backup-20250115-143052.zip
 | `/coaches/new` | 新增教练 | 表单页面，含照片采集 |
 | `/coaches/[id]` | 教练详情页 | 只读展示页，含个人信息、所授课程 |
 | `/coaches/[id]/edit` | 编辑教练 | 表单页面，预填充数据 |
+| `/classes` | 班级列表页 | 表格展示，支持搜索、筛选 |
+| `/classes/new` | 新增班级 | 表单页面 |
+| `/classes/[id]` | 班级详情页 | 只读展示页，含班级信息、学员列表、课程列表 |
+| `/classes/[id]/edit` | 编辑班级 | 表单页面，预填充数据 |
 | `/ai` | AI 对话页 | AI Agent 交互界面 |
 | `/backup` | 数据备份页 | 备份/导入操作入口，含导出按钮和导入上传区 |
 
@@ -357,11 +363,21 @@ taekwondo-backup-20250115-143052.zip
 | `POST` | `/api/upload` | 上传照片（学员/教练），通过 `type` 参数区分目录 |
 | `DELETE` | `/api/upload` | 删除照片文件 |
 
+#### 班级 API
+
+| 方法 | 路由 | 功能 |
+|------|------|------|
+| `GET` | `/api/classes` | 查询班级列表（支持 `?search=名称&status=active`） |
+| `POST` | `/api/classes` | 创建班级 |
+| `GET` | `/api/classes/[id]` | 获取班级详情（含学员列表、课程列表） |
+| `PUT` | `/api/classes/[id]` | 更新班级信息 |
+| `DELETE` | `/api/classes/[id]` | 删除班级 |
+
 #### 课程 API
 
 | 方法 | 路由 | 功能 |
 |------|------|------|
-| `GET` | `/api/courses` | 查询课程列表（支持 `?start=日期&end=日期` 范围查询） |
+| `GET` | `/api/courses` | 查询课程列表（支持 `?start=日期&end=日期&classId=班级ID` 范围查询） |
 | `POST` | `/api/courses` | 创建课程 |
 | `GET` | `/api/courses/[id]` | 获取课程详情 |
 | `PUT` | `/api/courses/[id]` | 更新课程信息 |
@@ -516,6 +532,7 @@ model Student {
   competitions Competition[]
   camps        Camp[]
   attendances  Attendance[]
+  classes      Class[]      @relation("ClassToStudent")
 
   @@index([name])
   @@index([status])
@@ -545,26 +562,48 @@ model Coach {
   @@map("coaches")
 }
 
+// 班级表
+model Class {
+  id          String   @id @default(uuid())
+  name        String
+  level       String?  // 段位/级别，如"白带","黄带"
+  description String?
+  maxStudents Int      @default(30) @map("max_students")
+  status      Status   @default(active)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // 关联
+  students Student[] @relation("ClassToStudent")
+  courses  Course[]
+
+  @@index([name])
+  @@index([status])
+  @@map("classes")
+}
+
 // 课程表
 model Course {
-  id          String      @id @default(uuid())
-  title       String
-  type        CourseType  @default(regular)
-  startTime   DateTime    @map("start_time")
-  endTime     DateTime    @map("end_time")
-  coachId     String?     @map("coach_id")   // 关联 Coach 表
+  id          String   @id @default(uuid())
+  title       String?  // 未填写时自动生成：{班级名} {日期}
+  startTime   DateTime @map("start_time")
+  endTime     DateTime @map("end_time")
+  coachId     String?  @map("coach_id")   // 关联 Coach 表
+  classId     String   @map("class_id")   // 关联 Class 表
   location    String?
-  maxStudents Int         @default(30) @map("max_students")
+  maxStudents Int      @default(30) @map("max_students")
   description String?
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   // 关联
   coach       Coach?       @relation(fields: [coachId], references: [id], onDelete: SetNull)
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   attendances Attendance[]
 
   @@index([startTime])
   @@index([coachId])
+  @@index([classId])
   @@map("courses")
 }
 
@@ -592,14 +631,14 @@ model Attendance {
 
 // 考级晋升记录表
 model Grading {
-  id            String   @id @default(uuid())
-  studentId     String   @map("student_id")
-  examDate      DateTime @map("exam_date") @db.Date
+  id            String    @id @default(uuid())
+  studentId     String    @map("student_id")
+  examDate      DateTime  @map("exam_date") @db.Date
   beltLevel     BeltLevel @map("belt_level")
-  certificateNo String?  @map("certificate_no")
+  certificateNo String?   @map("certificate_no")
   notes         String?
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   // 关联
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -664,13 +703,6 @@ enum CoachStatus {
   on_leave   // 休假
 }
 
-enum CourseType {
-  regular
-  exam_prep
-  camp
-  competition
-}
-
 enum AttendanceStatus {
   present
   absent
@@ -701,11 +733,14 @@ Student (1) ──────< (N) Grading        一个学员有多条考级�
 Student (1) ──────< (N) Competition    一个学员有多条比赛记录
 Student (1) ──────< (N) Camp           一个学员有多条集训记录
 Student (1) ──────< (N) Attendance     一个学员有多条考勤记录
+Student (N) ──────< (M) Class          一个学员可属于多个班级，一个班级有多个学员
 Coach (1)   ──────< (N) Course         一个教练可教授多门课程
+Class (1)   ──────< (N) Course         一个班级有多门课程
+Class (1)   ──────< (N) Student        一个班级有多个学员（通过多对多关系）
 Course (1)  ──────< (N) Attendance     一个课程有多条考勤记录
 ```
 
-所有关联均为**一对多**关系，通过 PostgreSQL 外键约束 + Prisma `relation` 定义。Prisma 自动处理 JOIN 查询，支持级联删除。`Coach` 删除时，`Course.coachId` 自动设为 `NULL`（`onDelete: SetNull`）。
+关联关系通过 PostgreSQL 外键约束 + Prisma `relation` 定义。Prisma 自动处理 JOIN 查询，支持级联删除。`Coach` 删除时，`Course.coachId` 自动设为 `NULL`（`onDelete: SetNull`）；`Class` 删除时，关联的 `Course` 级联删除（`onDelete: Cascade`）。
 
 #### 4.3.1 教练存储目录
 
@@ -742,8 +777,11 @@ Prisma Schema 中通过 `@@index` 声明索引，迁移时自动生成。已定�
 | `students` | `status` | B-tree | 状态筛选 |
 | `coaches` | `name` | B-tree | 教练姓名搜索 |
 | `coaches` | `status` | B-tree | 教练状态筛选 |
+| `classes` | `name` | B-tree | 班级名称搜索 |
+| `classes` | `status` | B-tree | 班级状态筛选 |
 | `courses` | `startTime` | B-tree | 日历范围查询 |
 | `courses` | `coachId` | B-tree | 按教练查询课程 |
+| `courses` | `classId` | B-tree | 按班级查询课程 |
 | `attendances` | `courseId` + `studentId` + `attendanceDate` | 复合唯一索引 | 防止重复点名 |
 | `attendances` | `studentId` | B-tree | 学员考勤查询 |
 | `attendances` | `courseId` | B-tree | 课程考勤查询 |
@@ -866,8 +904,8 @@ export function getModel(): LanguageModel {
 
 | 工具名 | 功能 | 参数 |
 |--------|------|------|
-| `listCourses` | 列出课程 | `startDate?`, `endDate?` |
-| `createCourse` | 创建课程 | `title`, `startTime`, `endTime`, `type?`, `coach?`, `location?` |
+| `listCourses` | 列出课程 | `startDate?`, `endDate?`, `classId?` |
+| `createCourse` | 创建课程 | `title?`, `startTime`, `endTime`, `classId`, `coachId?`, `location?` |
 | `updateCourse` | 更新课程 | `courseId`, 可变字段 |
 | `deleteCourse` | 删除课程 | `courseId` |
 
@@ -953,7 +991,7 @@ export async function POST(req: Request) {
           return courses.map(c => ({
             id: c.id, title: c.title,
             startTime: c.startTime, endTime: c.endTime,
-            coach: c.coach, type: c.type
+            coach: c.coach, classId: c.classId
           }));
         }
       }),
@@ -961,10 +999,10 @@ export async function POST(req: Request) {
       createCourse: tool({
         description: '创建课程',
         parameters: z.object({
-          title: z.string().describe('课程名称'),
+          title: z.string().optional().describe('课程名称，未填写时自动生成'),
           startTime: z.string().describe('开始时间 ISO 格式'),
           endTime: z.string().describe('结束时间 ISO 格式'),
-          type: z.enum(['regular', 'exam_prep', 'camp', 'competition']).optional(),
+          classId: z.string().describe('班级ID（必填）'),
           coachId: z.string().optional().describe('教练ID（如需指定教练）'),
         }),
         execute: async (input) => {
@@ -1170,15 +1208,17 @@ export default function ChatPage() {
 核心管理页面，以 FullCalendar 为中心。
 
 **页面布局**：
-- 左侧边栏（可收起）：快速创建课程表单、课程筛选器（按类型）
+- 左侧边栏（可收起）：快速创建课程表单
 - 主区域：FullCalendar 组件
 - 顶部工具栏：视图切换（月/周/日）、今天按钮、上/下导航
 
 **月视图交互**：
 - 每个日期格内以色块展示课程，色块上显示课程名和时间段
-- 课程类型颜色编码：常规课（蓝色）、考级辅导（紫色）、集训营（橙色）、比赛预备（红色）
 - 点击课程色块 → 右侧滑出课程详情面板，含"编辑"、"删除"、"开始点名"按钮
 - 点击日期格空白处 → 右侧滑出创建课程表单，日期自动填充
+
+**课程表单**：
+- 新增"所属班级"下拉选择（必填），选择班级后自动关联该班级的学员
 
 **点名流程**：
 1. 在课程详情面板点击"开始点名"
@@ -1482,6 +1522,10 @@ taekwondo-crm/
 │   │   │   └── route.ts            # GET/POST 教练列表
 │   │   ├── coaches/[id]/
 │   │   │   └── route.ts            # GET/PUT/DELETE 单个教练
+│   │   ├── classes/
+│   │   │   └── route.ts            # GET/POST 班级列表
+│   │   ├── classes/[id]/
+│   │   │   └── route.ts            # GET/PUT/DELETE 单个班级
 │   │   ├── attendance/
 │   │   │   └── route.ts            # GET/POST 考勤
 │   │   ├── attendance/batch/
@@ -1517,6 +1561,14 @@ taekwondo-crm/
 │   │       ├── page.tsx            # 教练详情页（只读展示）
 │   │       └── edit/
 │   │           └── page.tsx        # 编辑教练页
+│   ├── classes/
+│   │   ├── page.tsx                # 班级列表页
+│   │   ├── new/
+│   │   │   └── page.tsx            # 新增班级页
+│   │   └── [id]/
+│   │       ├── page.tsx            # 班级详情页（只读展示）
+│   │       └── edit/
+│   │           └── page.tsx        # 编辑班级页
 │   ├── ai/
 │   │   └── page.tsx                # AI 对话页
 │   ├── backup/
@@ -1541,6 +1593,10 @@ taekwondo-crm/
 │   │   ├── coach-table.tsx         # 教练表格
 │   │   ├── coach-detail-card.tsx   # 教练详情页信息卡
 │   │   └── coach-courses.tsx       # 教练所授课程列表
+│   ├── classes/
+│   │   ├── class-form.tsx          # 班级表单（新增/编辑共用）
+│   │   ├── class-table.tsx         # 班级表格
+│   │   └── class-detail-card.tsx   # 班级详情页信息卡
 │   ├── calendar/
 │   ├── calendar/
 │   │   ├── course-calendar.tsx     # FullCalendar 封装
@@ -1881,7 +1937,7 @@ export async function GET() {
       version: '1.0',
       createdAt: new Date().toISOString(),
       dbEngine: 'postgresql',
-      tables: ['students', 'courses', 'attendances', 'gradings', 'competitions', 'camps'],
+      tables: ['students', 'coaches', 'classes', 'courses', 'attendances', 'gradings', 'competitions', 'camps'],
       photoCount,
       appVersion: '1.0.0'
     };
