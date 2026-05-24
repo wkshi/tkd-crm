@@ -13,6 +13,7 @@ const createSchema = z.object({
   remainingSessions: z.number().default(0),
   expiryDate: z.string().optional(),
   status: z.enum(["active", "inactive", "suspended"]).default("active"),
+  classIds: z.array(z.string()).optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -36,6 +37,10 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
+      include: {
+        classes: { select: { id: true, name: true } },
+        _count: { select: { classes: true } },
+      },
     }),
     prisma.student.count({ where }),
   ]);
@@ -55,6 +60,12 @@ export async function POST(req: Request) {
         ? new Date(data.enrollmentDate)
         : new Date(),
       expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
+      classes: data.classIds?.length
+        ? { connect: data.classIds.map((id) => ({ id })) }
+        : undefined,
+    },
+    include: {
+      classes: { select: { id: true, name: true } },
     },
   });
 

@@ -1,37 +1,36 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Prisma, CourseType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 // 创建课程的验证模式
 const createSchema = z.object({
-  title: z.string().min(1),
-  type: z.enum(["regular", "exam_prep", "camp", "competition"]).default("regular"),
+  title: z.string().optional(),
   startTime: z.string(),
   endTime: z.string(),
   coachId: z.string().optional(),
+  classId: z.string().min(1),
   location: z.string().optional(),
   maxStudents: z.number().default(30),
   description: z.string().optional(),
-  studentIds: z.array(z.string()).optional(),
 });
 
-// 获取课程列表（支持类型筛选、教练筛选和时间范围）
+// 获取课程列表（支持类型筛选、教练筛选、班级筛选和时间范围）
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const type = searchParams.get("type") || undefined;
   const coachId = searchParams.get("coachId") || undefined;
+  const classId = searchParams.get("classId") || undefined;
   const start = searchParams.get("start") || undefined;
   const end = searchParams.get("end") || undefined;
   const page = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("pageSize") || "100");
 
   const where: Prisma.CourseWhereInput = {};
-  if (type) {
-    where.type = type as CourseType;
-  }
   if (coachId) {
     where.coachId = coachId;
+  }
+  if (classId) {
+    where.classId = classId;
   }
   if (start && end) {
     where.startTime = {
@@ -48,8 +47,7 @@ export async function GET(req: NextRequest) {
       take: pageSize,
       include: {
         coach: { select: { id: true, name: true } },
-        students: { select: { id: true, name: true } },
-        _count: { select: { students: true } },
+        class: { select: { id: true, name: true } },
       },
     }),
     prisma.course.count({ where }),
@@ -63,19 +61,35 @@ export async function POST(req: Request) {
   const body = await req.json();
   const data = createSchema.parse(body);
 
+  // 如果未提供课程名称，自动生成：班级名 + 日期
+  let title = data.title;
+  if (!title) {
+    const cls = await prisma.class.findUnique({
+      where: { id: data.classId },
+      select: { name: true },
+    });
+    const dateStr = new Date(data.startTime).toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    title = `${cls?.name || "未命名课程"} ${dateStr}`;
+  }
+
   const course = await prisma.course.create({
     data: {
-      ...data,
+      title,
       startTime: new Date(data.startTime),
       endTime: new Date(data.endTime),
       coachId: data.coachId || null,
-      students: data.studentIds?.length
-        ? { connect: data.studentIds.map((id) => ({ id })) }
-        : undefined,
+      classId: data.classId,
+      location: data.location,
+      maxStudents: data.maxStudents,
+      description: data.description,
     },
     include: {
       coach: { select: { id: true, name: true } },
-      students: { select: { id: true, name: true } },
+      class: { select: { id: true, name: true } },
     },
   });
 

@@ -11,6 +11,7 @@ const updateSchema = z.object({
   remainingSessions: z.number().optional(),
   expiryDate: z.string().optional(),
   status: z.enum(["active", "inactive", "suspended"]).optional(),
+  classIds: z.array(z.string()).optional(),
 });
 
 export async function GET(
@@ -21,6 +22,7 @@ export async function GET(
   const student = await prisma.student.findUnique({
     where: { id },
     include: {
+      classes: { select: { id: true, name: true } },
       gradings: { orderBy: { examDate: "desc" } },
       competitions: { orderBy: { competitionDate: "desc" } },
       camps: { orderBy: { activityDate: "desc" } },
@@ -56,6 +58,13 @@ export async function PUT(
         ? new Date(data.enrollmentDate)
         : undefined,
       expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
+      classes:
+        data.classIds !== undefined
+          ? { set: data.classIds.map((cid) => ({ id: cid })) }
+          : undefined,
+    },
+    include: {
+      classes: { select: { id: true, name: true } },
     },
   });
 

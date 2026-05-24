@@ -3,15 +3,14 @@ import { z } from "zod";
 
 // 更新课程的验证模式
 const updateSchema = z.object({
-  title: z.string().min(1).optional(),
-  type: z.enum(["regular", "exam_prep", "camp", "competition"]).optional(),
+  title: z.string().optional(),
   startTime: z.string().optional(),
   endTime: z.string().optional(),
   coachId: z.string().optional(),
+  classId: z.string().optional(),
   location: z.string().optional(),
   maxStudents: z.number().optional(),
   description: z.string().optional(),
-  studentIds: z.array(z.string()).optional(),
 });
 
 // 获取单个课程详情
@@ -24,7 +23,11 @@ export async function GET(
     where: { id },
     include: {
       coach: { select: { id: true, name: true } },
-      students: { select: { id: true, name: true, photoUrl: true } },
+      class: {
+        include: {
+          students: { select: { id: true, name: true, photoUrl: true } },
+        },
+      },
       attendances: {
         include: {
           student: { select: { id: true, name: true, photoUrl: true } },
@@ -57,14 +60,15 @@ export async function PUT(
       startTime: data.startTime ? new Date(data.startTime) : undefined,
       endTime: data.endTime ? new Date(data.endTime) : undefined,
       coachId: data.coachId === undefined ? undefined : data.coachId || null,
-      students:
-        data.studentIds !== undefined
-          ? { set: data.studentIds.map((sid) => ({ id: sid })) }
-          : undefined,
+      classId: data.classId === undefined ? undefined : data.classId,
     },
     include: {
       coach: { select: { id: true, name: true } },
-      students: { select: { id: true, name: true, photoUrl: true } },
+      class: {
+        include: {
+          students: { select: { id: true, name: true, photoUrl: true } },
+        },
+      },
     },
   });
 
