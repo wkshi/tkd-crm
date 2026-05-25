@@ -25,6 +25,7 @@ import {
   GraduationCap,
   Pencil,
   Trash2,
+  X,
 } from "lucide-react";
 
 // belt 级别中文映射
@@ -79,6 +80,20 @@ export default function GradingPage() {
   // 考级记录筛选
   const [listSearch, setListSearch] = useState("");
   const [listClassFilter, setListClassFilter] = useState("");
+  const [beltLevelFilter, setBeltLevelFilter] = useState("");
+  const [yearFilter, setYearFilter] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
+  const [dayFilter, setDayFilter] = useState("")
+
+  // 清除所有筛选条件
+  function clearFilters() {
+    setListSearch("");
+    setListClassFilter("");
+    setBeltLevelFilter("");
+    setYearFilter("");
+    setMonthFilter("");
+    setDayFilter("");
+  }
 
   const [examDate, setExamDate] = useState(
     new Date().toISOString().split("T")[0],
@@ -168,6 +183,25 @@ export default function GradingPage() {
     return map;
   }, [students]);
 
+  // 提取所有不重复的年份
+  const yearOptions = useMemo(() => {
+    const set = new Set<number>();
+    gradings.forEach((g) => {
+      set.add(new Date(g.examDate).getFullYear());
+    });
+    return Array.from(set).sort((a, b) => b - a);
+  }, [gradings]);
+
+  // 月份选项（1-12）
+  const monthOptions = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => String(i + 1));
+  }, []);
+
+  // 日期选项（1-31）
+  const dayOptions = useMemo(() => {
+    return Array.from({ length: 31 }, (_, i) => String(i + 1));
+  }, []);
+
   // 筛选考级记录
   const filteredGradings = useMemo(() => {
     return gradings.filter((g) => {
@@ -179,9 +213,32 @@ export default function GradingPage() {
       const matchClass =
         !listClassFilter ||
         (studentClassMap.get(g.studentId) || []).includes(listClassFilter);
-      return matchSearch && matchClass;
+      const matchBeltLevel =
+        !beltLevelFilter || g.beltLevel === beltLevelFilter;
+      const d = new Date(g.examDate);
+      const matchYear = !yearFilter || d.getFullYear() === Number(yearFilter);
+      const matchMonth =
+        !monthFilter || d.getMonth() + 1 === Number(monthFilter);
+      const matchDay = !dayFilter || d.getDate() === Number(dayFilter);
+      return (
+        matchSearch &&
+        matchClass &&
+        matchBeltLevel &&
+        matchYear &&
+        matchMonth &&
+        matchDay
+      );
     });
-  }, [gradings, listSearch, listClassFilter, studentClassMap]);
+  }, [
+    gradings,
+    listSearch,
+    listClassFilter,
+    beltLevelFilter,
+    yearFilter,
+    monthFilter,
+    dayFilter,
+    studentClassMap,
+  ]);
 
   // 全选/全不选
   const allSelected =
@@ -594,7 +651,7 @@ export default function GradingPage() {
               </option>
             ))}
           </select>
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <div className="relative min-w-[180px] max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1A6]" />
             <Input
               placeholder="搜索学员姓名..."
@@ -603,6 +660,61 @@ export default function GradingPage() {
               className="pl-10 bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
+          <select
+            value={beltLevelFilter}
+            onChange={(e) => setBeltLevelFilter(e.target.value)}
+            className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none h-10"
+          >
+            <option value="">全部级别</option>
+            {beltLevelOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={yearFilter}
+            onChange={(e) => setYearFilter(e.target.value)}
+            className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none h-10"
+          >
+            <option value="">全部年份</option>
+            {yearOptions.map((y) => (
+              <option key={y} value={String(y)}>
+                {y}年
+              </option>
+            ))}
+          </select>
+          <select
+            value={monthFilter}
+            onChange={(e) => setMonthFilter(e.target.value)}
+            className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none h-10"
+          >
+            <option value="">全部月份</option>
+            {monthOptions.map((m) => (
+              <option key={m} value={m}>
+                {m}月
+              </option>
+            ))}
+          </select>
+          <select
+            value={dayFilter}
+            onChange={(e) => setDayFilter(e.target.value)}
+            className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none h-10"
+          >
+            <option value="">全部日期</option>
+            {dayOptions.map((d) => (
+              <option key={d} value={d}>
+                {d}日
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={clearFilters}
+            className="flex items-center gap-1.5 px-3 py-2 h-10 bg-black/[0.06] hover:bg-black/[0.1] rounded-[10px] text-[13px] text-[#6E6E73] transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+            清除筛选
+          </button>
           <span className="text-[13px] text-[#6E6E73]">
             共 {filteredGradings.length} 条
           </span>
