@@ -932,21 +932,80 @@ export function getModel(): LanguageModel {
 | `updateStudent` | 更新学员 | `studentId`, 可变字段 |
 | `deleteStudent` | 删除学员 | `studentId` |
 
+#### 教练管理工具
+
+| 工具名 | 功能 | 参数 |
+|--------|------|------|
+| `searchCoaches` | 搜索教练 | `search?`, `status?`, `page?`, `pageSize?` |
+| `getCoachDetail` | 获取教练详情 | `id` |
+| `createCoach` | 创建教练 | `name`, `gender`, `birthDate?`, `phone?`, `joinDate?`, `bio?`, `status?` |
+| `updateCoach` | 更新教练 | `id`, 可变字段 |
+| `deleteCoach` | 软删除教练 | `id` |
+
+#### 班级管理工具
+
+| 工具名 | 功能 | 参数 |
+|--------|------|------|
+| `listClasses` | 列出班级 | `search?`, `status?`, `page?`, `pageSize?` |
+| `createClass` | 创建班级 | `name`, `level?`, `description?`, `maxStudents?`, `status?` |
+| `updateClass` | 更新班级 | `id`, 可变字段 |
+| `deleteClass` | 删除班级 | `id` |
+
 #### 课程管理工具
 
 | 工具名 | 功能 | 参数 |
 |--------|------|------|
-| `listCourses` | 列出课程 | `startDate?`, `endDate?`, `classId?` |
+| `listCourses` | 列出课程 | `coachId?`, `start?`, `end?`, `page?`, `pageSize?` |
 | `createCourse` | 创建课程 | `title?`, `startTime`, `endTime`, `classId`, `coachId?`, `location?` |
-| `updateCourse` | 更新课程 | `courseId`, 可变字段 |
-| `deleteCourse` | 删除课程 | `courseId` |
+| `updateCourse` | 更新课程 | `id`, 可变字段 |
+| `deleteCourse` | 删除课程 | `id` |
 
 #### 考勤工具
 
 | 工具名 | 功能 | 参数 |
 |--------|------|------|
-| `takeAttendance` | 课程点名 | `courseId`, `records` (学员ID+状态数组) |
-| `getAttendance` | 查询考勤 | `courseId?`, `studentId?`, `date?` |
+| `takeAttendance` | 课程点名 | `courseId`, `studentId`, `attendanceDate`, `status?` |
+| `getAttendance` | 查询考勤 | `courseId?`, `studentId?`, `date?`, `page?`, `pageSize?` |
+
+#### 充值管理工具
+
+| 工具名 | 功能 | 参数 |
+|--------|------|------|
+| `createRecharge` | 创建充值记录 | `studentId`, `action`, `sessions`, `durationDays`, `notes?` |
+| `searchRecharges` | 查询充值记录 | `search?`, `action?`, `page?`, `pageSize?` |
+
+#### 考级管理工具
+
+| 工具名 | 功能 | 参数 |
+|--------|------|------|
+| `searchGradings` | 查询考级记录 | `search?`, `beltLevel?`, `page?`, `pageSize?` |
+| `createGrading` | 创建考级记录 | `studentId`, `examDate`, `beltLevel`, `notes?` |
+| `updateGrading` | 更新考级记录 | `id`, 可变字段 |
+| `deleteGrading` | 删除考级记录 | `id` |
+
+#### 比赛管理工具
+
+| 工具名 | 功能 | 参数 |
+|--------|------|------|
+| `searchCompetitions` | 查询比赛记录 | `search?`, `competitionName?`, `page?`, `pageSize?` |
+| `createCompetition` | 创建比赛记录 | `studentId`, `competitionDate`, `competitionName`, `category?`, `result?`, `award?` |
+| `updateCompetition` | 更新比赛记录 | `id`, 可变字段 |
+| `deleteCompetition` | 删除比赛记录 | `id` |
+
+#### 集训管理工具
+
+| 工具名 | 功能 | 参数 |
+|--------|------|------|
+| `searchCamps` | 查询集训记录 | `search?`, `page?`, `pageSize?` |
+| `createCamp` | 创建集训记录 | `studentId`, `activityDate`, `activityName`, `duration`, `location?`, `notes?` |
+| `updateCamp` | 更新集训记录 | `id`, 可变字段 |
+| `deleteCamp` | 删除集训记录 | `id` |
+
+#### 系统工具
+
+| 工具名 | 功能 | 参数 |
+|--------|------|------|
+| `getCurrentTime` | 获取当前系统时间 | 无 |
 
 ### 5.6 工具实现示例
 

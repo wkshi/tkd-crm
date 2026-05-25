@@ -538,3 +538,421 @@ export const getCurrentTime = tool({
     };
   },
 });
+
+
+// ==================== 教练删除工具 ====================
+
+export const deleteCoach = tool({
+  description: "删除（软删除）教练，将状态设为 inactive",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("教练 ID"),
+    })
+  ),
+  execute: async ({ id }) => {
+    await prisma.coach.update({
+      where: { id },
+      data: { status: "inactive" },
+    });
+    return { success: true, message: "教练已删除" };
+  },
+});
+
+// ==================== 班级删除工具 ====================
+
+export const deleteClass = tool({
+  description: "删除班级",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("班级 ID"),
+    })
+  ),
+  execute: async ({ id }) => {
+    await prisma.class.delete({ where: { id } });
+    return { success: true, message: "班级已删除" };
+  },
+});
+
+// ==================== 充值管理工具 ====================
+
+export const createRecharge = tool({
+  description: "为学员创建充值记录，同时更新学员的剩余课时和到期时间",
+  inputSchema: zodSchema(
+    z.object({
+      studentId: z.string().describe("学员 ID"),
+      action: z.enum(["increment", "decrement"]).describe("操作类型：increment 增加课时，decrement 减少课时"),
+      sessions: z.number().min(1).describe("课时数量"),
+      durationDays: z.number().min(0).default(0).describe("有效期延长天数"),
+      notes: z.string().optional().describe("备注"),
+    })
+  ),
+  execute: async ({ studentId, action, sessions, durationDays, notes }) => {
+    const student = await prisma.student.findUnique({
+      where: { id: studentId },
+      select: { id: true, expiryDate: true },
+    });
+    if (!student) return { error: "学员不存在" };
+
+    const baseDate = student.expiryDate && new Date(student.expiryDate) > new Date()
+      ? new Date(student.expiryDate)
+      : new Date();
+    const newExpiryDate = new Date(baseDate);
+    newExpiryDate.setDate(newExpiryDate.getDate() + durationDays);
+
+    const recharge = await prisma.$transaction(async (tx) => {
+      const record = await tx.recharge.create({
+        data: {
+          studentId,
+          action,
+          sessions,
+          durationDays,
+          notes: notes || undefined,
+        },
+      });
+      await tx.student.update({
+        where: { id: studentId },
+        data: {
+          remainingSessions: action === "increment"
+            ? { increment: sessions }
+            : { decrement: sessions },
+          ...(action === "increment" && { expiryDate: newExpiryDate }),
+        },
+      });
+      return record;
+    });
+    return recharge;
+  },
+});
+
+export const searchRecharges = tool({
+  description: "查询充值记录，支持按学员姓名搜索、行为筛选和分页",
+  inputSchema: zodSchema(
+    z.object({
+      search: z.string().optional().describe("搜索关键词（学员姓名）"),
+      action: z.enum(["increment", "decrement"]).optional().describe("行为筛选"),
+      page: z.number().default(1).describe("页码"),
+      pageSize: z.number().default(20).describe("每页数量"),
+    })
+  ),
+  execute: async ({ search, action, page, pageSize }) => {
+    const where: Prisma.RechargeWhereInput = {};
+    if (action) where.action = action;
+    if (search) {
+      where.student = { name: { contains: search, mode: "insensitive" } };
+    }
+    const [recharges, total] = await Promise.all([
+      prisma.recharge.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { student: { select: { id: true, name: true } } },
+      }),
+      prisma.recharge.count({ where }),
+    ]);
+    return { recharges, total, page, pageSize };
+  },
+});
+
+// ==================== 考级管理工具 ====================
+
+export const createGrading = tool({
+  description: "为学员创建考级晋升记录",
+  inputSchema: zodSchema(
+    z.object({
+      studentId: z.string().describe("学员 ID"),
+      examDate: z.string().describe("考级日期（ISO 字符串）"),
+      beltLevel: z.enum([
+        "white", "white_yellow", "yellow", "yellow_green", "green",
+        "green_blue", "blue", "blue_red", "red", "red_black", "black",
+      ]).describe("腰带级别"),
+      notes: z.string().optional().describe("备注"),
+    })
+  ),
+  execute: async ({ studentId, examDate, beltLevel, notes }) => {
+    const student = await prisma.student.findUnique({ where: { id: studentId } });
+    if (!student) return { error: "学员不存在" };
+    const grading = await prisma.grading.create({
+      data: {
+        studentId,
+        examDate: new Date(examDate),
+        beltLevel,
+        notes: notes || undefined,
+      },
+    });
+    return grading;
+  },
+});
+
+export const updateGrading = tool({
+  description: "更新考级晋升记录",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("考级记录 ID"),
+      examDate: z.string().optional().describe("考级日期（ISO 字符串）"),
+      beltLevel: z.enum([
+        "white", "white_yellow", "yellow", "yellow_green", "green",
+        "green_blue", "blue", "blue_red", "red", "red_black", "black",
+      ]).optional().describe("腰带级别"),
+      notes: z.string().optional().describe("备注"),
+    })
+  ),
+  execute: async ({ id, ...data }) => {
+    const grading = await prisma.grading.update({
+      where: { id },
+      data: {
+        ...data,
+        examDate: data.examDate ? new Date(data.examDate) : undefined,
+      },
+    });
+    return grading;
+  },
+});
+
+export const deleteGrading = tool({
+  description: "删除考级晋升记录",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("考级记录 ID"),
+    })
+  ),
+  execute: async ({ id }) => {
+    await prisma.grading.delete({ where: { id } });
+    return { success: true, message: "考级记录已删除" };
+  },
+});
+
+export const searchGradings = tool({
+  description: "查询考级记录，支持按学员姓名搜索、腰带级别筛选和分页",
+  inputSchema: zodSchema(
+    z.object({
+      search: z.string().optional().describe("搜索关键词（学员姓名）"),
+      beltLevel: z.enum([
+        "white", "white_yellow", "yellow", "yellow_green", "green",
+        "green_blue", "blue", "blue_red", "red", "red_black", "black",
+      ]).optional().describe("腰带级别筛选"),
+      page: z.number().default(1).describe("页码"),
+      pageSize: z.number().default(20).describe("每页数量"),
+    })
+  ),
+  execute: async ({ search, beltLevel, page, pageSize }) => {
+    const where: Prisma.GradingWhereInput = {};
+    if (beltLevel) where.beltLevel = beltLevel;
+    if (search) {
+      where.student = { name: { contains: search, mode: "insensitive" } };
+    }
+    const [gradings, total] = await Promise.all([
+      prisma.grading.findMany({
+        where,
+        orderBy: { examDate: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { student: { select: { id: true, name: true } } },
+      }),
+      prisma.grading.count({ where }),
+    ]);
+    return { gradings, total, page, pageSize };
+  },
+});
+
+// ==================== 比赛管理工具 ====================
+
+export const createCompetition = tool({
+  description: "为学员创建比赛记录",
+  inputSchema: zodSchema(
+    z.object({
+      studentId: z.string().describe("学员 ID"),
+      competitionDate: z.string().describe("比赛日期（ISO 字符串）"),
+      competitionName: z.string().min(1).describe("比赛名称"),
+      category: z.string().optional().describe("参赛项目/类别"),
+      result: z.string().optional().describe("比赛结果"),
+      award: z.string().optional().describe("获奖情况"),
+    })
+  ),
+  execute: async ({ studentId, competitionDate, competitionName, category, result, award }) => {
+    const student = await prisma.student.findUnique({ where: { id: studentId } });
+    if (!student) return { error: "学员不存在" };
+    const competition = await prisma.competition.create({
+      data: {
+        studentId,
+        competitionDate: new Date(competitionDate),
+        competitionName,
+        category: category || undefined,
+        result: result || undefined,
+        award: award || undefined,
+      },
+    });
+    return competition;
+  },
+});
+
+export const updateCompetition = tool({
+  description: "更新比赛记录",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("比赛记录 ID"),
+      competitionDate: z.string().optional().describe("比赛日期（ISO 字符串）"),
+      competitionName: z.string().optional().describe("比赛名称"),
+      category: z.string().optional().describe("参赛项目/类别"),
+      result: z.string().optional().describe("比赛结果"),
+      award: z.string().optional().describe("获奖情况"),
+    })
+  ),
+  execute: async ({ id, ...data }) => {
+    const competition = await prisma.competition.update({
+      where: { id },
+      data: {
+        ...data,
+        competitionDate: data.competitionDate ? new Date(data.competitionDate) : undefined,
+      },
+    });
+    return competition;
+  },
+});
+
+export const deleteCompetition = tool({
+  description: "删除比赛记录",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("比赛记录 ID"),
+    })
+  ),
+  execute: async ({ id }) => {
+    await prisma.competition.delete({ where: { id } });
+    return { success: true, message: "比赛记录已删除" };
+  },
+});
+
+export const searchCompetitions = tool({
+  description: "查询比赛记录，支持按学员姓名或比赛名称搜索和分页",
+  inputSchema: zodSchema(
+    z.object({
+      search: z.string().optional().describe("搜索关键词（学员姓名或比赛名称）"),
+      competitionName: z.string().optional().describe("按比赛名称筛选"),
+      page: z.number().default(1).describe("页码"),
+      pageSize: z.number().default(20).describe("每页数量"),
+    })
+  ),
+  execute: async ({ search, competitionName, page, pageSize }) => {
+    const where: Prisma.CompetitionWhereInput = {};
+    if (competitionName) {
+      where.competitionName = { contains: competitionName, mode: "insensitive" };
+    }
+    if (search) {
+      where.OR = [
+        { student: { name: { contains: search, mode: "insensitive" } } },
+        { competitionName: { contains: search, mode: "insensitive" } },
+      ];
+    }
+    const [competitions, total] = await Promise.all([
+      prisma.competition.findMany({
+        where,
+        orderBy: { competitionDate: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { student: { select: { id: true, name: true } } },
+      }),
+      prisma.competition.count({ where }),
+    ]);
+    return { competitions, total, page, pageSize };
+  },
+});
+
+// ==================== 集训管理工具 ====================
+
+export const createCamp = tool({
+  description: "为学员创建集训/拓展活动记录",
+  inputSchema: zodSchema(
+    z.object({
+      studentId: z.string().describe("学员 ID"),
+      activityDate: z.string().describe("活动日期（ISO 字符串）"),
+      activityName: z.string().min(1).describe("活动名称"),
+      duration: z.number().min(1).describe("活动时长（小时）"),
+      location: z.string().optional().describe("活动地点"),
+      notes: z.string().optional().describe("备注"),
+    })
+  ),
+  execute: async ({ studentId, activityDate, activityName, duration, location, notes }) => {
+    const student = await prisma.student.findUnique({ where: { id: studentId } });
+    if (!student) return { error: "学员不存在" };
+    const camp = await prisma.camp.create({
+      data: {
+        studentId,
+        activityDate: new Date(activityDate),
+        activityName,
+        duration,
+        location: location || undefined,
+        notes: notes || undefined,
+      },
+    });
+    return camp;
+  },
+});
+
+export const updateCamp = tool({
+  description: "更新集训/拓展活动记录",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("集训记录 ID"),
+      activityDate: z.string().optional().describe("活动日期（ISO 字符串）"),
+      activityName: z.string().optional().describe("活动名称"),
+      duration: z.number().optional().describe("活动时长（小时）"),
+      location: z.string().optional().describe("活动地点"),
+      notes: z.string().optional().describe("备注"),
+    })
+  ),
+  execute: async ({ id, ...data }) => {
+    const camp = await prisma.camp.update({
+      where: { id },
+      data: {
+        ...data,
+        activityDate: data.activityDate ? new Date(data.activityDate) : undefined,
+      },
+    });
+    return camp;
+  },
+});
+
+export const deleteCamp = tool({
+  description: "删除集训/拓展活动记录",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("集训记录 ID"),
+    })
+  ),
+  execute: async ({ id }) => {
+    await prisma.camp.delete({ where: { id } });
+    return { success: true, message: "集训记录已删除" };
+  },
+});
+
+export const searchCamps = tool({
+  description: "查询集训/拓展活动记录，支持按学员姓名或活动名称搜索和分页",
+  inputSchema: zodSchema(
+    z.object({
+      search: z.string().optional().describe("搜索关键词（学员姓名或活动名称）"),
+      page: z.number().default(1).describe("页码"),
+      pageSize: z.number().default(20).describe("每页数量"),
+    })
+  ),
+  execute: async ({ search, page, pageSize }) => {
+    const where: Prisma.CampWhereInput = {};
+    if (search) {
+      where.OR = [
+        { student: { name: { contains: search, mode: "insensitive" } } },
+        { activityName: { contains: search, mode: "insensitive" } },
+      ];
+    }
+    const [camps, total] = await Promise.all([
+      prisma.camp.findMany({
+        where,
+        orderBy: { activityDate: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { student: { select: { id: true, name: true } } },
+      }),
+      prisma.camp.count({ where }),
+    ]);
+    return { camps, total, page, pageSize };
+  },
+});

@@ -11,27 +11,47 @@ import {
   getCoachDetail,
   createCoach,
   updateCoach,
+  deleteCoach,
   listClasses,
   createClass,
   updateClass,
+  deleteClass,
   listCourses,
   createCourse,
   updateCourse,
   deleteCourse,
   takeAttendance,
   getAttendance,
+  createRecharge,
+  searchRecharges,
+  createGrading,
+  updateGrading,
+  deleteGrading,
+  searchGradings,
+  createCompetition,
+  updateCompetition,
+  deleteCompetition,
+  searchCompetitions,
+  createCamp,
+  updateCamp,
+  deleteCamp,
+  searchCamps,
   getCurrentTime,
 } from "@/lib/ai-tools";
 
 // 系统提示词，定义 AI 助手的角色和行为边界
-const SYSTEM_PROMPT = `你是跆拳道馆 CRM 系统的 AI 助手，可以帮助用户管理学员、教练、课程和考勤数据。
+const SYSTEM_PROMPT = `你是跆拳道馆 CRM 系统的 AI 助手，可以帮助用户管理学员、教练、班级、课程、考勤、充值、考级、比赛和集训数据。
 
 你可以执行以下操作：
 - 查询、创建、更新、删除学员信息
-- 查询、创建、更新教练信息
-- 查询、创建、更新班级信息
+- 查询、创建、更新、删除教练信息
+- 查询、创建、更新、删除班级信息
 - 查询、创建、更新、删除课程信息（课程必须关联到一个活动状态的班级）
 - 登记和查询考勤记录
+- 创建和查询充值记录（同时更新学员课时）
+- 查询、创建、更新、删除考级晋升记录
+- 查询、创建、更新、删除比赛记录
+- 查询、创建、更新、删除集训/拓展活动记录
 
 注意事项：
 - 所有日期请使用 ISO 8601 格式
@@ -62,15 +82,31 @@ export async function POST(req: NextRequest) {
       getCoachDetail,
       createCoach,
       updateCoach,
+      deleteCoach,
       listClasses,
       createClass,
       updateClass,
+      deleteClass,
       listCourses,
       createCourse,
       updateCourse,
       deleteCourse,
       takeAttendance,
       getAttendance,
+      createRecharge,
+      searchRecharges,
+      createGrading,
+      updateGrading,
+      deleteGrading,
+      searchGradings,
+      createCompetition,
+      updateCompetition,
+      deleteCompetition,
+      searchCompetitions,
+      createCamp,
+      updateCamp,
+      deleteCamp,
+      searchCamps,
       getCurrentTime,
     },
   });

@@ -68,8 +68,11 @@ export default function CoachesPage() {
   }, []);
 
   useEffect(() => {
-    fetchCoaches();
-    fetchCourses();
+    const id = requestAnimationFrame(() => {
+      fetchCoaches();
+      fetchCourses();
+    });
+    return () => cancelAnimationFrame(id);
   }, [fetchCoaches, fetchCourses]);
 
   // 软删除教练
