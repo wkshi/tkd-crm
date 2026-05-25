@@ -79,7 +79,7 @@ tkd-crm/
 │   │   ├── upload/route.ts         # 照片上传/删除
 │   │   └── backup/route.ts         # 数据备份/恢复（ZIP + pg_dump/psql）
 │   ├── students/                   # 学员列表、新增、详情、编辑页面
-│   ├── coaches/                    # 教练列表、新增、详情、编辑页面
+│   ├── coaches/                    # 教练管理（双Tab：教练列表 + 课时统计）、新增、详情、编辑页面
 │   ├── classes/                    # 班级列表、新增、详情、编辑页面
 │   ├── calendar/                   # 课表日历页面（FullCalendar 月/周/日 + 自定义周课表视图）
 │   ├── attendance/                 # 考勤查询、点名、学员考勤详情页面
