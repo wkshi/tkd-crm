@@ -45,30 +45,38 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const body = await req.json();
-  const data = updateSchema.parse(body);
+  try {
+    const { id } = await params;
+    const body = await req.json();
+    const { classIds, ...data } = updateSchema.parse(body);
 
-  const student = await prisma.student.update({
-    where: { id },
-    data: {
-      ...data,
-      birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
-      enrollmentDate: data.enrollmentDate
-        ? new Date(data.enrollmentDate)
-        : undefined,
-      expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
-      classes:
-        data.classIds !== undefined
-          ? { set: data.classIds.map((cid) => ({ id: cid })) }
+    const student = await prisma.student.update({
+      where: { id },
+      data: {
+        ...data,
+        birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
+        enrollmentDate: data.enrollmentDate
+          ? new Date(data.enrollmentDate)
           : undefined,
-    },
-    include: {
-      classes: { select: { id: true, name: true } },
-    },
-  });
+        expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
+        classes:
+          classIds !== undefined
+            ? { set: classIds.map((cid) => ({ id: cid })) }
+            : undefined,
+      },
+      include: {
+        classes: { select: { id: true, name: true } },
+      },
+    });
 
-  return Response.json(student);
+    return Response.json(student);
+  } catch (error) {
+    console.error("更新学员失败:", error);
+    if (error instanceof z.ZodError) {
+      return Response.json({ error: "请求参数错误", details: error.issues }, { status: 400 });
+    }
+    return Response.json({ error: "更新学员失败" }, { status: 500 });
+  }
 }
 
 export async function DELETE(

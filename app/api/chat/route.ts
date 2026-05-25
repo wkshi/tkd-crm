@@ -11,6 +11,9 @@ import {
   getCoachDetail,
   createCoach,
   updateCoach,
+  listClasses,
+  createClass,
+  updateClass,
   listCourses,
   createCourse,
   updateCourse,
@@ -26,7 +29,8 @@ const SYSTEM_PROMPT = `你是跆拳道馆 CRM 系统的 AI 助手，可以帮助
 你可以执行以下操作：
 - 查询、创建、更新、删除学员信息
 - 查询、创建、更新教练信息
-- 查询、创建、更新、删除课程信息
+- 查询、创建、更新班级信息
+- 查询、创建、更新、删除课程信息（课程必须关联到一个活动状态的班级）
 - 登记和查询考勤记录
 
 注意事项：
@@ -58,6 +62,9 @@ export async function POST(req: NextRequest) {
       getCoachDetail,
       createCoach,
       updateCoach,
+      listClasses,
+      createClass,
+      updateClass,
       listCourses,
       createCourse,
       updateCourse,

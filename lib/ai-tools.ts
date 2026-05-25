@@ -247,8 +247,78 @@ export const updateCoach = tool({
   },
 });
 
+export const listClasses = tool({
+  description: "获取班级列表，支持按名称搜索、状态筛选和分页",
+  inputSchema: zodSchema(
+    z.object({
+      search: z.string().optional().describe("搜索关键词（班级名称）"),
+      status: z.enum(["active", "inactive", "suspended"]).optional().describe("班级状态筛选"),
+      page: z.number().default(1).describe("页码"),
+      pageSize: z.number().default(20).describe("每页数量"),
+    })
+  ),
+  execute: async ({ search, status, page, pageSize }) => {
+    const where: Prisma.ClassWhereInput = {};
+    if (search) {
+      where.name = { contains: search, mode: "insensitive" };
+    }
+    if (status) {
+      where.status = status;
+    }
+    const [classes, total] = await Promise.all([
+      prisma.class.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { _count: { select: { students: true, courses: true } } },
+      }),
+      prisma.class.count({ where }),
+    ]);
+    return { classes, total, page, pageSize };
+  },
+});
+
+export const createClass = tool({
+  description: "创建新班级",
+  inputSchema: zodSchema(
+    z.object({
+      name: z.string().min(1).describe("班级名称"),
+      level: z.string().optional().describe("段位/级别，如白带、黄带"),
+      description: z.string().optional().describe("班级描述"),
+      maxStudents: z.number().default(30).describe("最大学员数"),
+      status: z.enum(["active", "inactive", "suspended"]).default("active").describe("状态"),
+    })
+  ),
+  execute: async (data) => {
+    const cls = await prisma.class.create({ data });
+    return cls;
+  },
+});
+
+export const updateClass = tool({
+  description: "更新班级信息",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("班级 ID"),
+      name: z.string().min(1).optional().describe("班级名称"),
+      level: z.string().optional().describe("段位/级别，如白带、黄带"),
+      description: z.string().optional().describe("班级描述"),
+      maxStudents: z.number().optional().describe("最大学员数"),
+      status: z.enum(["active", "inactive", "suspended"]).optional().describe("状态"),
+    })
+  ),
+  execute: async ({ id, ...data }) => {
+    const cls = await prisma.class.update({
+      where: { id },
+      data,
+    });
+    return cls;
+  },
+});
+
 export const listCourses = tool({
-  description: "获取课程列表，支持类型筛选、教练筛选、时间范围和分页",
+  description: "获取课程列表，支持班级筛选、教练筛选、时间范围和分页",
   inputSchema: zodSchema(
     z.object({
 
@@ -300,19 +370,23 @@ export const createCourse = tool({
     })
   ),
   execute: async (data) => {
+    // 校验班级必须存在且处于活动状态
+    const cls = await prisma.class.findUnique({
+      where: { id: data.classId },
+      select: { id: true, name: true, status: true },
+    });
+    if (!cls) return { error: "班级不存在" };
+    if (cls.status !== "active") return { error: `班级 "${cls.name}" 当前状态为 ${cls.status}，只有活动状态的班级才能添加课程` };
+
     // 如果未提供课程名称，自动生成：班级名 + 日期
     let title = data.title;
     if (!title) {
-      const cls = await prisma.class.findUnique({
-        where: { id: data.classId },
-        select: { name: true },
-      });
       const dateStr = new Date(data.startTime).toLocaleDateString("zh-CN", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
       });
-      title = `${cls?.name || "未命名课程"} ${dateStr}`;
+      title = `${cls.name} ${dateStr}`;
     }
 
     const course = await prisma.course.create({
@@ -334,10 +408,9 @@ export const updateCourse = tool({
     z.object({
       id: z.string().describe("课程 ID"),
       title: z.string().min(1).optional().describe("课程标题"),
-      type: z.enum(["regular", "exam_prep", "camp", "competition"]).optional().describe("课程类型"),
+      classId: z.string().optional().describe("班级 ID"),
       startTime: z.string().optional().describe("开始时间（ISO 字符串）"),
       endTime: z.string().optional().describe("结束时间（ISO 字符串）"),
-      classId: z.string().optional().describe("班级 ID"),
       coachId: z.string().optional().describe("教练 ID"),
       location: z.string().optional().describe("上课地点"),
       maxStudents: z.number().optional().describe("最大学员数"),
@@ -345,6 +418,16 @@ export const updateCourse = tool({
     })
   ),
   execute: async ({ id, ...data }) => {
+    // 如果更换班级，校验新班级必须处于活动状态
+    if (data.classId) {
+      const cls = await prisma.class.findUnique({
+        where: { id: data.classId },
+        select: { id: true, name: true, status: true },
+      });
+      if (!cls) return { error: "班级不存在" };
+      if (cls.status !== "active") return { error: `班级 "${cls.name}" 当前状态为 ${cls.status}，只有活动状态的班级才能关联课程` };
+    }
+
     const course = await prisma.course.update({
       where: { id },
       data: {

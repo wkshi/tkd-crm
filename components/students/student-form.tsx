@@ -65,12 +65,45 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
     classIds: initialData?.classIds || [],
   });
 
+  // 当初始数据变化时同步表单状态（支持客户端导航复用组件）
+  useEffect(() => {
+    if (initialData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setForm({
+        name: initialData.name || "",
+        gender: initialData.gender || "male",
+        birthDate: initialData.birthDate
+          ? new Date(initialData.birthDate).toISOString().split("T")[0]
+          : "",
+        idCard: initialData.idCard || "",
+        phone: initialData.phone || "",
+        enrollmentDate: initialData.enrollmentDate
+          ? new Date(initialData.enrollmentDate).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        remainingSessions: initialData.remainingSessions ?? 0,
+        expiryDate: initialData.expiryDate
+          ? new Date(initialData.expiryDate).toISOString().split("T")[0]
+          : "",
+        status: initialData.status || "active",
+        classIds: initialData.classIds || [],
+      });
+    }
+  }, [initialData]);
+
   // 加载可用班级列表
   useEffect(() => {
     async function fetchClasses() {
-      const res = await fetch("/api/classes?pageSize=999&status=active");
-      const data = await res.json();
-      setAvailableClasses(data.classes || []);
+      try {
+        const res = await fetch("/api/classes?pageSize=999&status=active");
+        if (!res.ok) {
+          console.error("加载班级列表失败", res.status);
+          return;
+        }
+        const data = await res.json();
+        setAvailableClasses(data.classes || []);
+      } catch (err) {
+        console.error("加载班级列表出错", err);
+      }
     }
     fetchClasses();
   }, []);
@@ -328,7 +361,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -361,7 +394,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               type="date"
               value={form.birthDate}
               onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -369,7 +402,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
             <Input
               value={form.idCard}
               onChange={(e) => setForm({ ...form, idCard: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -377,7 +410,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
             <Input
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
         </div>
@@ -399,7 +432,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               onChange={(e) =>
                 setForm({ ...form, enrollmentDate: e.target.value })
               }
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -414,7 +447,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
                   remainingSessions: parseInt(e.target.value) || 0,
                 })
               }
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -425,7 +458,7 @@ export function StudentForm({ initialData, studentId }: StudentFormProps) {
               onChange={(e) =>
                 setForm({ ...form, expiryDate: e.target.value })
               }
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">

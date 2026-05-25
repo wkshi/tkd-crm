@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { testApiHandler } from "next-test-api-route-handler";
 import * as courseListHandler from "@/app/api/courses/route";
 import * as courseDetailHandler from "@/app/api/courses/[id]/route";
-import { cleanupTestData, createTestCourse, createTestCoach, createTestClass } from "@/tests/helpers";
+import { cleanupTestData, createTestCourse, createTestCoach, createTestClass, createTestStudent } from "@/tests/helpers";
 
 describe("课程 API", () => {
   beforeEach(async () => {
@@ -93,6 +93,44 @@ describe("课程 API", () => {
         expect(json.title).toBe("[test]详情课程");
         expect(json.coach).toBeDefined();
         expect(json.coach?.name).toBe("[test]李教练");
+        expect(json.class).toBeDefined();
+        expect(json.class?.name).toBeDefined();
+      },
+    });
+  });
+
+  it("GET /api/courses/[id] 返回班级及学员", async () => {
+    const cls = await createTestClass({ name: "课程班级" });
+    const student = await createTestStudent({ name: "课程学员" });
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.class.update({
+      where: { id: cls.id },
+      data: { students: { connect: { id: student.id } } },
+    });
+
+    const startTime = new Date(Date.now() + 86400000);
+    const endTime = new Date(Date.now() + 90000000);
+    const course = await prisma.course.create({
+      data: {
+        title: "[test]带学员课程",
+        startTime,
+        endTime,
+        classId: cls.id,
+        location: "主训练馆",
+      },
+    });
+
+    await testApiHandler({
+      appHandler: courseDetailHandler,
+      params: { id: course.id },
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        expect(json.class).toBeDefined();
+        expect(json.class.students).toBeDefined();
+        expect(json.class.students.length).toBe(1);
+        expect(json.class.students[0].name).toBe("[test]课程学员");
       },
     });
   });
@@ -113,6 +151,25 @@ describe("课程 API", () => {
         expect(res.status).toBe(200);
         expect(json.location).toBe("副训练馆");
         expect(json.maxStudents).toBe(25);
+      },
+    });
+  });
+
+  it("GET /api/courses?classId= 支持按班级筛选", async () => {
+    const clsA = await createTestClass({ name: "班级A" });
+    const clsB = await createTestClass({ name: "班级B" });
+    await createTestCourse({ title: "课程A", classId: clsA.id });
+    await createTestCourse({ title: "课程B", classId: clsB.id });
+
+    await testApiHandler({
+      appHandler: courseListHandler,
+      url: `/api/courses?classId=${clsA.id}`,
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        expect(json.courses.length).toBeGreaterThanOrEqual(1);
+        expect(json.courses.every((c: { classId: string }) => c.classId === clsA.id)).toBe(true);
       },
     });
   });

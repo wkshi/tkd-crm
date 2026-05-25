@@ -3,7 +3,7 @@ import { testApiHandler } from "next-test-api-route-handler";
 import { Status } from "@prisma/client";
 import * as studentListHandler from "@/app/api/students/route";
 import * as studentDetailHandler from "@/app/api/students/[id]/route";
-import { cleanupTestData, createTestStudent } from "@/tests/helpers";
+import { cleanupTestData, createTestStudent, createTestClass } from "@/tests/helpers";
 
 describe("学员 API", () => {
   beforeEach(async () => {
@@ -35,6 +35,29 @@ describe("学员 API", () => {
         expect(json.gender).toBe("male");
         expect(json.remainingSessions).toBe(24);
         expect(json.status).toBe("active");
+      },
+    });
+  });
+
+  it("POST /api/students 创建学员时关联班级", async () => {
+    const cls = await createTestClass({ name: "关联班级" });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      test: async ({ fetch }) => {
+        const res = await fetch({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: "[test]带班级学员",
+            gender: "female",
+            classIds: [cls.id],
+          }),
+        });
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        expect(json.classes).toHaveLength(1);
+        expect(json.classes[0].name).toBe("[test]关联班级");
       },
     });
   });
@@ -105,6 +128,29 @@ describe("学员 API", () => {
         expect(json.competitions).toBeDefined();
         expect(json.camps).toBeDefined();
         expect(json.attendances).toBeDefined();
+        expect(json.classes).toBeDefined();
+      },
+    });
+  });
+
+  it("GET /api/students/[id] 返回学员关联的班级", async () => {
+    const cls = await createTestClass({ name: "学员所在班级" });
+    const student = await createTestStudent({ name: "有班级学员" });
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.student.update({
+      where: { id: student.id },
+      data: { classes: { connect: { id: cls.id } } },
+    });
+
+    await testApiHandler({
+      appHandler: studentDetailHandler,
+      params: { id: student.id },
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        expect(json.classes).toHaveLength(1);
+        expect(json.classes[0].name).toBe("[test]学员所在班级");
       },
     });
   });
@@ -125,6 +171,33 @@ describe("学员 API", () => {
         expect(res.status).toBe(200);
         expect(json.name).toBe("[test]更新后");
         expect(json.remainingSessions).toBe(10);
+      },
+    });
+  });
+
+  it("PUT /api/students/[id] 更新学员关联班级", async () => {
+    const student = await createTestStudent({ name: "换班级学员" });
+    const clsA = await createTestClass({ name: "班级A" });
+    const clsB = await createTestClass({ name: "班级B" });
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.student.update({
+      where: { id: student.id },
+      data: { classes: { connect: { id: clsA.id } } },
+    });
+
+    await testApiHandler({
+      appHandler: studentDetailHandler,
+      params: { id: student.id },
+      test: async ({ fetch }) => {
+        const res = await fetch({
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ classIds: [clsB.id] }),
+        });
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        expect(json.classes).toHaveLength(1);
+        expect(json.classes[0].name).toBe("[test]班级B");
       },
     });
   });

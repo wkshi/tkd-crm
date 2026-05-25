@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const data = createSchema.parse(body);
+  const { classIds, ...data } = createSchema.parse(body);
 
   const student = await prisma.student.create({
     data: {
@@ -60,8 +60,8 @@ export async function POST(req: Request) {
         ? new Date(data.enrollmentDate)
         : new Date(),
       expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
-      classes: data.classIds?.length
-        ? { connect: data.classIds.map((id) => ({ id })) }
+      classes: classIds?.length
+        ? { connect: classIds.map((id) => ({ id })) }
         : undefined,
     },
     include: {
