@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { beltLevelMap, beltLevelStyleMap } from "@/lib/belt-level";
 
 interface StudentWithRecords {
  id: string;
@@ -154,20 +155,6 @@ export default function StudentDetailPage() {
  suspended: { label: "暂停", color: "bg-orange-500/10 text-orange-500" },
  };
 
- const beltLabelMap: Record<string, string> = {
- white: "白带",
- white_yellow: "白黄带",
- yellow: "黄带",
- yellow_green: "黄绿带",
- green: "绿带",
- green_blue: "绿蓝带",
- blue: "蓝带",
- blue_red: "蓝红带",
- red: "红带",
- red_black: "红黑带",
- black: "黑带",
- };
-
  return (
  <div className="space-y-6">
  <div className="flex items-center justify-between">
@@ -257,7 +244,7 @@ export default function StudentDetailPage() {
  <div key={g.id} className="flex items-center gap-4">
  <div className={`w-5 h-5 rounded-full ${idx === 0 ? 'bg-[#1D1D1F]' : 'bg-white border-2 border-black/[0.12]'}`} />
  <span className="text-[12px] text-[#A1A1A6]">{new Date(g.examDate).toLocaleDateString("zh-CN")}</span>
- <span className="text-[17px] font-semibold">{beltLabelMap[g.beltLevel] || g.beltLevel}</span>
+ <span className={`text-[17px] font-semibold ${beltLevelStyleMap[g.beltLevel]?.text || "text-[#1D1D1F]"}`}>{beltLevelMap[g.beltLevel] || g.beltLevel}</span>
  {g.certificateNo && <span className="text-xs text-[#A1A1A6]">证书: {g.certificateNo}</span>}
  </div>
  ))}

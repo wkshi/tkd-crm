@@ -29,20 +29,7 @@ import {
   X,
 } from "lucide-react";
 
-// belt 级别中文映射
-const beltLevelMap: Record<string, string> = {
-  white: "白带",
-  white_yellow: "白黄带",
-  yellow: "黄带",
-  yellow_green: "黄绿带",
-  green: "绿带",
-  green_blue: "绿蓝带",
-  blue: "蓝带",
-  blue_red: "蓝红带",
-  red: "红带",
-  red_black: "红黑带",
-  black: "黑带",
-};
+import { BeltBadge } from "@/lib/belt-level";
 
 interface Student {
   id: string;
@@ -557,10 +544,7 @@ export default function CompetitionPage() {
                         </TableCell>
                         <TableCell>
                           {currentBelt ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 text-[12px] font-medium">
-                              <Trophy className="w-3 h-3" />
-                              {beltLevelMap[currentBelt] || currentBelt}
-                            </span>
+                            <BeltBadge beltLevel={currentBelt} />
                           ) : (
                             <span className="text-[#A1A1A6] text-[13px]">—</span>
                           )}

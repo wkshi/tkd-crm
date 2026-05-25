@@ -28,20 +28,10 @@ import {
   X,
 } from "lucide-react";
 
-// belt 级别中文映射
-const beltLevelMap: Record<string, string> = {
-  white: "白带",
-  white_yellow: "白黄带",
-  yellow: "黄带",
-  yellow_green: "黄绿带",
-  green: "绿带",
-  green_blue: "绿蓝带",
-  blue: "蓝带",
-  blue_red: "蓝红带",
-  red: "红带",
-  red_black: "红黑带",
-  black: "黑带",
-};
+import {
+  beltLevelMap,
+  BeltBadge,
+} from "@/lib/belt-level";
 
 const beltLevelOptions = Object.entries(beltLevelMap).map(
   ([value, label]) => ({ value, label }),
@@ -513,10 +503,7 @@ export default function GradingPage() {
                       </TableCell>
                       <TableCell>
                         {currentBelt ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 text-[12px] font-medium">
-                            <Award className="w-3 h-3" />
-                            {beltLevelMap[currentBelt] || currentBelt}
-                          </span>
+                          <BeltBadge beltLevel={currentBelt} />
                         ) : (
                           <span className="text-[#A1A1A6] text-[13px]">—</span>
                         )}
@@ -754,10 +741,7 @@ export default function GradingPage() {
                   {new Date(g.examDate).toLocaleDateString("zh-CN")}
                 </TableCell>
                 <TableCell>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 text-[12px] font-medium">
-                    <Award className="w-3 h-3" />
-                    {beltLevelMap[g.beltLevel] || g.beltLevel}
-                  </span>
+                  <BeltBadge beltLevel={g.beltLevel} />
                 </TableCell>
                 <TableCell className="text-[14px] text-[#6E6E73] max-w-[200px] truncate">
                   {g.notes || "—"}
