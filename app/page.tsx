@@ -13,6 +13,8 @@ import {
   ChevronRight,
   UserPlus,
   Calendar,
+  Clock,
+  AlertTriangle,
   TrendingUp,
 } from "lucide-react";
 
@@ -58,6 +60,22 @@ export default async function DashboardPage() {
   const thirtyDaysLater = new Date();
   thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
 
+  // 即将到期学员（30天内且已设置到期日期）
+  const expiringSoonCount = await prisma.student.count({
+    where: {
+      status: "active",
+      expiryDate: { gte: now, lte: thirtyDaysLater },
+    },
+  });
+
+  // 课时预警学员（剩余课时 <= 5）
+  const lowSessionsCount = await prisma.student.count({
+    where: {
+      status: "active",
+      remainingSessions: { lte: 5 },
+    },
+  });
+
   // ---------- 2. 今日课程列表 ----------
   const todayCourses = await prisma.course.findMany({
     where: { startTime: { gte: startOfToday, lte: endOfToday } },
@@ -71,15 +89,6 @@ export default async function DashboardPage() {
     },
     orderBy: { startTime: "asc" },
   });
-
-  // 待点名数量
-  const pendingRollCall = todayCourses.filter((course) => {
-    const classStudents = course.class?.students || [];
-    if (classStudents.length === 0) return false;
-    return !classStudents.every((s) =>
-      course.attendances.some((a) => a.studentId === s.id && a.status !== "unmarked")
-    );
-  }).length;
 
   // ---------- 3. 最近活动 ----------
   const recentStudents = await prisma.student.findMany({
@@ -161,7 +170,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">仪表盘</h1>
           <p className="text-sm text-[#86868B] mt-1">
-            欢迎回来，今天有 {todayCoursesCount} 节课{pendingRollCall > 0 ? `，其中 ${pendingRollCall} 节待点名` : ""}
+            欢迎回来，今天有 {todayCoursesCount} 节课
           </p>
         </div>
         <div className="flex gap-2">
@@ -186,82 +195,94 @@ export default async function DashboardPage() {
       {/* ==================== 统计卡片 ==================== */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 在籍学员 */}
-        <Card className="bg-white rounded-[14px] border-black/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-pointer hover:-translate-y-px">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-[10px] bg-[#0071E3]/8 flex items-center justify-center">
-                <Users className="w-[18px] h-[18px] text-[#0071E3]" />
+        <Link href="/students?status=active">
+          <Card className="bg-white rounded-[14px] border-black/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-pointer hover:-translate-y-px">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-9 h-9 rounded-[10px] bg-[#0071E3]/8 flex items-center justify-center">
+                  <Users className="w-[18px] h-[18px] text-[#0071E3]" />
+                </div>
+                <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#34C759]/10 text-[#34C759]">
+                  +3
+                </span>
               </div>
-              <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#34C759]/10 text-[#34C759]">
-                +3
-              </span>
-            </div>
-            <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">{totalStudents}</div>
-            <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">在册学员</div>
-            <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
-              <div className="h-full bg-[#0071E3] rounded-full" style={{ width: "80%" }} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 今日课时 */}
-        <Card className="bg-white rounded-[14px] border-black/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-pointer hover:-translate-y-px">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-[10px] bg-[#34C759]/8 flex items-center justify-center">
-                <CalendarDays className="w-[18px] h-[18px] text-[#34C759]" />
+              <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">{totalStudents}</div>
+              <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">在册学员</div>
+              <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
+                <div className="h-full bg-[#0071E3] rounded-full" style={{ width: "80%" }} />
               </div>
-              <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#34C759]/10 text-[#34C759]">
-                满
-              </span>
-            </div>
-            <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">{todayCoursesCount}</div>
-            <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">今日课时</div>
-            <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
-              <div className="h-full bg-[#34C759] rounded-full" style={{ width: "100%" }} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 待点名 */}
-        <Card className="bg-white rounded-[14px] border-black/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-pointer hover:-translate-y-px">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-[10px] bg-[#FF9500]/8 flex items-center justify-center">
-                <ClipboardCheck className="w-[18px] h-[18px] text-[#FF9500]" />
-              </div>
-              <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#FF9500]/10 text-[#FF9500]">
-                {pendingRollCall} 节
-              </span>
-            </div>
-            <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">
-              {todayCourses.reduce((sum, c) => sum + (c.class?.students?.length || 0), 0)}
-            </div>
-            <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">待点名</div>
-            <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
-              <div className="h-full bg-[#FF9500] rounded-full" style={{ width: `${pendingRollCall > 0 ? 60 : 100}%` }} />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* 本月出勤率 */}
-        <Card className="bg-white rounded-[14px] border-black/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-pointer hover:-translate-y-px">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-[10px] bg-[#AF52DE]/8 flex items-center justify-center">
-                <TrendingUp className="w-[18px] h-[18px] text-[#AF52DE]" />
+        <Link href={`/attendance?year=${now.getFullYear()}&month=${now.getMonth() + 1}`}>
+          <Card className="bg-white rounded-[14px] border-black/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-pointer hover:-translate-y-px">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-9 h-9 rounded-[10px] bg-[#AF52DE]/8 flex items-center justify-center">
+                  <TrendingUp className="w-[18px] h-[18px] text-[#AF52DE]" />
+                </div>
+                <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#AF52DE]/10 text-[#AF52DE]">
+                  {attendanceRate >= 90 ? "优秀" : attendanceRate >= 75 ? "良好" : "需关注"}
+                </span>
               </div>
-              <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#AF52DE]/10 text-[#AF52DE]">
-                +12%
-              </span>
-            </div>
-            <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">{attendanceRate}%</div>
-            <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">本月出勤率</div>
-            <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
-              <div className="h-full bg-[#AF52DE] rounded-full" style={{ width: `${attendanceRate}%` }} />
-            </div>
-          </CardContent>
-        </Card>
+              <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">{attendanceRate}%</div>
+              <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">本月出勤率</div>
+              <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
+                <div className="h-full bg-[#AF52DE] rounded-full" style={{ width: `${attendanceRate}%` }} />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* 即将到期 */}
+        <Link href="/students?expiry=30days">
+          <Card className="bg-white rounded-[14px] border-black/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-pointer hover:-translate-y-px">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-9 h-9 rounded-[10px] bg-[#FF9500]/8 flex items-center justify-center">
+                  <Clock className="w-[18px] h-[18px] text-[#FF9500]" />
+                </div>
+                <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#FF9500]/10 text-[#FF9500]">
+                  30天内
+                </span>
+              </div>
+              <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">{expiringSoonCount}</div>
+              <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">即将到期</div>
+              <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
+                <div
+                  className="h-full bg-[#FF9500] rounded-full"
+                  style={{ width: `${expiringSoonCount > 0 ? Math.min(expiringSoonCount * 10, 100) : 0}%` }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* 课时预警 */}
+        <Link href="/students?sessions=critical">
+          <Card className="bg-white rounded-[14px] border-black/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-pointer hover:-translate-y-px">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-9 h-9 rounded-[10px] bg-[#FF3B30]/8 flex items-center justify-center">
+                  <AlertTriangle className="w-[18px] h-[18px] text-[#FF3B30]" />
+                </div>
+                <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#FF3B30]/10 text-[#FF3B30]">
+                  ≤5 课时
+                </span>
+              </div>
+              <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">{lowSessionsCount}</div>
+              <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">课时预警</div>
+              <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
+                <div
+                  className="h-full bg-[#FF3B30] rounded-full"
+                  style={{ width: `${lowSessionsCount > 0 ? Math.min(lowSessionsCount * 10, 100) : 0}%` }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* ==================== 双栏：今日课程 + 快捷入口 ==================== */}

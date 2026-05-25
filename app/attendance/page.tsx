@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, CalendarDays, User, BookOpen } from "lucide-react";
+import { Search, CalendarDays, User, BookOpen, X } from "lucide-react";
 
 interface AttendanceRecord {
   id: string;
@@ -37,27 +38,60 @@ const statusMap: Record<string, { label: string; color: string }> = {
 };
 
 export default function AttendancePage() {
+  const searchParams = useSearchParams();
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [studentName, setStudentName] = useState("");
   const [className, setClassName] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const [yearFilter, setYearFilter] = useState(
+    searchParams.get("year") || String(currentYear)
+  );
+  const [monthFilter, setMonthFilter] = useState(
+    searchParams.get("month") || String(currentMonth)
+  );
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // 年份选项基于实际考勤数据（去重、降序），始终保留"全部年份"
+  const yearOptions = useMemo(() => {
+    const years = availableYears.length > 0
+      ? availableYears.map((y) => String(y))
+      : [String(currentYear)];
+    return ["", ...years];
+  }, [availableYears, currentYear]);
+
+  const monthOptions = [
+    { value: "", label: "全部月份" },
+    { value: "1", label: "1月" },
+    { value: "2", label: "2月" },
+    { value: "3", label: "3月" },
+    { value: "4", label: "4月" },
+    { value: "5", label: "5月" },
+    { value: "6", label: "6月" },
+    { value: "7", label: "7月" },
+    { value: "8", label: "8月" },
+    { value: "9", label: "9月" },
+    { value: "10", label: "10月" },
+    { value: "11", label: "11月" },
+    { value: "12", label: "12月" },
+  ];
 
   const fetchAttendances = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
     if (studentName.trim()) params.set("studentName", studentName.trim());
     if (className.trim()) params.set("className", className.trim());
-    if (startDate) params.set("startDate", startDate);
-    if (endDate) params.set("endDate", endDate);
+    if (yearFilter) params.set("year", yearFilter);
+    if (monthFilter) params.set("month", monthFilter);
 
     const res = await fetch(`/api/attendance?${params}`);
     const data = await res.json();
     setAttendances(data.attendances || []);
+    setAvailableYears(data.availableYears || []);
     setLoading(false);
-  }, [studentName, className, startDate, endDate]);
+  }, [studentName, className, yearFilter, monthFilter]);
 
   const fetchClasses = useCallback(async () => {
     const res = await fetch("/api/classes?pageSize=9999&status=active");
@@ -122,25 +156,33 @@ export default function AttendancePage() {
               ))}
             </datalist>
           </div>
-          <div className="relative flex-1 min-w-[200px]">
-            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1A6]" />
-            <Input
-              type="date"
-              placeholder="开始日期"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="pl-10 bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
-            />
+          {/* 年份筛选 */}
+          <div className="relative min-w-[120px]">
+            <select
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+              className="w-full h-10 px-3 bg-black/[0.06] border-0 rounded-[10px] text-sm text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white appearance-none cursor-pointer"
+            >
+              {yearOptions.map((y) => (
+                <option key={y} value={y}>
+                  {y ? `${y}年` : "全部年份"}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="relative flex-1 min-w-[200px]">
-            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1A6]" />
-            <Input
-              type="date"
-              placeholder="结束日期"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="pl-10 bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
-            />
+          {/* 月份筛选 */}
+          <div className="relative min-w-[100px]">
+            <select
+              value={monthFilter}
+              onChange={(e) => setMonthFilter(e.target.value)}
+              className="w-full h-10 px-3 bg-black/[0.06] border-0 rounded-[10px] text-sm text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white appearance-none cursor-pointer"
+            >
+              {monthOptions.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
           </div>
           <Button
             onClick={fetchAttendances}
@@ -149,6 +191,19 @@ export default function AttendancePage() {
           >
             <Search className="w-4 h-4 mr-2" />
             查询
+          </Button>
+          <Button
+            onClick={() => {
+              setStudentName("");
+              setClassName("");
+              setYearFilter("");
+              setMonthFilter("");
+            }}
+            variant="outline"
+            className="rounded-full border-black/[0.08] text-[#6E6E73] hover:text-[#1D1D1F]"
+          >
+            <X className="w-4 h-4 mr-1.5" />
+            清除
           </Button>
         </div>
       </Card>
