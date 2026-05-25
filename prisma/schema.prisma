@@ -25,6 +25,7 @@ model Student {
   gradings     Grading[]
   competitions Competition[]
   camps        Camp[]
+  recharges    Recharge[]
   attendances  Attendance[]
   classes      Class[]      @relation("ClassToStudent")
 
@@ -161,6 +162,22 @@ model Camp {
 
   @@index([studentId])
   @@map("camps")
+}
+
+model Recharge {
+  id           String   @id @default(uuid())
+  studentId    String   @map("student_id")
+  action       String   // increment | decrement
+  sessions     Int      // 变动次数
+  durationDays Int      @map("duration_days") // 有效天数
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@map("recharges")
 }
 
 enum Gender {

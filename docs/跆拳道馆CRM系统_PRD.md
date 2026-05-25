@@ -60,7 +60,7 @@
 - **删除学员**：软删除（将 `status` 置为 `inactive`），保留历史记录。同步删除照片文件
 - **查询学员**：支持按姓名模糊搜索、按状态筛选、分页展示
 - **学员拍照**：新增/编辑学员时，可调起系统摄像头拍照，或从本地选择文件上传
-- **学员详情页**：只读的信息汇总页面，展示个人资料、课务信息、考级记录、比赛记录、集训记录、考勤历史，UI 美观适合展示给学员/家长查看
+- **学员详情页**：只读的信息汇总页面，展示个人资料、课务信息、考级记录、比赛记录、集训记录、充值记录、考勤历史，UI 美观适合展示给学员/家长查看
 
 #### 2.1.3 学员详情页（只读展示页）设计
 
@@ -223,6 +223,7 @@
 | 考级记录 | 关联学员添加 | 确认删除 | 全字段编辑 | 学员详情页时间线 | |
 | 比赛记录 | 关联学员添加 | 确认删除 | 全字段编辑 | 学员详情页表格 | |
 | 集训记录 | 关联学员添加 | 确认删除 | 全字段编辑 | 学员详情页卡片 | |
+| 充值记录 | 关联学员添加 | 确认删除 | 仅备注可编辑 | 学员详情页表格 | 联动更新学员课时与过期日期 |
 | 数据备份 | 全量导出 | — | — | — | PostgreSQL SQL + 照片 ZIP 打包下载 |
 | 数据导入 | ZIP 上传导入 | — | — | — | 自动恢复 SQL + 解压照片 |
 
@@ -259,7 +260,7 @@ taekwondo-backup-20250115-143052.zip
   "version": "1.0",
   "createdAt": "2025-01-15T14:30:52.000Z",
   "dbEngine": "postgresql",
-  "tables": ["students", "coaches", "classes", "courses", "attendances", "gradings", "competitions", "camps"],
+  "tables": ["students", "coaches", "classes", "courses", "attendances", "gradings", "competitions", "camps", "recharges"],
   "photoCount": 128,
   "appVersion": "1.0.0"
 }
@@ -399,6 +400,16 @@ taekwondo-backup-20250115-143052.zip
 | `GET/POST` | `/api/competition` | 比赛记录查询/新增 |
 | `GET/POST` | `/api/camp` | 集训记录查询/新增 |
 
+#### 充值记录 API
+
+| 方法 | 路由 | 功能 |
+|------|------|------|
+| `GET` | `/api/recharges` | 查询充值记录列表（支持 `?search=姓名&action=increment&page=1`） |
+| `POST` | `/api/recharges` | 创建充值记录，同时更新学员课时和过期日期 |
+| `GET` | `/api/recharges/[id]` | 获取单条充值记录详情 |
+| `PUT` | `/api/recharges/[id]` | 更新充值记录备注（核心字段不可修改） |
+| `DELETE` | `/api/recharges/[id]` | 删除充值记录，同时回滚学员课时和过期日期 |
+
 #### AI Agent API
 
 | 方法 | 路由 | 功能 |
@@ -530,6 +541,7 @@ model Student {
   gradings     Grading[]
   competitions Competition[]
   camps        Camp[]
+  recharges    Recharge[]
   attendances  Attendance[]
   classes      Class[]      @relation("ClassToStudent")
 
@@ -684,6 +696,24 @@ model Camp {
   @@map("camps")
 }
 
+// 充值记录表
+model Recharge {
+  id           String   @id @default(uuid())
+  studentId    String   @map("student_id")
+  action       String   // "increment" | "decrement"
+  sessions     Int      // 变动次数（正整数）
+  durationDays Int      @map("duration_days") // 有效天数（整数）
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // 关联
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@map("recharges")
+}
+
 // 枚举定义
 enum Gender {
   male
@@ -731,6 +761,7 @@ enum BeltLevel {
 Student (1) ──────< (N) Grading        一个学员有多条考级记录
 Student (1) ──────< (N) Competition    一个学员有多条比赛记录
 Student (1) ──────< (N) Camp           一个学员有多条集训记录
+Student (1) ──────< (N) Recharge       一个学员有多条充值记录
 Student (1) ──────< (N) Attendance     一个学员有多条考勤记录
 Student (N) ──────< (M) Class          一个学员可属于多个班级，一个班级有多个学员
 Coach (1)   ──────< (N) Course         一个教练可教授多门课程
@@ -785,6 +816,7 @@ Prisma Schema 中通过 `@@index` 声明索引，迁移时自动生成。已定�
 | `attendances` | `studentId` | B-tree | 学员考勤查询 |
 | `attendances` | `courseId` | B-tree | 课程考勤查询 |
 | `gradings` | `studentId` + `examDate` | 复合索引 | 成长时间线查询 |
+| `recharges` | `studentId` | B-tree | 学员充值记录查询 |
 
 ---
 
@@ -1198,6 +1230,8 @@ export default function ChatPage() {
 
 **集训记录区**：网格卡片，每张卡片：日期、活动名称、地点、时长
 
+**充值记录区**：表格卡片，列：日期、行为（增加/减少）、变动次数、有效天数、备注
+
 **考勤统计区**：
 - 小型柱状图：近 6 个月出勤率
 - 列表：最近 10 次考勤记录（日期、课程名、状态色点+文字）
@@ -1513,6 +1547,119 @@ export default function ChatPage() {
 - `GET`：查询单条集训记录详情
 - `PUT`：更新活动日期、活动名称、活动地点、时长、备注
 - `DELETE`：删除集训记录
+
+### 6.5c 充值管理页 (`/recharges`)
+
+**核心场景**：统一管理学员课时充值操作，包括为学员录入课时增减记录，以及查看、编辑、删除历史充值数据。页面顶部提供 Tab 切换，分为"充值录入"和"充值记录"两个视图。
+
+**页面布局**：
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  充值管理                                                    │
+│  [充值录入] [充值记录]                                       │
+├─────────────────────────────────────────────────────────────┤
+│  [班级▼] [搜索姓名...] [全选] [已选 5 人]    [清空]          │
+├──────────────────────────────┬──────────────────────────────┤
+│                              │  充值信息                     │
+│  📋 学员列表                  │  ┌────────────────────────┐ │
+│  ┌────────────────────────┐  │  │ 行为 *                │ │
+│  │ ☑ 张三   男  黄带  一班 │  │ │ [增加课时 ▼        ] │ │
+│  │ ☑ 李四   女  黄带  一班 │  │  └────────────────────────┘ │
+│  │ ☐ 王五   男  绿带  二班 │  │  ┌────────────────────────┐ │
+│  │ ☐ 赵六   女  白带  二班 │  │  │ 次数 *                │ │
+│  │    ...                 │  │ │ [30               ] │ │
+│  └────────────────────────┘  │  └────────────────────────┘ │
+│                              │  ┌────────────────────────┐ │
+│                              │  │ 有效天数 *            │ │
+│                              │ │ [60               ] │ │
+│                              │  └────────────────────────┘ │
+│                              │  ┌────────────────────────┐ │
+│                              │  │ 备注（可选）          │ │
+│                              │ │ [                  ] │ │
+│                              │  └────────────────────────┘ │
+│                              │                             │
+│                              │  [    📝 批量录入    ]      │
+│                              │                             │
+└──────────────────────────────┴──────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  📋 充值记录列表（共 X 条）                                   │
+│  ┌────────┬──────────┬──────────┬──────────┬────────┬────────┐ │
+│  │ 学员   │ 行为     │ 变动次数 │ 有效天数 │ 备注   │ 操作   │ │
+│  │ 张三   │ 增加课时 │ 30       │ 60天     │ —      │ 编辑删除│ │
+│  │ 李四   │ 增加课时 │ 30       │ 60天     │ —      │ 编辑删除│ │
+│  └────────┴──────────┴──────────┴──────────┴────────┴────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Tab 切换**：
+- `bg-black/[0.06] rounded-[10px] p-1` 容器
+- 每个 Tab：`px-4 py-1.5 rounded-lg text-[14px] font-medium`
+  - 激活态：`bg-white shadow-sm text-[#1D1D1F]`
+  - 非激活态：`text-[#6E6E73] hover:text-[#1D1D1F]`
+
+**交互流程（充值录入 Tab）**：
+
+1. **筛选学员**：顶部提供班级下拉筛选 + 姓名实时搜索输入框
+2. **勾选学员**：表格每行左侧复选框，表头支持"全选/全不选"切换
+3. **填写充值信息**：右侧面板统一填写（行为下拉选择"增加课时"/"减少课时"、次数必填正整数、有效天数必填整数、备注可选）
+4. **提交录入**：按钮实时显示"为 N 名学员录入充值信息"，点击后循环调用 `/api/recharges` 为每个选中学员创建记录
+5. **成功反馈**：Toast 提示成功条数，清空选择态，刷新列表，学员列表课时数即时刷新
+
+**业务逻辑**：
+
+- **增加课时（increment）**：`remainingSessions += N`，`totalSessions += N`，`expiryDate` 以 `max(当前 expiryDate, 今天)` 为基准顺延 `durationDays` 天
+- **减少课时（decrement）**：`remainingSessions -= N`（保底 0），`expiryDate` 不变
+
+**学员列表字段**：
+
+| 字段 | 来源 | 说明 |
+|------|------|------|
+| 复选框 | 本地 state | 选中态控制 |
+| 姓名 | Student.name | 文字 |
+| 性别 | Student.gender | 男/女 |
+| **当前腰带级别** | Grading 表最新记录 | 白/白黄/黄/黄绿/绿/绿蓝/蓝/蓝红/红/红黑/黑，无记录显示"—" |
+| 所属班级 | Student.classes | 标签形式展示 |
+
+**充值记录列表字段**：
+
+| 字段 | 说明 |
+|------|------|
+| 学员姓名 | 关联 Student.name |
+| 行为 | "增加课时" / "减少课时" pill 徽章 |
+| 变动次数 | 数字 |
+| 有效天数 | 数字 + "天" |
+| 备注 | 文字，空显示"—" |
+| 操作 | 编辑 / 删除 图标按钮 |
+
+**编辑弹窗**：点击编辑按钮弹出 Dialog，仅允许修改备注，保存后刷新列表。
+
+**删除确认**：点击删除按钮弹出浏览器 `confirm`，确认后调用 `DELETE /api/recharges/[id]` 删除，同时回滚学员课时和过期日期（逆向执行业务逻辑）。
+
+**API**：`GET/POST /api/recharges`
+
+- `GET`：查询充值记录列表（支持 `?search=姓名&action=increment&page=1`）
+- `POST`：创建充值记录，同时更新学员课时和过期日期
+
+```typescript
+// Request Body
+{
+  studentId: "uuid",
+  action: "increment", // 或 "decrement"
+  sessions: 30,
+  durationDays: 60,
+  notes?: ""
+}
+```
+
+- 增加课时：学员 `remainingSessions` 增加 `sessions`，`totalSessions` 同步增加，`expiryDate` 以 `max(当前 expiryDate, 今天)` 为基准顺延 `durationDays` 天
+- 减少课时：学员 `remainingSessions` 减少 `sessions`（不低于 0），`expiryDate` 不变
+
+**单条详情 API**：`GET/PUT/DELETE /api/recharges/[id]`
+
+- `GET`：查询单条充值记录详情
+- `PUT`：仅允许修改备注（行为、次数、天数等核心字段不可修改，避免数据不一致）
+- `DELETE`：删除充值记录，同时逆向回滚学员课时和过期日期
 
 ### 6.6 日历/课表页 (`/calendar`)
 
@@ -1977,6 +2124,7 @@ const student = await prisma.student.findUnique({
     gradings: { orderBy: { examDate: 'desc' } },
     competitions: { orderBy: { competitionDate: 'desc' } },
     camps: { orderBy: { activityDate: 'desc' } },
+    recharges: { orderBy: { createdAt: 'desc' } },
     attendances: {
       orderBy: { attendanceDate: 'desc' },
       take: 10,

@@ -208,14 +208,35 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 
 **导航菜单项**：
 
+📊 **仪表盘**
+
 | 路由 | 图标 | 标签 | 说明 |
 |------|------|------|------|
 | `/` | `LayoutDashboard` | 仪表盘 | 首页入口 |
+
+**── 教务管理 ──**
+
+| 路由 | 图标 | 标签 | 说明 |
+|------|------|------|------|
 | `/students` | `Users` | 学员管理 | 核心高频入口 |
 | `/coaches` | `UserCog` | 教练管理 | 教练信息维护 |
 | `/classes` | `GraduationCap` | 班级管理 | 班级与学员分组管理 |
 | `/calendar` | `CalendarDays` | 课表日历 | 课程管理核心 |
 | `/attendance` | `ClipboardCheck` | 考勤查询 | 点名记录查询 |
+
+**── 成长与财务 ──**
+
+| 路由 | 图标 | 标签 | 说明 |
+|------|------|------|------|
+| `/grading` | `Award` | 考级管理 | 学员考级晋升记录 |
+| `/competition` | `Trophy` | 比赛管理 | 学员比赛成绩记录 |
+| `/camp` | `MapPin` | 集训管理 | 集训与拓展活动记录 |
+| `/recharges` | `Wallet` | 充值管理 | 学员课时充值管理 |
+
+**── 系统 ──**
+
+| 路由 | 图标 | 标签 | 说明 |
+|------|------|------|------|
 | `/backup` | `HardDrive` | 数据备份 | 备份/导入操作入口 |
 | `/ai` | `Sparkles` | AI 助手 | 智能交互入口 |
 
@@ -977,6 +998,64 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 - 标题：`DialogTitle text-[17px] font-semibold text-[#1D1D1F]` "编辑集训记录"
 - 学员：只读展示
 - 活动日期、活动名称、活动地点、时长、备注：表单字段
+- 底部按钮：取消 + 保存
+
+#### 充值管理页（`/recharges`）
+
+**页面结构**：分栏布局，左栏占 60%，右栏占 40%，间距 `gap-5`。页面顶部提供 Tab 切换，分为"充值录入"和"充值记录"两个视图。
+
+**顶部 Tab 切换**：`flex gap-1 bg-black/[0.06] rounded-[10px] p-1 w-fit`
+- 每个 Tab：`px-4 py-1.5 rounded-lg text-[14px] font-medium`
+  - 激活态：`bg-white shadow-sm text-[#1D1D1F]`
+  - 非激活态：`text-[#6E6E73] hover:text-[#1D1D1F]`
+
+**充值录入 Tab**
+
+与集训录入页保持完全一致的布局结构和交互模式，仅表单字段不同：
+
+**左栏：学员选择列表**
+
+白色卡片，`bg-white rounded-[20px] overflow-hidden`
+
+表格样式同学员列表页，列：复选框、姓名、性别、当前带位、班级
+
+**右栏：充值信息表单**
+
+白色卡片，`bg-white rounded-[20px] p-6`，sticky 定位跟随滚动。
+
+- 图标：`Wallet w-5 h-5 text-blue-500` + 标题 `text-[17px] font-semibold text-[#1D1D1F]` "充值信息"
+- 行为 *：下拉选择框，选项「增加课时」「减少课时」
+- 次数 *：`type="number"` 输入框，最小值 1，placeholder "例如：30"
+- 有效天数 *：`type="number"` 输入框，placeholder "例如：30"，单位"天"
+- 备注（可选）：输入框，placeholder "选填"
+- 已选提示：`text-[13px] text-[#6E6E73]`，图标 `Users w-4 h-4`
+- 提交按钮：同集训录入页样式
+
+**充值记录 Tab**
+
+`space-y-5` 容器，筛选栏在外，表格在独立白色卡片内。
+
+**筛选栏**：`flex flex-wrap items-center gap-3`
+- 班级下拉、姓名搜索框、行为筛选下拉（全部/增加/减少）、清除按钮、数量提示 `共 X 条`
+
+**表格样式**：
+- 表头：同学员列表页表头样式
+- 列：学员姓名、行为、变动次数、有效天数、备注、操作
+- 操作列：`flex justify-end gap-2`
+  - 编辑按钮：`Pencil w-4 h-4`，颜色 `text-[#6E6E73] hover:text-[#1D1D1F]`
+  - 删除按钮：`Trash2 w-4 h-4`，颜色 `text-[#FF3B30] hover:text-[#FF3B30]`
+- 空状态：`text-center py-12 text-[#A1A1A6]` "暂无充值记录"
+
+**编辑弹窗**
+
+白色弹窗，`bg-white rounded-[20px] border-black/[0.06] max-w-md`
+
+- 标题：`DialogTitle text-[17px] font-semibold text-[#1D1D1F]` "编辑充值记录"
+- 学员：只读展示
+- 行为：只读展示（不可修改）
+- 次数：只读展示（不可修改）
+- 有效天数：只读展示（不可修改）
+- 备注：输入框，可修改
 - 底部按钮：取消 + 保存
 
 ---
