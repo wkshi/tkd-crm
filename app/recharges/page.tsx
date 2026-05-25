@@ -69,12 +69,18 @@ export default function RechargePage() {
   const [listSearch, setListSearch] = useState("")
   const [listClassFilter, setListClassFilter] = useState("")
   const [actionFilter, setActionFilter] = useState<"" | "increment" | "decrement">("")
+  const [yearFilter, setYearFilter] = useState("")
+  const [monthFilter, setMonthFilter] = useState("")
+  const [dayFilter, setDayFilter] = useState("")
 
   // 清除所有筛选条件
   function clearFilters() {
     setListSearch("")
     setListClassFilter("")
     setActionFilter("")
+    setYearFilter("")
+    setMonthFilter("")
+    setDayFilter("")
   }
 
   // 加载班级列表
@@ -213,6 +219,26 @@ export default function RechargePage() {
     return map
   }, [students])
 
+  // 提取所有不重复的年份
+  const yearOptions = useMemo(() => {
+    const set = new Set<number>()
+    recharges.forEach((r) => {
+      const d = new Date(r.createdAt)
+      if (!isNaN(d.getTime())) set.add(d.getFullYear())
+    })
+    return Array.from(set).sort((a, b) => b - a)
+  }, [recharges])
+
+  // 月份选项（1-12）
+  const monthOptions = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => String(i + 1))
+  }, [])
+
+  // 日期选项（1-31）
+  const dayOptions = useMemo(() => {
+    return Array.from({ length: 31 }, (_, i) => String(i + 1))
+  }, [])
+
   // 筛选充值记录
   const filteredRecharges = useMemo(() => {
     return recharges.filter((r) => {
@@ -225,9 +251,25 @@ export default function RechargePage() {
         !listClassFilter ||
         (studentClassMap.get(r.studentId) || []).includes(listClassFilter)
       const matchAction = !actionFilter || r.action === actionFilter
-      return matchSearch && matchClass && matchAction
+      const d = new Date(r.createdAt)
+      const matchYear = !yearFilter || d.getFullYear() === Number(yearFilter)
+      const matchMonth =
+        !monthFilter || d.getMonth() + 1 === Number(monthFilter)
+      const matchDay = !dayFilter || d.getDate() === Number(dayFilter)
+      return (
+        matchSearch && matchClass && matchAction && matchYear && matchMonth && matchDay
+      )
     })
-  }, [recharges, listSearch, listClassFilter, actionFilter, studentClassMap])
+  }, [
+    recharges,
+    listSearch,
+    listClassFilter,
+    actionFilter,
+    yearFilter,
+    monthFilter,
+    dayFilter,
+    studentClassMap,
+  ])
 
   // 行为中文映射
   const actionLabelMap: Record<string, string> = {
@@ -396,7 +438,7 @@ export default function RechargePage() {
                   {filteredStudents.length === 0 && !loading && (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={6}
                         className="text-center py-12 text-[#A1A1A6]"
                       >
                         {search || classFilter
@@ -556,6 +598,42 @@ export default function RechargePage() {
               <option value="increment">增加课时</option>
               <option value="decrement">减少课时</option>
             </select>
+            <select
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+              className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none h-10"
+            >
+              <option value="">全部年份</option>
+              {yearOptions.map((y) => (
+                <option key={y} value={String(y)}>
+                  {y}年
+                </option>
+              ))}
+            </select>
+            <select
+              value={monthFilter}
+              onChange={(e) => setMonthFilter(e.target.value)}
+              className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none h-10"
+            >
+              <option value="">全部月份</option>
+              {monthOptions.map((m) => (
+                <option key={m} value={m}>
+                  {m}月
+                </option>
+              ))}
+            </select>
+            <select
+              value={dayFilter}
+              onChange={(e) => setDayFilter(e.target.value)}
+              className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none h-10"
+            >
+              <option value="">全部日期</option>
+              {dayOptions.map((d) => (
+                <option key={d} value={d}>
+                  {d}日
+                </option>
+              ))}
+            </select>
             <button
               onClick={clearFilters}
               className="flex items-center gap-1.5 px-3 py-2 h-10 bg-black/[0.06] hover:bg-black/[0.1] rounded-[10px] text-[13px] text-[#6E6E73] transition-colors"
@@ -574,6 +652,9 @@ export default function RechargePage() {
                 <TableRow className="border-b border-black/[0.04]">
                   <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal">
                     学员姓名
+                  </TableHead>
+                  <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal">
+                    充值时间
                   </TableHead>
                   <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal">
                     行为
@@ -598,6 +679,14 @@ export default function RechargePage() {
                   >
                     <TableCell className="font-medium text-[#1D1D1F]">
                       {r.student?.name || "—"}
+                    </TableCell>
+                    <TableCell className="text-[14px] text-[#6E6E73]">
+                      {new Date(r.createdAt).toLocaleString("zh-CN", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </TableCell>
                     <TableCell
                       className={`text-[14px] font-medium ${
