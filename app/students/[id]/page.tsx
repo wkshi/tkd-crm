@@ -359,7 +359,7 @@ export default function StudentDetailPage() {
  type="date"
  required
  value={gradingForm.examDate}
- onChange={(e) => setGradingForm({ ...gradingForm, examDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setGradingForm({ ...gradingForm, examDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
@@ -368,7 +368,7 @@ export default function StudentDetailPage() {
  required
  value={gradingForm.beltLevel}
  onChange={(e) => setGradingForm({ ...gradingForm, beltLevel: e.target.value })}
- className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
+ className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none"
 >
  <option value="white">白带</option>
  <option value="white_yellow">白黄带</option>
@@ -387,14 +387,14 @@ export default function StudentDetailPage() {
  <Label>证书编号</Label>
  <Input
  value={gradingForm.certificateNo}
- onChange={(e) => setGradingForm({ ...gradingForm, certificateNo: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setGradingForm({ ...gradingForm, certificateNo: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
  <Label>备注</Label>
  <Input
  value={gradingForm.notes}
- onChange={(e) => setGradingForm({ ...gradingForm, notes: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setGradingForm({ ...gradingForm, notes: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <DialogFooter>
@@ -418,7 +418,7 @@ export default function StudentDetailPage() {
  type="date"
  required
  value={competitionForm.competitionDate}
- onChange={(e) => setCompetitionForm({ ...competitionForm, competitionDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCompetitionForm({ ...competitionForm, competitionDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
@@ -426,28 +426,28 @@ export default function StudentDetailPage() {
  <Input
  required
  value={competitionForm.competitionName}
- onChange={(e) => setCompetitionForm({ ...competitionForm, competitionName: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCompetitionForm({ ...competitionForm, competitionName: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
  <Label>参赛项目</Label>
  <Input
  value={competitionForm.category}
- onChange={(e) => setCompetitionForm({ ...competitionForm, category: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCompetitionForm({ ...competitionForm, category: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
  <Label>成绩</Label>
  <Input
  value={competitionForm.result}
- onChange={(e) => setCompetitionForm({ ...competitionForm, result: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCompetitionForm({ ...competitionForm, result: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
  <Label>获奖情况</Label>
  <Input
  value={competitionForm.award}
- onChange={(e) => setCompetitionForm({ ...competitionForm, award: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCompetitionForm({ ...competitionForm, award: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <DialogFooter>
@@ -471,7 +471,7 @@ export default function StudentDetailPage() {
  type="date"
  required
  value={campForm.activityDate}
- onChange={(e) => setCampForm({ ...campForm, activityDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCampForm({ ...campForm, activityDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
@@ -479,14 +479,14 @@ export default function StudentDetailPage() {
  <Input
  required
  value={campForm.activityName}
- onChange={(e) => setCampForm({ ...campForm, activityName: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCampForm({ ...campForm, activityName: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
  <Label>地点</Label>
  <Input
  value={campForm.location}
- onChange={(e) => setCampForm({ ...campForm, location: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCampForm({ ...campForm, location: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
@@ -494,14 +494,14 @@ export default function StudentDetailPage() {
  <Input
  type="number"
  value={campForm.duration}
- onChange={(e) => setCampForm({ ...campForm, duration: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCampForm({ ...campForm, duration: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <div className="space-y-2">
  <Label>备注</Label>
  <Input
  value={campForm.notes}
- onChange={(e) => setCampForm({ ...campForm, notes: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ onChange={(e) => setCampForm({ ...campForm, notes: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <DialogFooter>
