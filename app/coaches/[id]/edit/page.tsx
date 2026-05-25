@@ -26,7 +26,6 @@ export default function EditCoachPage() {
 
  return (
  <div className="space-y-6">
- <h2 className="text-2xl font-bold text-[#1D1D1F]">编辑教练</h2>
  <CoachForm initialData={coach} coachId={coach.id} />
  </div>
  );

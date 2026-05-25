@@ -166,15 +166,9 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* ==================== 页面头部 ==================== */}
-      <div className="flex items-end justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">仪表盘</h1>
-          <p className="text-sm text-[#86868B] mt-1">
-            欢迎回来，今天有 {todayCoursesCount} 节课
-          </p>
-        </div>
-
-      </div>
+      <p className="text-sm text-[#86868B]">
+        欢迎回来，今天有 {todayCoursesCount} 节课
+      </p>
 
       {/* ==================== 统计卡片 ==================== */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

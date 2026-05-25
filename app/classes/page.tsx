@@ -61,8 +61,7 @@ export default function ClassesPage() {
   return (
     <div className="space-y-6">
       {/* 标题栏 */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[#1D1D1F]">班级管理</h2>
+      <div className="flex items-center justify-end">
         <Button
           onClick={() => router.push("/classes/new")}
           className="rounded-full bg-[#1D1D1F] text-white hover:bg-black/80"

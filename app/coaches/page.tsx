@@ -70,8 +70,7 @@ export default function CoachesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[#1D1D1F]">教练管理</h2>
+      <div className="flex items-center justify-end">
         <Link href="/coaches/new">
           <Button className="rounded-full bg-black/[0.06] text-[#1D1D1F] px-5 py-2.5 hover:bg-black/[0.1]">
             <Plus className="w-4 h-4 mr-2" />

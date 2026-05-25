@@ -120,8 +120,7 @@ export default function BackupPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[#1D1D1F]">数据备份与恢复</h2>
+      <div className="flex items-center justify-end">
         <HardDrive className="w-6 h-6 text-[#A1A1A6]" />
       </div>
 

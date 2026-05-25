@@ -241,7 +241,6 @@ export default function RollCallPage() {
           <ArrowLeft className="w-4 h-4 mr-1" />
           返回
         </Button>
-        <h2 className="text-xl font-bold text-[#1D1D1F]">课程点名</h2>
       </div>
 
       {/* 课程信息卡片 */}

@@ -117,13 +117,6 @@ export default function StudentAttendancePage() {
         返回考勤查询
       </Link>
 
-      {/* 学员信息 */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[#1D1D1F]">
-          {student?.name || "学员考勤详情"}
-        </h2>
-      </div>
-
       {/* 统计卡片 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4 bg-white rounded-[14px] shadow-none">

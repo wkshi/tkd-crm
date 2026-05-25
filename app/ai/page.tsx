@@ -296,8 +296,7 @@ export default function AIPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-7rem)]">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-[#1D1D1F]">AI 助手</h2>
+      <div className="flex items-center justify-end mb-4">
         <div className="flex items-center gap-2">
           <Button
             type="button"

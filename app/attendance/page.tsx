@@ -125,10 +125,6 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[#1D1D1F]">考勤查询</h2>
-      </div>
-
       {/* 查询条件 */}
       <Card className="p-4 bg-white rounded-[20px] shadow-none">
         <div className="flex flex-wrap items-center gap-4">
