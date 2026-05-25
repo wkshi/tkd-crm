@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Award,
   Trophy,
+  MapPin,
 } from "lucide-react";
 
 const navItems = [
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/attendance", icon: ClipboardCheck, label: "考勤查询" },
   { href: "/grading", icon: Award, label: "考级管理" },
   { href: "/competition", icon: Trophy, label: "比赛管理" },
+  { href: "/camp", icon: MapPin, label: "集训管理" },
   { href: "/backup", icon: HardDrive, label: "数据备份" },
   { href: "/ai", icon: Sparkles, label: "AI 助手" },
 ];

@@ -923,6 +923,62 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 - 比赛日期、比赛名称、参赛组别、成绩/名次、备注：表单字段
 - 底部按钮：取消 + 保存
 
+#### 集训管理页（`/camp`）
+
+**页面结构**：分栏布局，左栏占 60%，右栏占 40%，间距 `gap-5`。页面顶部提供 Tab 切换，分为"集训录入"和"集训记录"两个视图。
+
+**顶部 Tab 切换**：`flex gap-1 bg-black/[0.06] rounded-[10px] p-1 w-fit`
+- 每个 Tab：`px-4 py-1.5 rounded-lg text-[14px] font-medium`
+  - 激活态：`bg-white shadow-sm text-[#1D1D1F]`
+  - 非激活态：`text-[#6E6E73] hover:text-[#1D1D1F]`
+
+**集训录入 Tab**
+
+与比赛录入页保持完全一致的布局结构和交互模式，仅表单字段不同：
+
+**左栏：学员选择列表**
+
+白色卡片，`bg-white rounded-[20px] overflow-hidden`
+
+表格样式同学员列表页，列：复选框、姓名、性别、当前带位、班级
+
+**右栏：集训信息表单**
+
+白色卡片，`bg-white rounded-[20px] p-6`，sticky 定位跟随滚动。
+
+- 图标：`MapPin w-5 h-5 text-blue-500` + 标题 `text-[17px] font-semibold text-[#1D1D1F]` "集训信息"
+- 活动日期 *：`type="date"`，默认当天
+- 活动名称 *：必填输入框
+- 活动地点（可选）：输入框，placeholder "选填"
+- 时长/天（可选）：`type="number"` 输入框，placeholder "选填"
+- 备注（可选）：输入框，placeholder "选填"
+- 已选提示：`text-[13px] text-[#6E6E73]`，图标 `Users w-4 h-4`
+- 提交按钮：同比赛录入页样式
+
+**集训记录 Tab**
+
+`space-y-5` 容器，筛选栏在外，表格在独立白色卡片内。
+
+**筛选栏**：`flex flex-wrap items-center gap-3`
+- 班级下拉、姓名搜索框、活动名称搜索框、地点下拉（动态提取）、年份下拉、月份下拉、日期选择、清除按钮、数量提示 `共 X 条`
+
+**表格样式**：
+- 表头：同学员列表页表头样式
+- 列：学员姓名、活动日期、活动名称、活动地点、时长、操作
+- 操作列：`flex justify-end gap-2`
+  - 编辑按钮：`Pencil w-4 h-4`，颜色 `text-[#6E6E73] hover:text-[#1D1D1F]`
+  - 删除按钮：`Trash2 w-4 h-4`，颜色 `text-[#FF3B30] hover:text-[#FF3B30]`
+- 空状态：`text-center py-12 text-[#A1A1A6]` "暂无集训记录"
+
+**编辑弹窗**
+
+白色弹窗，`bg-white rounded-[20px] border-black/[0.06] max-w-md`
+
+- 标题：`DialogTitle text-[17px] font-semibold text-[#1D1D1F]` "编辑集训记录"
+- 学员：只读展示
+- 活动日期、活动名称、活动地点、时长、备注：表单字段
+- 底部按钮：取消 + 保存
+
 ---
 
 ### 4.3b 教练详情页（`/coaches/[id]`）
