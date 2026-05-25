@@ -118,7 +118,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -151,7 +151,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
               type="date"
               value={form.birthDate}
               onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -159,7 +159,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
             <Input
               value={form.idCard}
               onChange={(e) => setForm({ ...form, idCard: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -167,7 +167,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
             <Input
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -177,7 +177,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
               required
               value={form.joinDate}
               onChange={(e) => setForm({ ...form, joinDate: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2 col-span-2">
@@ -186,7 +186,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
               value={form.bio}
               onChange={(e) => setForm({ ...form, bio: e.target.value })}
               rows={4}
-              className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
+              className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none"
               placeholder="请输入教练的资质、特长、教学经验等..."
             />
           </div>

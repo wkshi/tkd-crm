@@ -79,7 +79,7 @@ export default function ClassesPage() {
           placeholder="搜索班级名称..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-black/[0.06] border-0 rounded-full focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+          className="pl-9 bg-black/[0.06] border-0 rounded-full focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
         />
       </div>
 

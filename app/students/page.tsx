@@ -86,13 +86,13 @@ export default function StudentsPage() {
  placeholder="搜索学员姓名..."
  value={search}
  onChange={(e) => { setSearch(e.target.value); setPage(1); }}
- className="pl-10 bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+ className="pl-10 bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
  />
  </div>
  <select
  value={statusFilter}
  onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
- className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white focus:outline-none"
+ className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none"
 >
  <option value="">全部状态</option>
  <option value="active">在籍</option>

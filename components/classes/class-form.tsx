@@ -104,7 +104,7 @@ export function ClassForm({ initialData, classId }: ClassFormProps) {
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -113,7 +113,7 @@ export function ClassForm({ initialData, classId }: ClassFormProps) {
               value={form.level}
               onChange={(e) => setForm({ ...form, level: e.target.value })}
               placeholder="如：白带、黄带"
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -124,7 +124,7 @@ export function ClassForm({ initialData, classId }: ClassFormProps) {
               onChange={(e) =>
                 setForm({ ...form, maxStudents: parseInt(e.target.value) || 0 })
               }
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -162,7 +162,7 @@ export function ClassForm({ initialData, classId }: ClassFormProps) {
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows={3}
-            className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-[#D9264A]/20 focus:bg-white"
+            className="w-full bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
           />
         </div>
       </div>
