@@ -408,11 +408,6 @@ export default function CampPage() {
 
   return (
     <div className="space-y-6">
-      {/* 页面头部 */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[#1D1D1F]">集训管理</h2>
-      </div>
-
       {/* Tab 切换 */}
       <div className="flex gap-1 bg-black/[0.06] rounded-[10px] p-1 w-fit">
         {[
