@@ -444,7 +444,7 @@ export default function StudentDetailPage() {
  />
  </div>
  <div className="space-y-2">
- <Label>获奖情况</Label>
+ <Label>备注</Label>
  <Input
  value={competitionForm.award}
  onChange={(e) => setCompetitionForm({ ...competitionForm, award: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
