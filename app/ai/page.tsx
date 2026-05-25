@@ -202,12 +202,15 @@ export default function AIPage() {
     }
   }
 
-  // 确认使用矫正后的文本
+  // 确认使用矫正后的文本并直接提交
   function applyCorrectedText(text: string) {
-    setInput((prev) => (prev ? prev + text : text));
+    const finalText = (input + text).trim();
+    if (!finalText || isLoading) return;
+    setInput("");
     setShowCorrection(false);
     setVoiceText("");
     setCorrectedText("");
+    sendMessage({ text: finalText });
   }
 
   // 取消矫正，丢弃语音内容
