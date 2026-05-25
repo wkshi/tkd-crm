@@ -330,7 +330,7 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
   - 图标：`w-7 h-7 mx-auto mb-2`
   - 标签：`text-[13px] text-[#6E6E73]`，hover 时继承 `text-accent`
 
-**6 个入口**：新增学员、查看日历、考勤查询、考级录入、比赛录入、AI 助手
+**6 个入口**：新增学员、查看日历、考勤查询、考级管理、比赛录入、AI 助手
 
 ---
 
@@ -744,7 +744,6 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
     - 白带-绿带：`text-[#1D1D1F]`
     - 蓝带-红带：`text-blue-600`
     - 红黑带-黑带：`text-purple-600 font-bold`（高阶带位高亮）
-  - 证书编号：`text-[12px] text-[#A1A1A6] mt-1`
   - 备注（如有）：`text-[14px] text-[#6E6E73] mt-1`
 
 **Belt 颜色编码**：每个 belt 级别用对应颜色的细竖条标识 `w-[3px] h-full absolute left-0 rounded-full`
@@ -785,6 +784,86 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
   - 每行：`flex items-center justify-between py-2.5 border-b border-black/[0.04]`
     - 左侧：日期 `text-[15px] text-[#6E6E73]` + 课程名 `text-[15px] text-[#1D1D1F] ml-4`
     - 右侧：状态 pill 徽章（同功能色定义）
+
+#### 考级管理页（`/grading`）
+
+**页面结构**：分栏布局，左栏占 60%，右栏占 40%，间距 `gap-5`。
+
+**顶部操作栏**：`flex items-center justify-between mb-4`
+- 左侧筛选区：`flex items-center gap-3`
+  - 班级下拉：`bg-black/[0.06] border-0 rounded-[10px] px-3 py-2 text-[14px]`
+  - 搜索框：带 `Search w-4 h-4` 图标，占位符"搜索学员姓名..."
+  - 全选复选框：`text-[14px] text-[#1D1D1F]`
+  - 已选人数：`text-[13px] text-[#0071E3] font-medium`
+- 右侧清空按钮：`text-[13px] text-[#6E6E73] hover:text-[#1D1D1F]`
+
+**左栏：学员选择列表**
+
+白色卡片，`bg-white rounded-[20px] overflow-hidden`，高度 `h-[calc(100vh-220px)]` 或自适应。
+
+表格样式同学员列表页：
+- 表头：`border-b border-black/[0.04]`，`text-[13px] font-medium text-[#6E6E73]`
+- 列：复选框、姓名、性别、当前带位、班级
+- 行：`hover:bg-black/[0.04] border-b border-black/[0.04]`
+- 当前带位用 pill 徽章展示，无记录显示"—" `text-[#A1A1A6]`
+- 班级标签：`inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/[0.04] text-[12px] text-[#6E6E73]`
+
+**右栏：考级信息表单**
+
+白色卡片，`bg-white rounded-[20px] p-6`，sticky 定位跟随滚动。
+
+表单字段：
+- 标签：`text-[14px] font-medium text-[#1D1D1F] mb-2`
+- 输入框/下拉：`bg-black/[0.06] border-0 rounded-[10px] h-10 px-3 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white`
+- 日期输入：type="date"，默认值为当天
+- 腰带级别下拉：11 级枚举，选项文字使用中文（白带、白黄带、黄带...）
+- 备注：可选字段，placeholder 提示"选填"
+
+已选提示：`text-[13px] text-[#6E6E73] mt-4`，图标 `Users w-4 h-4 mr-1`
+- 示例："💡 将为 5 名学员录入考级信息"
+
+提交按钮：`w-full h-11 rounded-full bg-[#1D1D1F] text-white text-[14px] font-medium hover:bg-black/80 disabled:opacity-40`
+- 未选学员时：disabled，文字"请先选择学员"
+- 已选学员时：文字"为 N 名学员录入考级信息"
+
+**空状态**：当筛选结果为空时，列表区展示 `Search w-12 h-12 text-[#A1A1A6] mx-auto mb-3` + "未找到匹配的学员" `text-[14px] text-[#6E6E73]`
+
+**成功反馈**：提交成功后，页面顶部显示 Toast 提示（可复用全局 toast 样式）："成功为 5 名学员录入考级记录"，随后清空选择态并刷新列表。
+
+#### 考级记录列表（页面下半部分）
+
+白色卡片，`bg-white rounded-[20px] overflow-hidden`
+
+**卡片头部**：`px-5 pt-5 pb-3 flex items-center gap-2`
+- 图标：`Award w-5 h-5 text-purple-500`
+- 标题：`text-[17px] font-semibold text-[#1D1D1F]` "考级记录"
+- 数量：`text-[13px] text-[#6E6E73] ml-2` "共 X 条"
+
+**表格样式**：
+- 表头：同学员列表页表头样式
+- 列：学员姓名、考试日期、腰带级别、备注、操作
+- 腰带级别：`inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 text-[12px] font-medium`
+- 备注：`text-[14px] text-[#6E6E73] max-w-[200px] truncate`
+- 操作列：`flex justify-end gap-2`
+  - 编辑按钮：`Pencil w-4 h-4`，颜色 `text-[#6E6E73] hover:text-[#1D1D1F]`
+  - 删除按钮：`Trash2 w-4 h-4`，颜色 `text-[#FF3B30] hover:text-[#FF3B30]`
+- 空状态：`text-center py-12 text-[#A1A1A6]` "暂无考级记录"
+
+#### 编辑弹窗
+
+白色弹窗，`bg-white rounded-[20px] border-black/[0.06] max-w-md`
+
+**弹窗头部**：`DialogTitle text-[17px] font-semibold text-[#1D1D1F]` "编辑考级记录"
+
+**表单字段**（同录入表单样式）：
+- 学员：只读展示，`h-10 px-3 flex items-center bg-black/[0.04] rounded-[10px] text-[14px] text-[#6E6E73]`
+- 考试日期：type="date"
+- 腰带级别：下拉选择
+- 备注：输入框
+
+**底部按钮**：`flex gap-3 pt-2`
+- 取消：`flex-1 h-10 rounded-full border-black/[0.08] text-[#6E6E73]`
+- 保存：`flex-1 h-10 rounded-full bg-[#1D1D1F] text-white`
 
 ---
 

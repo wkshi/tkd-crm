@@ -26,7 +26,6 @@ describe("考级 API", () => {
             studentId: student.id,
             examDate: "2024-06-15",
             beltLevel: "yellow",
-            certificateNo: "CERT-2024-001",
             notes: "表现优秀",
           }),
         });
@@ -34,7 +33,6 @@ describe("考级 API", () => {
         expect(res.status).toBe(200);
         expect(json.studentId).toBe(student.id);
         expect(json.beltLevel).toBe("yellow");
-        expect(json.certificateNo).toBe("CERT-2024-001");
         expect(json.notes).toBe("表现优秀");
       },
     });

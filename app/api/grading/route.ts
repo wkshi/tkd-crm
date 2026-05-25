@@ -19,7 +19,6 @@ const createSchema = z.object({
     "red_black",
     "black",
   ]),
-  certificateNo: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -58,7 +57,6 @@ export async function POST(req: Request) {
       studentId: data.studentId,
       examDate: new Date(data.examDate),
       beltLevel: data.beltLevel,
-      certificateNo: data.certificateNo,
       notes: data.notes,
     },
   });

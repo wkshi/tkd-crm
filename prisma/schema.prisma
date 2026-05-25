@@ -119,7 +119,6 @@ model Grading {
   studentId     String    @map("student_id")
   examDate      DateTime  @map("exam_date") @db.Date
   beltLevel     BeltLevel @map("belt_level")
-  certificateNo String?   @map("certificate_no")
   notes         String?
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")

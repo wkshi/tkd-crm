@@ -12,6 +12,7 @@ import {
   HardDrive,
   Sparkles,
   GraduationCap,
+  Award,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/classes", icon: GraduationCap, label: "班级管理" },
   { href: "/calendar", icon: CalendarDays, label: "课表日历" },
   { href: "/attendance", icon: ClipboardCheck, label: "考勤查询" },
+  { href: "/grading", icon: Award, label: "考级管理" },
   { href: "/backup", icon: HardDrive, label: "数据备份" },
   { href: "/ai", icon: Sparkles, label: "AI 助手" },
 ];
