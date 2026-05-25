@@ -179,7 +179,7 @@ export default function CoachesPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(coach.id)}
-                      className="text-[#D9264A] hover:text-[#D9264A]"
+                      className="text-[#FF3B30] hover:text-[#FF3B30]"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

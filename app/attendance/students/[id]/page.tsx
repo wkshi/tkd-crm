@@ -42,7 +42,7 @@ interface AttendanceRecord {
 
 const statusMap: Record<string, { label: string; color: string }> = {
   present: { label: "出勤", color: "bg-green-500/10 text-green-700" },
-  absent: { label: "缺勤", color: "bg-red-500/10 text-[#D9264A]" },
+  absent: { label: "缺勤", color: "bg-red-500/10 text-[#FF3B30]" },
   late: { label: "迟到", color: "bg-yellow-500/10 text-yellow-700" },
   leave: { label: "请假", color: "bg-blue-500/10 text-blue-700" },
   unmarked: { label: "未点名", color: "bg-black/[0.06] text-[#6E6E73]" },
@@ -140,7 +140,7 @@ export default function StudentAttendancePage() {
         <Card className="p-4 bg-white rounded-[14px] shadow-none">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-[#D9264A]" />
+              <TrendingUp className="w-5 h-5 text-[#0071E3]" />
             </div>
             <div>
               <p className="text-xs text-[#6E6E73]">缺勤次数</p>

@@ -485,7 +485,7 @@ export default function AIPage() {
 
         {error && (
           <div className="flex justify-center">
-            <Badge className="bg-[#D9264A] text-white hover:bg-[#D9264A] border-0">发生错误：{error.message}</Badge>
+            <Badge className="bg-[#FF3B30] text-white hover:bg-[#FF3B30] border-0">发生错误：{error.message}</Badge>
           </div>
         )}
 

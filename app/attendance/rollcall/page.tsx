@@ -59,8 +59,8 @@ const statusConfig: Record<
   },
   absent: {
     label: "缺勤",
-    color: "bg-red-500/10 text-[#D9264A]",
-    activeColor: "bg-[#D9264A] text-white",
+    color: "bg-red-500/10 text-[#FF3B30]",
+    activeColor: "bg-[#FF3B30] text-white",
   },
   late: {
     label: "迟到",
@@ -298,7 +298,7 @@ export default function RollCallPage() {
             </Badge>
             <Badge
               variant="secondary"
-              className="bg-red-500/10 text-[#D9264A] border-0"
+              className="bg-red-500/10 text-[#FF3B30] border-0"
             >
               缺勤 {absentCount}
             </Badge>

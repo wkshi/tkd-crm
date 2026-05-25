@@ -55,8 +55,8 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 
 | 名称 | 色值 | Tailwind 实现 | 用途 |
 |------|------|---------------|------|
-| **accent** | `#D9264A` | `bg-[#D9264A]` / `text-[#D9264A]` | 主按钮、选中状态、链接、激活指示器 |
-| **accent-light** | `rgba(217,38,74,0.10)` | `bg-[#D9264A]/10` | 选中项背景、hover 高亮底 |
+| **accent** | `#0071E3` | `bg-[#0071E3]` / `text-[#0071E3]` | 主按钮、选中状态、链接、激活指示器 |
+| **accent-light** | `rgba(0,113,227,0.08)` | `bg-[#0071E3]/8` | 选中项背景、hover 高亮底 |
 
 #### 功能色（Semantic Colors）
 
@@ -196,7 +196,7 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 
 ### 3.2 侧边栏（Sidebar）
 
-**背景**：`backdrop-blur-xl bg-white/70`，右边框 `border-r border-black/[0.04]`
+**背景**：`backdrop-blur-xl bg-white/70`，右边框 `border-r border-black/[0.04]`，选中项无左侧竖条，使用蓝色背景 pill 高亮
 
 **默认状态**：宽度 `220px`
 **折叠状态**：宽度 `64px`，只显示图标，文字隐藏
@@ -222,7 +222,7 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 **菜单项样式（Apple 风格）**：
 - 默认：`text-[#6E6E73]`，`h-11`（44px），圆角 `rounded-[10px]`，padding `px-3`
 - hover：`bg-black/[0.06] text-[#1D1D1F]`
-- 激活（当前路由）：`bg-[#D9264A]/10 text-[#D9264A]` + 左侧 3px 圆角竖条指示器 `absolute left-0 w-[3px] h-5 bg-accent rounded-r-full`
+- 激活（当前路由）：`bg-[#0071E3]/8 text-[#0071E3] font-semibold`
 - 图标：`w-5 h-5 mr-3`
 - 菜单项间距：`space-y-0.5`
 
@@ -234,7 +234,7 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 
 **左侧**：
 - 侧边栏折叠/展开按钮（小屏下为汉堡菜单）：圆形触控区域 `w-9 h-9 rounded-full hover:bg-black/[0.06] flex items-center justify-center`
-- 页面标题：`text-[22px] font-semibold text-[#1D1D1F]`
+- 导航链接 pill：`px-3.5 py-1.5 rounded-lg text-[13px] font-medium`，hover `bg-black/[0.03]`，active `bg-[#0071E3]/8 text-[#0071E3]`
 - 面包屑（可选）：`text-[13px] text-[#6E6E73]`，分隔符 `text-[#A1A1A6] mx-1.5`
 
 **右侧**：
@@ -291,9 +291,10 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 > 无阴影！纯白卡片在 `#F5F5F7` 灰色背景上自然形成层级。
 
 **内部结构**：
-- 顶部一行：左侧图标（圆形背景 `w-10 h-10 rounded-full bg-black/[0.06]`），右侧趋势箭头 + 百分比
-- 中部：大数字 `text-[28px] font-bold text-[#1D1D1F] mt-3`
+- 顶部一行：左侧图标（圆角方形背景 `w-9 h-9 rounded-[10px]`），右侧趋势标签（如 `+3`、`满`、`2节`、`+12%`），带语义色背景 pill
+- 中部：大数字 `text-[32px] font-bold text-[#1D1D1F] mt-3`
 - 底部：标签 `text-[13px] text-[#6E6E73] mt-1`
+- 底部进度条：`h-[3px] bg-black/[0.05] rounded-full mt-3`，填充色使用对应语义色
 
 **图标配色**：
 - 在籍学员：`text-blue-500`（图标 `Users`，底 `bg-blue-500/10`）

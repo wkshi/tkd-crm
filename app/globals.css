@@ -55,19 +55,19 @@
     --card-foreground: #1D1D1F;
     --popover: #FFFFFF;
     --popover-foreground: #1D1D1F;
-    --primary: #D9264A;
+    --primary: #0071E3;
     --primary-foreground: #FFFFFF;
     --secondary: rgba(120, 120, 128, 0.12);
     --secondary-foreground: #1D1D1F;
     --muted: rgba(120, 120, 128, 0.12);
     --muted-foreground: #6E6E73;
-    --accent: rgba(217, 38, 74, 0.10);
-    --accent-foreground: #D9264A;
+    --accent: rgba(0, 113, 227, 0.08);
+    --accent-foreground: #0071E3;
     --destructive: #FF3B30;
     --border: rgba(60, 60, 67, 0.15);
     --input: rgba(120, 120, 128, 0.12);
     --ring: #1D1D1F;
-    --chart-1: #D9264A;
+    --chart-1: #0071E3;
     --chart-2: #007AFF;
     --chart-3: #34C759;
     --chart-4: #FF9500;
@@ -75,10 +75,10 @@
     --radius: 0.625rem;
     --sidebar: rgba(255, 255, 255, 0.70);
     --sidebar-foreground: #1D1D1F;
-    --sidebar-primary: #D9264A;
+    --sidebar-primary: #0071E3;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: rgba(217, 38, 74, 0.10);
-    --sidebar-accent-foreground: #D9264A;
+    --sidebar-accent: rgba(0, 113, 227, 0.08);
+    --sidebar-accent-foreground: #0071E3;
     --sidebar-border: rgba(0, 0, 0, 0.04);
     --sidebar-ring: #1D1D1F;
 }
@@ -90,29 +90,29 @@
     --card-foreground: #FFFFFF;
     --popover: #2C2C2E;
     --popover-foreground: #FFFFFF;
-    --primary: #FF375F;
+    --primary: #0A84FF;
     --primary-foreground: #FFFFFF;
     --secondary: rgba(120, 120, 128, 0.24);
     --secondary-foreground: #FFFFFF;
     --muted: rgba(120, 120, 128, 0.24);
     --muted-foreground: #8E8E93;
-    --accent: rgba(255, 55, 95, 0.15);
-    --accent-foreground: #FF375F;
+    --accent: rgba(10, 132, 255, 0.15);
+    --accent-foreground: #0A84FF;
     --destructive: #FF453A;
     --border: rgba(84, 84, 88, 0.3);
     --input: rgba(120, 120, 128, 0.24);
     --ring: #1D1D1F;
-    --chart-1: #FF375F;
+    --chart-1: #0A84FF;
     --chart-2: #0A84FF;
     --chart-3: #32D74B;
     --chart-4: #FF9F0A;
     --chart-5: #BF5AF2;
     --sidebar: rgba(28, 28, 30, 0.80);
     --sidebar-foreground: #FFFFFF;
-    --sidebar-primary: #FF375F;
+    --sidebar-primary: #0A84FF;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: rgba(255, 55, 95, 0.15);
-    --sidebar-accent-foreground: #FF375F;
+    --sidebar-accent: rgba(10, 132, 255, 0.15);
+    --sidebar-accent-foreground: #0A84FF;
     --sidebar-border: rgba(255, 255, 255, 0.06);
     --sidebar-ring: #1D1D1F;
 }
@@ -209,8 +209,8 @@
     font-size: 12px;
   }
 
-  /* 当前日期高亮 —— 极淡的红色背景 */
+  /* 当前日期高亮 —— 极淡的蓝色背景 */
   .fc .fc-day-today {
-    background: rgba(217, 38, 74, 0.04) !important;
+    background: rgba(0, 113, 227, 0.04) !important;
   }
 }

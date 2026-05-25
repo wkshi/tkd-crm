@@ -30,7 +30,7 @@ interface ClassItem {
 
 const statusMap: Record<string, { label: string; color: string }> = {
   present: { label: "出勤", color: "bg-green-500/10 text-green-700" },
-  absent: { label: "缺勤", color: "bg-red-500/10 text-[#D9264A]" },
+  absent: { label: "缺勤", color: "bg-red-500/10 text-[#FF3B30]" },
   late: { label: "迟到", color: "bg-yellow-500/10 text-yellow-700" },
   leave: { label: "请假", color: "bg-blue-500/10 text-blue-700" },
   unmarked: { label: "未点名", color: "bg-black/[0.06] text-[#6E6E73]" },
@@ -176,7 +176,7 @@ export default function AttendancePage() {
                   {student ? (
                     <Link
                       href={`/attendance/students/${student.id}`}
-                      className="font-medium text-[15px] text-[#1D1D1F] hover:text-[#D9264A] transition-colors"
+                      className="font-medium text-[15px] text-[#1D1D1F] hover:text-[#0071E3] transition-colors"
                     >
                       {student.name}
                     </Link>
@@ -196,7 +196,7 @@ export default function AttendancePage() {
                     </span>
                   )}
                   {stats.absent > 0 && (
-                    <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-[#D9264A]">
+                    <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-[#FF3B30]">
                       缺勤 {stats.absent}
                     </span>
                   )}

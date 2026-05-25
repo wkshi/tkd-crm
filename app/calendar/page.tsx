@@ -307,7 +307,7 @@ export default function CalendarPage() {
             ))}
           </select>
           {classes.length === 0 && (
-            <p className="text-xs text-[#D9264A]">
+            <p className="text-xs text-[#FF3B30]">
               暂无可选班级，请先创建班级
             </p>
           )}

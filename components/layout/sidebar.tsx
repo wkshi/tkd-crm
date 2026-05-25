@@ -30,8 +30,9 @@ export function Sidebar() {
 
   return (
     <aside className="w-[220px] shrink-0 border-r border-black/[0.04] backdrop-blur-xl bg-white/70 flex flex-col h-screen sticky top-0 z-40">
-      <div className="h-14 flex items-center px-5">
-        <span className="text-[17px] font-semibold text-[#1D1D1F]">跆拳道 CRM</span>
+      <div className="h-14 flex items-center px-5 gap-2">
+        <GraduationCap className="w-[22px] h-[22px] text-[#1D1D1F]" />
+        <span className="text-[17px] font-bold tracking-tight text-[#1D1D1F]">跆拳道 CRM</span>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {navItems.map((item) => {
@@ -43,16 +44,13 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center h-11 px-3 rounded-[10px] text-[14px] font-medium transition-colors duration-150 relative",
+                "flex items-center h-11 px-3 rounded-[10px] text-[13px] font-medium transition-all duration-150",
                 isActive
-                  ? "bg-[#D9264A]/10 text-[#D9264A]"
-                  : "text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/[0.06]"
+                  ? "bg-[#0071E3]/8 text-[#0071E3] font-semibold"
+                  : "text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/[0.04]"
               )}
             >
-              {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[#D9264A] rounded-r-full" />
-              )}
-              <Icon className="w-5 h-5 mr-3" />
+              <Icon className="w-[18px] h-[18px] mr-3" />
               {item.label}
             </Link>
           );

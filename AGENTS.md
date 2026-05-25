@@ -1,4 +1,3 @@
-<!-- From: /Users/wkshi/git/github/wkshi/tkd-crm/AGENTS.md -->
 # 跆拳道馆 CRM 系统 —— AI 代理指南
 
 > 本文档供 AI 编码代理阅读。如果你正在阅读此文件，说明你对本项目一无所知——本文档将告诉你需要了解的一切。
@@ -11,33 +10,35 @@
 
 **当前状态**：项目已完成核心功能编码，包括数据库 Schema、REST API、前端页面、AI 对话流、照片上传、数据备份与恢复，以及完整的测试基础设施。`docs/` 目录下保留有产品需求文档（PRD）和 UI 设计文档作为参考。
 
+> **注意**：仪表盘首页（`/`）的快捷入口包含"/grading"（考级录入）和"/competition"（比赛录入）链接，但对应的前端页面尚未创建，目前仅有 API 路由（`/api/grading`、`/api/competition`、`/api/camp`）可用。
+
 ---
 
 ## 技术栈
 
 | 层级 | 技术方案 |
 |------|----------|
-| **前端框架** | Next.js 16 + App Router + React 19 |
-| **语言** | TypeScript 5 |
-| **样式** | Tailwind CSS 4 + shadcn/ui（base-nova 风格） |
+| **前端框架** | Next.js 16.1.7 + App Router + React 19.2.4 |
+| **语言** | TypeScript 5.9.3 |
+| **样式** | Tailwind CSS 4.2.1 + shadcn/ui（base-nova 风格） |
 | **UI 底层** | `@base-ui/react`（shadcn/ui 组件基于此构建） |
 | **日历组件** | `@fullcalendar/react` |
 | **数据库** | PostgreSQL 16 |
-| **ORM** | Prisma 6 |
-| **AI SDK** | Vercel AI SDK 6 + Provider Registry |
+| **ORM** | Prisma 6.19.3 |
+| **AI SDK** | Vercel AI SDK 6.0.190 + Provider Registry |
 | **数据表格** | TanStack Table |
 | **图表** | Recharts |
 | **图标** | Lucide React |
 | **容器化** | Docker + Docker Compose |
-| **校验** | Zod |
-| **测试** | Vitest + jsdom + @testing-library/react + next-test-api-route-handler |
+| **校验** | Zod 4.4.3 |
+| **测试** | Vitest 4.1.7 + jsdom + `@testing-library/react` + `next-test-api-route-handler` |
 | **构建工具** | Turbopack（开发模式） |
 
 ### 支持的 LLM 提供商
 
 通过 Vercel AI SDK 的 Provider Registry 支持多提供商动态切换：
 
-- OpenAI (`@ai-sdk/openai`) —— 同时用于兼容 OpenAI API 的第三方服务
+- OpenAI (`@ai-sdk/openai`)
 - Anthropic Claude (`@ai-sdk/anthropic`)
 - Google Gemini (`@ai-sdk/google`)
 - DeepSeek (`@ai-sdk/deepseek`)
@@ -52,6 +53,11 @@
 ```
 tkd-crm/
 ├── app/                            # Next.js App Router
+│   ├── page.tsx                    # 仪表盘首页（Server Component，直接查 Prisma）
+│   ├── layout.tsx                  # 根布局（侧边栏导航 + Header + ThemeProvider）
+│   ├── globals.css                 # Tailwind CSS 入口 + CSS 变量主题
+│   ├── ai/
+│   │   └── page.tsx                # AI 助手对话页面（Client Component）
 │   ├── api/                        # API 路由
 │   │   ├── students/route.ts
 │   │   ├── students/[id]/route.ts
@@ -68,26 +74,21 @@ tkd-crm/
 │   │   ├── camp/route.ts
 │   │   ├── chat/route.ts           # AI 对话流式接口
 │   │   ├── correct/route.ts        # 语音输入文本矫正
-│   │   ├── config/route.ts         # 返回客户端可用的系统配置（如当前模型名）
+│   │   ├── config/route.ts         # 返回客户端可用的系统配置（当前模型名）
 │   │   ├── upload/route.ts         # 照片上传/删除
 │   │   └── backup/route.ts         # 数据备份/恢复（ZIP + pg_dump/psql）
-│   ├── page.tsx                    # 仪表盘首页（Server Component，直接查 Prisma）
-│   ├── layout.tsx                  # 根布局（侧边栏导航 + Header）
-│   ├── globals.css                 # Tailwind CSS 入口 + CSS 变量主题
 │   ├── students/                   # 学员列表、新增、详情、编辑页面
 │   ├── coaches/                    # 教练列表、新增、详情、编辑页面
 │   ├── classes/                    # 班级列表、新增、详情、编辑页面
-│   ├── calendar/                   # 课表日历页面
-│   ├── attendance/                 # 考勤查询页面
-│   ├── ai/                         # AI 助手对话页面
-│   └── backup/                     # 数据备份页面
+│   ├── calendar/                   # 课表日历页面（FullCalendar）
+│   ├── attendance/                 # 考勤查询、点名、学员考勤详情页面
+│   └── backup/                     # 数据备份管理页面
 ├── components/                     # 可复用组件
 │   ├── ui/                         # shadcn/ui 组件（badge, button, card, dialog, input, label, select, table）
 │   ├── layout/                     # sidebar.tsx, header.tsx
 │   ├── students/                   # student-form.tsx
 │   ├── coaches/                    # coach-form.tsx
-│   ├── classes/                    # class-form.tsx
-│   └── theme-provider.tsx          # Next Themes 提供者（强制 light 主题）
+│   └── classes/                    # class-form.tsx
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
 │   ├── ai-model.ts                 # AI Provider Registry + getModel()
@@ -97,25 +98,25 @@ tkd-crm/
 │   ├── api/                        # API 路由测试
 │   ├── components/                 # 组件测试
 │   ├── lib/                        # 工具函数测试
-│   ├── helpers.ts                  # 测试辅助函数（部分函数，不推荐使用）
+│   ├── helpers.ts                  # 备用测试辅助函数
 │   └── setup.ts                    # Vitest 全局 setup（mock next/navigation）
 ├── tests/                          # 主要测试辅助函数
-│   └── helpers.ts                  # 测试辅助函数（cleanupTestData, createTestStudent 等，API 测试从此导入）
+│   └── helpers.ts                  # cleanupTestData, createTestStudent 等（API 测试从此导入）
 ├── prisma/
 │   ├── schema.prisma               # 数据库 Schema
 │   └── migrations/                 # Prisma 迁移文件
 ├── public/
 │   └── uploads/                    # 照片本地存储（students/ + coaches/）
 ├── scripts/
-│   └── start-local-prod.sh         # 本地生产环境启动脚本（自动启动独立数据库）
+│   └── start-local-prod.sh         # 本地生产环境启动脚本
 ├── docker-compose.yml              # PostgreSQL 16 + pgAdmin + 本地生产数据库容器配置
-├── .env.local                      # 本地环境变量（不提交 Git）
 ├── .env                            # 默认环境变量模板
-├── next.config.mjs                 # Next.js 配置（standalone 输出由 DOCKER_DEPLOY 控制）
-├── vitest.config.ts                # Vitest 配置（jsdom + @vitejs/plugin-react）
-├── eslint.config.mjs               # ESLint 配置（next/core-web-vitals + next/typescript）
-├── postcss.config.mjs              # PostCSS 配置（@tailwindcss/postcss）
-├── components.json                 # shadcn/ui 配置
+├── .env.local                      # 本地环境变量（Git 忽略）
+├── next.config.mjs
+├── vitest.config.ts
+├── eslint.config.mjs
+├── postcss.config.mjs
+├── .prettierrc
 └── package.json
 ```
 
@@ -141,24 +142,30 @@ Student (1) ──────< (N) Grading
 Student (1) ──────< (N) Competition
 Student (1) ──────< (N) Camp
 Student (1) ──────< (N) Attendance
-Student (N) ──────< (M) Class
+Student (N) ──────< (M) Class      (@relation("ClassToStudent"))
 Coach   (1) ──────< (N) Course
 Class   (1) ──────< (N) Course
-Class   (1) ──────< (N) Student
+Class   (1) ──────< (M) Student    (@relation("ClassToStudent"))
 Course  (1) ──────< (N) Attendance
 ```
 
-- Coach 删除时，Course.coachId 自动设为 NULL（`onDelete: SetNull`）
+- Coach 删除时，`Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
 - Class 删除时，关联 Course 级联删除（`onDelete: Cascade`）
-- Attendance 有复合唯一索引：`@@unique([courseId, studentId, attendanceDate])`
+- Student/Course 删除时，关联 Attendance/Grading/Competition/Camp 级联删除（`onDelete: Cascade`）
+
+### 唯一索引与约束
+
+- `Attendance` 有复合唯一索引：`@@unique([courseId, studentId, attendanceDate])` —— 防止同一学员同一天同一课程重复考勤
 
 ### 枚举定义
 
-- `Gender`: `male` / `female`
-- `Status`（学员）: `active` / `inactive` / `suspended`
-- `CoachStatus`: `active` / `inactive` / `on_leave`
-- `AttendanceStatus`: `present` / `absent` / `late` / `leave` / `unmarked`
-- `BeltLevel`: `white` → `white_yellow` → `yellow` → ... → `black`（共 11 级）
+| 枚举 | 值 |
+|------|-----|
+| `Gender` | `male`, `female` |
+| `Status`（学员/班级） | `active`, `inactive`, `suspended` |
+| `CoachStatus` | `active`, `inactive`, `on_leave` |
+| `AttendanceStatus` | `present`, `absent`, `late`, `leave`, `unmarked` |
+| `BeltLevel` | `white` → `white_yellow` → `yellow` → `yellow_green` → `green` → `green_blue` → `blue` → `blue_red` → `red` → `red_black` → `black`（共 11 级） |
 
 ---
 
@@ -184,6 +191,8 @@ OPENAI_API_KEY=sk-your-openai-api-key-here
 # CUSTOM_OPENAI_BASE_URL=http://localhost:1234/v1
 # CUSTOM_OPENAI_API_KEY=your-custom-key
 ```
+
+客户端可通过 `process.env.APP_NAME` 和 `process.env.APP_VERSION` 访问应用名称和版本（在 `next.config.mjs` 中定义）。
 
 ---
 
@@ -263,12 +272,12 @@ npm run lint
 
 脚本行为：
 1. 启动 `postgres-prod` 容器（端口 5433）
-2. 等待数据库就绪（`pg_isready` 轮询）
+2. 等待数据库就绪（`pg_isready` 轮询，最多 30 秒）
 3. 设置 `DATABASE_URL` 指向生产数据库
 4. 执行 `prisma migrate deploy`
 5. 生成 Prisma Client
 6. `NODE_ENV=production npm run build`
-7. `NODE_ENV=production npx next start`
+7. `NODE_ENV=production npx next start -p $PORT`
 8. **退出时自动停止**生产数据库容器（`trap EXIT/INT/TERM`）
 
 ### 测试命令
@@ -286,10 +295,10 @@ npm run test:ui
 
 测试配置在 `vitest.config.ts` 中：
 - 环境：`jsdom`
-- 全局模式：开启
+- 全局模式：开启（`globals: true`）
 - 并行：`fileParallelism: false`（避免数据库并发冲突）
 - 包含路径：`__tests__/**/*.test.ts` 和 `__tests__/**/*.test.tsx`
-- Setup 文件：`__tests__/setup.ts`（mock `next/navigation`）
+- Setup 文件：`__tests__/setup.ts`（mock `next/navigation`、`next/head`）
 
 ---
 
@@ -297,9 +306,19 @@ npm run test:ui
 
 ### 语言与注释
 
-- 所有代码注释使用**中文**
+- **所有代码注释使用中文**
 - 变量命名：数据库字段使用 camelCase（Prisma Schema 中使用 `@map` 映射到数据库 snake_case）
 - 文件命名：使用 kebab-case（如 `student-form.tsx`）
+
+### Prettier 配置
+
+项目使用 `.prettierrc`：
+- 无分号（`semi: false`）
+- 双引号（`singleQuote: false`）
+- 2 空格缩进
+- ES5 兼容的尾随逗号
+- 打印宽度 80
+- 使用 `prettier-plugin-tailwindcss` 插件，配置 `tailwindStylesheet: "app/globals.css"`
 
 ### Prisma Client 单例模式
 
@@ -328,17 +347,32 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 - **主按钮颜色**：`bg-[#1D1D1F]`（深黑），hover `bg-black/80`
 - **危险操作**：仅破坏性操作使用 `bg-[#D9264A]`（红），如删除确认
 - **次要按钮**：`bg-black/[0.06]` 灰色背景，hover `bg-black/[0.1]`
-- **圆角风格**：大圆角为主，如消息气泡 `rounded-[18px]`、卡片 `rounded-[14px]`
+- **圆角风格**：大圆角为主，如消息气泡 `rounded-[18px]`、卡片 `rounded-[20px]`、内嵌元素 `rounded-[10px]`
 - **阴影层次**：极轻阴影或无边框，使用 `border-0 shadow-none`
-- **输入框样式**：`bg-black/[0.06] rounded-full border-0`，无 focus ring
+- **输入框样式**：`bg-black/[0.06] rounded-[10px] border-0`，无 focus ring（或使用 `focus:ring-2 focus:ring-[#1D1D1F]/10`）
 - **选择高亮**：`selection:bg-[#1D1D1F] selection:text-white`
+- **页面背景**：`bg-[#F5F5F7]`
+- **主文字**：`text-[#1D1D1F]`
+- **次要文字**：`text-[#6E6E73]`
+- **弱化文字**：`text-[#A1A1A6]`
+- **成功色**：`text-[#34C759]`
+- **警告色**：`text-[#FF9500]`
 
 ### API 路由风格
 
 - 列表查询：`GET /api/students?search=xxx&status=xxx&page=1&pageSize=20`
 - 详情/更新/删除：`GET/PUT/DELETE /api/students/[id]`
 - 批量操作：`POST /api/attendance/batch`
-- 使用 Zod 进行请求体验证
+- 使用 Zod 进行请求体验证，schema 定义在文件顶部
+- 分页标准：`skip: (page - 1) * pageSize`，返回 `{ data, total, page, pageSize }`
+- 搜索使用 Prisma `contains` + `mode: "insensitive"`
+- 错误响应：`Response.json({ error: "..." }, { status: XXX })`
+
+### Server Component vs Client Component
+
+- **仪表盘/静态页**：使用 Server Component（如 `app/page.tsx`），直接调用 `prisma` 查询
+- **列表页/交互页**：使用 `"use client"`，配合 `useState` + `useEffect` + `fetch()`
+- **表单页**：通常使用 `"use client"`，调用 `useRouter()` 进行导航
 
 ### 事务处理
 
@@ -399,28 +433,6 @@ const { messages, sendMessage, setMessages, status } = useChat({
 - 服务端必须用 `convertToModelMessages()` 将 `UIMessage[]` 转为模型消息
 - 服务端返回 `result.toUIMessageStreamResponse()` 供前端消费
 
-### 提交前检查流程（强制）
-
-**每次修改代码后，必须按以下顺序执行：**
-
-1. **Lint 检查**：`npm run lint`
-   - 必须 0 errors、0 warnings
-   - 如有 warning，先修复或添加合理的 eslint-disable 注释
-
-2. **运行所有测试**：`npm test`
-   - 所有测试必须通过
-   - 如测试失败，先修复代码或更新测试
-
-3. **用户确认**：**必须经用户确认修改无误后，才能执行后续步骤**
-   - 向用户展示修改摘要（改了哪些文件、核心变更点）
-   - 等待用户明确回复"可以提交"或类似确认
-   - **未经用户确认，不得擅自 commit**
-
-4. **Commit**：`git commit`
-
-5. **推送**：`git push origin main`
-   - 仅在 lint、测试全部通过且用户确认后推送
-
 ---
 
 ## 测试策略
@@ -429,21 +441,35 @@ const { messages, sendMessage, setMessages, status } = useChat({
 
 ### 测试目录结构
 
-- `__tests__/api/` —— API 路由测试（students, coaches, courses, attendance, grading, competition, camp, config）
+- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, grading, competition, camp, config）
 - `__tests__/components/` —— 组件测试（sidebar, student-form）
-- `__tests__/lib/` —— 工具函数测试（prisma 单例, utils）
+- `__tests__/lib/` —— 工具函数测试（prisma 单例, utils, ai-tools）
 - `__tests__/setup.ts` —— 全局 setup，mock `next/navigation` 和 `next/head`
-- `tests/helpers.ts` —— 主要测试辅助函数（API 测试从此文件导入）
-- `__tests__/helpers.ts` —— 备用测试辅助函数（部分函数，与 tests/helpers.ts 有重叠）
+- `tests/helpers.ts` —— **主要**测试辅助函数（API 测试从此文件导入）
+- `__tests__/helpers.ts` —— 备用测试辅助函数（与 tests/helpers.ts 内容重叠）
 
 ### 测试规范
 
 - API 测试使用真实数据库连接，通过 `cleanupTestData()` 在每个测试前清理数据
 - 测试并行已关闭（`fileParallelism: false`），避免数据库冲突
+- 测试数据使用 `[test]` 前缀隔离（如 `[test]学员`、`[test]课程`）
 - 使用 `@faker-js/faker` 生成测试数据（已安装）
 - 组件测试使用 `@testing-library/react`，需在 `__tests__/setup.ts` 中 mock Next.js 路由相关模块
+- AI 工具测试直接调用 `tool.execute(input, mockOptions)`，无需经过 HTTP 层
 
-### 持续集成
+### 测试辅助函数（`tests/helpers.ts`）
+
+| 函数 | 用途 |
+|------|------|
+| `cleanupTestData()` | 删除所有名称以 `[test]` 开头的记录（按依赖顺序：attendance → grading/competition/camp → course → student → coach → class） |
+| `createTestStudent(data?)` | 创建测试学员，名称自动加 `[test]` 前缀 |
+| `createTestCoach(data?)` | 创建测试教练 |
+| `createTestClass(data?)` | 创建测试班级 |
+| `createTestCourse(data?)` | 创建测试课程（如未提供 classId 则自动创建班级） |
+
+---
+
+## 持续集成
 
 GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
 
@@ -476,7 +502,7 @@ FROM node:22-alpine
 RUN apk add --no-cache postgresql-client
 ```
 
-**重要**：`./uploads:/app/public/uploads` 挂载必须配置，否则容器重启后照片数据将丢失。
+**重要**：`./uploads:/app/public/uploads` 挂载必须配置，否则容器重启后照片数据将丢失。项目根目录**没有 Dockerfile**，需自行创建。
 
 ---
 
@@ -488,6 +514,30 @@ RUN apk add --no-cache postgresql-client
 4. **软删除**：学员和教练删除时执行软删除（将状态设为 `inactive`），不实际删除数据库记录
 5. **环境变量隔离**：`.env.local` 不提交到版本控制（已在 `.gitignore` 中）；生产环境 API Key 通过 Vercel Dashboard 管理
 6. **身份证存储**：当前实现中身份证号以明文存储，如需加密请使用 Node.js `crypto` 模块进行对称加密后再存入数据库
+
+---
+
+## 提交前检查流程（强制）
+
+**每次修改代码后，必须按以下顺序执行：**
+
+1. **Lint 检查**：`npm run lint`
+   - 必须 0 errors、0 warnings
+   - 如有 warning，先修复或添加合理的 eslint-disable 注释
+
+2. **运行所有测试**：`npm test`
+   - 所有测试必须通过
+   - 如测试失败，先修复代码或更新测试
+
+3. **用户确认**：**必须经用户确认修改无误后，才能执行后续步骤**
+   - 向用户展示修改摘要（改了哪些文件、核心变更点）
+   - 等待用户明确回复"可以提交"或类似确认
+   - **未经用户确认，不得擅自 commit**
+
+4. **Commit**：`git commit`
+
+5. **推送**：`git push origin main`
+   - 仅在 lint、测试全部通过且用户确认后推送
 
 ---
 

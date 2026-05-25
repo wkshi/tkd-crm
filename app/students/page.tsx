@@ -124,10 +124,10 @@ export default function StudentsPage() {
  </TableCell>
  <TableCell>{student.gender === "male" ? "男" : "女"}</TableCell>
  <TableCell>{student.enrollmentDate ? new Date(student.enrollmentDate).toLocaleDateString("zh-CN") : "-"}</TableCell>
- <TableCell className={student.remainingSessions <= 5 ? "text-[#D9264A] font-bold" : ""}>
+ <TableCell className={student.remainingSessions <= 5 ? "text-[#FF9500] font-bold" : ""}>
  {student.remainingSessions}
  </TableCell>
- <TableCell className={student.expiryDate && new Date(student.expiryDate) < new Date() ? "text-[#D9264A]" : ""}>
+ <TableCell className={student.expiryDate && new Date(student.expiryDate) < new Date() ? "text-[#FF3B30]" : ""}>
  {student.expiryDate ? new Date(student.expiryDate).toLocaleDateString("zh-CN") : "-"}
  </TableCell>
  <TableCell>
@@ -148,7 +148,7 @@ export default function StudentsPage() {
  variant="ghost"
  size="sm"
  onClick={() => handleDelete(student.id)}
- className="text-[#D9264A] hover:text-[#D9264A]"
+ className="text-[#FF3B30] hover:text-[#FF3B30]"
 >
  <Trash2 className="w-4 h-4" />
  </Button>

@@ -131,7 +131,7 @@ export default function BackupPage() {
           className={`flex items-center gap-2 px-4 py-3 rounded-full text-sm backdrop-blur-md ${
             message.type === "success"
               ? "bg-green-500/10 text-green-700"
-              : "bg-red-500/10 text-[#D9264A]"
+              : "bg-red-500/10 text-[#FF3B30]"
           }`}
         >
           {message.type === "success" ? (
@@ -228,7 +228,7 @@ export default function BackupPage() {
                 您即将从备份文件 <Badge variant="outline">{restoreFile?.name}</Badge>{" "}
                 恢复数据。
               </p>
-              <p className="text-[#D9264A] font-medium">
+              <p className="text-[#FF3B30] font-medium">
                 此操作将覆盖当前数据库和照片文件，且无法撤销！
               </p>
               <p className="text-sm text-[#6E6E73]">
@@ -246,7 +246,7 @@ export default function BackupPage() {
             <Button
               onClick={handleConfirmRestore}
               disabled={isRestoring}
-              className="bg-[#D9264A] text-white rounded-full hover:opacity-90"
+              className="bg-[#FF3B30] text-white rounded-full hover:opacity-90"
             >
               {isRestoring ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
