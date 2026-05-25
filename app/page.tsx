@@ -275,8 +275,12 @@ export default async function DashboardPage() {
         <div className="lg:col-span-8">
           <Card className="bg-white rounded-[14px] border-black/[0.06] h-full">
             <CardHeader className="px-5 pt-5 pb-3 flex flex-row items-center justify-between">
-              <Link href="/calendar" className="hover:opacity-80 transition-opacity">
-                <CardTitle className="text-[15px] font-semibold text-[#1D1D1F]">今日课程</CardTitle>
+              <CardTitle className="text-[15px] font-semibold text-[#1D1D1F]">今日课程</CardTitle>
+              <Link
+                href="/calendar"
+                className="text-[13px] font-medium text-[#0071E3] hover:underline"
+              >
+                查看全部
               </Link>
             </CardHeader>
             <CardContent className="px-5 pb-5">
