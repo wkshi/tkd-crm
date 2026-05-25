@@ -173,23 +173,7 @@ export default async function DashboardPage() {
             欢迎回来，今天有 {todayCoursesCount} 节课
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/calendar">
-            <Button
-              variant="outline"
-              className="h-9 px-4 rounded-lg text-[14px] font-medium border-black/[0.08] bg-white hover:bg-black/[0.03]"
-            >
-              <Calendar className="w-4 h-4 mr-1.5" />
-              课表
-            </Button>
-          </Link>
-          <Link href="/attendance">
-            <Button className="h-9 px-4 rounded-lg text-[14px] font-medium bg-[#0071E3] hover:bg-[#0068D1] text-white">
-              <ClipboardCheck className="w-4 h-4 mr-1.5" />
-              开始点名
-            </Button>
-          </Link>
-        </div>
+
       </div>
 
       {/* ==================== 统计卡片 ==================== */}
@@ -291,12 +275,8 @@ export default async function DashboardPage() {
         <div className="lg:col-span-8">
           <Card className="bg-white rounded-[14px] border-black/[0.06] h-full">
             <CardHeader className="px-5 pt-5 pb-3 flex flex-row items-center justify-between">
-              <CardTitle className="text-[15px] font-semibold text-[#1D1D1F]">今日课程</CardTitle>
-              <Link
-                href="/calendar"
-                className="text-[13px] font-medium text-[#0071E3] hover:underline"
-              >
-                查看全部
+              <Link href="/calendar" className="hover:opacity-80 transition-opacity">
+                <CardTitle className="text-[15px] font-semibold text-[#1D1D1F]">今日课程</CardTitle>
               </Link>
             </CardHeader>
             <CardContent className="px-5 pb-5">
