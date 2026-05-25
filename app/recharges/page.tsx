@@ -12,21 +12,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
   Search,
   Users,
   Check,
   Wallet,
   GraduationCap,
-  Pencil,
-  Trash2,
   X,
-  Info,
 } from "lucide-react"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -73,11 +64,6 @@ export default function RechargePage() {
   const [submitting, setSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
   const [activeTab, setActiveTab] = useState<"entry" | "list">("entry")
-
-  // 编辑弹窗状态
-  const [editing, setEditing] = useState<Recharge | null>(null)
-  const [editNotes, setEditNotes] = useState("")
-  const [editSubmitting, setEditSubmitting] = useState(false)
 
   // 充值记录筛选
   const [listSearch, setListSearch] = useState("")
@@ -242,60 +228,6 @@ export default function RechargePage() {
       return matchSearch && matchClass && matchAction
     })
   }, [recharges, listSearch, listClassFilter, actionFilter, studentClassMap])
-
-  // 打开编辑弹窗
-  function openEdit(recharge: Recharge) {
-    setEditing(recharge)
-    setEditNotes(recharge.notes || "")
-  }
-
-  // 保存编辑
-  async function handleEditSave() {
-    if (!editing) return
-
-    setEditSubmitting(true)
-    try {
-      const res = await fetch(`/api/recharges/${editing.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          notes: editNotes.trim() || undefined,
-        }),
-      })
-
-      if (!res.ok) {
-        alert("更新失败")
-        setEditSubmitting(false)
-        return
-      }
-
-      setEditing(null)
-      fetchData()
-    } catch (err) {
-      console.error(err)
-      alert("更新失败")
-    } finally {
-      setEditSubmitting(false)
-    }
-  }
-
-  // 删除充值记录
-  async function handleDelete(id: string, studentName: string) {
-    if (!confirm(`确定删除学员 "${studentName}" 的这条充值记录吗？`))
-      return
-
-    try {
-      const res = await fetch(`/api/recharges/${id}`, { method: "DELETE" })
-      if (!res.ok) {
-        alert("删除失败")
-        return
-      }
-      fetchData()
-    } catch (err) {
-      console.error(err)
-      alert("删除失败")
-    }
-  }
 
   // 行为中文映射
   const actionLabelMap: Record<string, string> = {
@@ -487,14 +419,6 @@ export default function RechargePage() {
                   </h3>
                 </div>
 
-                {/* 提示：单独编辑请切换至充值记录 */}
-                <div className="flex items-start gap-1.5 text-[12px] text-[#A1A1A6]">
-                  <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                  <span>
-                    如需单独编辑某位学员的充值记录，请切换到「充值记录」页面
-                  </span>
-                </div>
-
                 <div className="space-y-2">
                   <label className="text-[14px] font-medium text-[#1D1D1F]">
                     行为 *
@@ -663,9 +587,7 @@ export default function RechargePage() {
                   <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal">
                     备注
                   </TableHead>
-                  <TableHead className="text-right text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal">
-                    操作
-                  </TableHead>
+
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -695,34 +617,12 @@ export default function RechargePage() {
                     <TableCell className="text-[14px] text-[#6E6E73]">
                       {r.notes || "—"}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openEdit(r)}
-                          className="text-[#6E6E73] hover:text-[#1D1D1F]"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            handleDelete(r.id, r.student?.name || "")
-                          }
-                          className="text-[#FF3B30] hover:text-[#FF3B30]"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
                   </TableRow>
                 ))}
                 {filteredRecharges.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={5}
                       className="text-center py-12 text-[#A1A1A6]"
                     >
                       暂无充值记录
@@ -735,82 +635,6 @@ export default function RechargePage() {
         </div>
       )}
 
-      {/* 编辑弹窗 */}
-      <Dialog open={!!editing} onOpenChange={() => setEditing(null)}>
-        <DialogContent className="bg-white rounded-[20px] border-black/[0.06] max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-[17px] font-semibold text-[#1D1D1F]">
-              编辑充值记录
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <label className="text-[14px] font-medium text-[#1D1D1F]">
-                学员
-              </label>
-              <div className="h-10 px-3 flex items-center bg-black/[0.04] rounded-[10px] text-[14px] text-[#6E6E73]">
-                {editing?.student?.name || "—"}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[14px] font-medium text-[#1D1D1F]">
-                行为
-              </label>
-              <div className="h-10 px-3 flex items-center bg-black/[0.04] rounded-[10px] text-[14px] text-[#6E6E73]">
-                {editing ? actionLabelMap[editing.action] || editing.action : "—"}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[14px] font-medium text-[#1D1D1F]">
-                变动次数
-              </label>
-              <div className="h-10 px-3 flex items-center bg-black/[0.04] rounded-[10px] text-[14px] text-[#6E6E73]">
-                {editing?.sessions ?? "—"}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[14px] font-medium text-[#1D1D1F]">
-                有效天数
-              </label>
-              <div className="h-10 px-3 flex items-center bg-black/[0.04] rounded-[10px] text-[14px] text-[#6E6E73]">
-                {editing?.durationDays ?? "—"}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[14px] font-medium text-[#1D1D1F]">
-                备注
-              </label>
-              <Input
-                placeholder="选填"
-                value={editNotes}
-                onChange={(e) => setEditNotes(e.target.value)}
-                className="bg-black/[0.06] border-0 rounded-[10px] h-10 px-3 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
-              />
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setEditing(null)}
-                className="flex-1 h-10 rounded-full border-black/[0.08] text-[#6E6E73] hover:text-[#1D1D1F]"
-              >
-                取消
-              </Button>
-              <Button
-                onClick={handleEditSave}
-                disabled={editSubmitting}
-                className="flex-1 h-10 rounded-full bg-[#1D1D1F] text-white hover:bg-black/80 disabled:opacity-40"
-              >
-                {editSubmitting ? "保存中..." : "保存"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
