@@ -27,7 +27,7 @@ export default function EditStudentPage() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[#1D1D1F]">编辑学员</h2>
-      <StudentForm key={student.id} initialData={student} studentId={student.id} />
+      <StudentForm key={student.id} initialData={student} studentId={student.id} hideSessionFields={true} />
     </div>
   );
 }

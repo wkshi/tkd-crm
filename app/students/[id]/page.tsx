@@ -217,7 +217,7 @@ export default function StudentDetailPage() {
  </div>
  {student.expiryDate && (
  <div>
- <p className="text-lg font-semibold">{new Date(student.expiryDate).toLocaleDateString("zh-CN")}</p>
+ <p className="text-3xl font-bold text-[#1D1D1F]">{new Date(student.expiryDate).toLocaleDateString("zh-CN")}</p>
  <p className="text-sm text-[#6E6E73]">到期时间</p>
  </div>
  )}
