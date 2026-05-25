@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     };
   }
   if (startDate || endDate) {
-    where.attendanceDate = {};
+    where.attendanceDate = {} as Prisma.DateTimeFilter<"Attendance">;
     if (startDate) {
       where.attendanceDate.gte = new Date(startDate);
     }
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     }
   }
   if (year || month) {
-    where.attendanceDate = where.attendanceDate || {};
+    where.attendanceDate = (where.attendanceDate || {}) as Prisma.DateTimeFilter<"Attendance">;
     const y = year ? parseInt(year, 10) : new Date().getFullYear();
     const m = month ? parseInt(month, 10) - 1 : 0;
     if (year && month) {

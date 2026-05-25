@@ -22,17 +22,18 @@
 | **语言** | TypeScript 5.9.3 |
 | **样式** | Tailwind CSS 4.2.1 + shadcn/ui（base-nova 风格） |
 | **UI 底层** | `@base-ui/react`（shadcn/ui 组件基于此构建） |
-| **日历组件** | `@fullcalendar/react` |
+| **日历组件** | `@fullcalendar/react`（daygrid / timegrid / interaction / list） |
 | **数据库** | PostgreSQL 16 |
 | **ORM** | Prisma 6.19.3 |
 | **AI SDK** | Vercel AI SDK 6.0.190 + Provider Registry |
-| **数据表格** | TanStack Table |
-| **图表** | Recharts |
+| **数据表格** | TanStack Table 8.21.3 |
+| **图表** | Recharts 3.8.1 |
 | **图标** | Lucide React |
 | **容器化** | Docker + Docker Compose |
 | **校验** | Zod 4.4.3 |
 | **测试** | Vitest 4.1.7 + jsdom + `@testing-library/react` + `next-test-api-route-handler` |
 | **构建工具** | Turbopack（开发模式） |
+| **其他** | `react-markdown` + `remark-gfm`（AI 消息渲染）、`archiver` + `decompress`（备份 ZIP）、`@faker-js/faker`（测试数据） |
 
 ### 支持的 LLM 提供商
 
@@ -57,7 +58,7 @@ tkd-crm/
 │   ├── layout.tsx                  # 根布局（侧边栏导航 + Header + ThemeProvider）
 │   ├── globals.css                 # Tailwind CSS 入口 + CSS 变量主题
 │   ├── ai/
-│   │   └── page.tsx                # AI 助手对话页面（Client Component）
+│   │   └── page.tsx                # AI 助手对话页面（Client Component，支持语音输入、文本矫正、localStorage 历史持久化）
 │   ├── api/                        # API 路由
 │   │   ├── students/route.ts
 │   │   ├── students/[id]/route.ts
@@ -80,41 +81,50 @@ tkd-crm/
 │   ├── students/                   # 学员列表、新增、详情、编辑页面
 │   ├── coaches/                    # 教练列表、新增、详情、编辑页面
 │   ├── classes/                    # 班级列表、新增、详情、编辑页面
-│   ├── calendar/                   # 课表日历页面（FullCalendar）
+│   ├── calendar/                   # 课表日历页面（FullCalendar 月/周/日 + 自定义周课表视图）
 │   ├── attendance/                 # 考勤查询、点名、学员考勤详情页面
+│   │   ├── page.tsx                # 考勤查询（按学员/班级/年月筛选）
+│   │   ├── rollcall/page.tsx       # 课程点名（?courseId 参数）
+│   │   └── students/[id]/page.tsx  # 学员个人考勤详情
 │   └── backup/                     # 数据备份管理页面
 ├── components/                     # 可复用组件
 │   ├── ui/                         # shadcn/ui 组件（badge, button, card, dialog, input, label, select, table）
 │   ├── layout/                     # sidebar.tsx, header.tsx
-│   ├── students/                   # student-form.tsx
-│   ├── coaches/                    # coach-form.tsx
-│   └── classes/                    # class-form.tsx
+│   ├── students/                   # student-form.tsx（含拍照上传、班级多选）
+│   ├── coaches/                    # coach-form.tsx（基本信息、在职状态切换）
+│   ├── classes/                    # class-form.tsx（基本信息、学员多选）
+│   └── theme-provider.tsx          # next-themes 封装，默认 light，支持 D 键切换 dark/light
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
 │   ├── ai-model.ts                 # AI Provider Registry + getModel()
 │   ├── ai-tools.ts                 # AI 工具函数封装（供 chat route 调用）
 │   └── utils.ts                    # cn() 工具（clsx + tailwind-merge）
 ├── __tests__/                      # 测试文件
-│   ├── api/                        # API 路由测试
-│   ├── components/                 # 组件测试
-│   ├── lib/                        # 工具函数测试
+│   ├── api/                        # API 路由测试（students, coaches, classes, courses, attendance, grading, competition, camp, config）
+│   ├── components/                 # 组件测试（sidebar, student-form）
+│   ├── lib/                        # 工具函数测试（prisma 单例, utils, ai-tools）
 │   ├── helpers.ts                  # 备用测试辅助函数
-│   └── setup.ts                    # Vitest 全局 setup（mock next/navigation）
+│   └── setup.ts                    # Vitest 全局 setup（mock next/navigation、next/head）
 ├── tests/                          # 主要测试辅助函数
 │   └── helpers.ts                  # cleanupTestData, createTestStudent 等（API 测试从此导入）
 ├── prisma/
 │   ├── schema.prisma               # 数据库 Schema
-│   └── migrations/                 # Prisma 迁移文件
+│   └── migrations/                 # 数据库迁移文件（init → add_course_students → add_class_model → remove_course_type → make_course_title_optional）
 ├── public/
 │   └── uploads/                    # 照片本地存储（students/ + coaches/）
 ├── scripts/
 │   └── start-local-prod.sh         # 本地生产环境启动脚本
+├── docs/                           # 开发参考文档
+│   ├── 跆拳道馆CRM系统_PRD.md      # 产品需求文档
+│   ├── 跆拳道馆CRM系统_UI设计文档.md # UI 设计文档
+│   └── 实施计划.md                 # 分阶段实施计划
+├── .github/workflows/ci.yml        # GitHub Actions CI 工作流
 ├── docker-compose.yml              # PostgreSQL 16 + pgAdmin + 本地生产数据库容器配置
 ├── .env                            # 默认环境变量模板
 ├── .env.local                      # 本地环境变量（Git 忽略）
 ├── next.config.mjs
 ├── vitest.config.ts
-├── eslint.config.mjs
+├── eslint.config.mjs               # ESLint v9 flat config
 ├── postcss.config.mjs
 ├── .prettierrc
 └── package.json
@@ -152,6 +162,12 @@ Course  (1) ──────< (N) Attendance
 - Coach 删除时，`Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
 - Class 删除时，关联 Course 级联删除（`onDelete: Cascade`）
 - Student/Course 删除时，关联 Attendance/Grading/Competition/Camp 级联删除（`onDelete: Cascade`）
+
+### 索引设计
+
+- 每个可列表实体均对 `name` 和 `status` 建立索引
+- `Course` 对 `startTime`、`coachId`、`classId` 建立索引
+- `Attendance` 对 `studentId`、`courseId` 建立索引
 
 ### 唯一索引与约束
 
@@ -241,8 +257,11 @@ npx prisma migrate dev --name init
 # 生成 Prisma Client 类型
 npx prisma generate
 
-# 启动开发服务器（Turbopack）
+# 启动开发服务器（Turbopack，前台运行）
 npm run dev
+
+# 启动开发服务器（守护进程模式，自动重启 + 心跳保活）
+npm run dev:daemon
 
 # 构建生产版本
 npm run build
@@ -319,6 +338,13 @@ npm run test:ui
 - ES5 兼容的尾随逗号
 - 打印宽度 80
 - 使用 `prettier-plugin-tailwindcss` 插件，配置 `tailwindStylesheet: "app/globals.css"`
+- 识别 `cn()` 和 `cva()` 作为 Tailwind 类函数
+
+### ESLint 配置
+
+使用 ESLint v9 flat config（`eslint.config.mjs`）：
+- 继承 `eslint-config-next/core-web-vitals` 和 `eslint-config-next/typescript`
+- 忽略 `.next/`、`out/`、`build/`、`next-env.d.ts`
 
 ### Prisma Client 单例模式
 
@@ -549,5 +575,6 @@ RUN apk add --no-cache postgresql-client
 |------|------|------|
 | **产品需求文档（PRD）** | `docs/跆拳道馆CRM系统_PRD.md` | 功能需求、数据库设计、API 设计、AI Agent 架构、核心代码示例、安装部署指南 |
 | **UI 设计文档** | `docs/跆拳道馆CRM系统_UI设计文档.md` | 设计系统（色彩/字体/间距/圆角/材质深度）、全局布局、各页面详细 UI 设计、组件规范、交互设计、响应式适配、图标系统 |
+| **实施计划** | `docs/实施计划.md` | 分阶段实施计划、测试策略、风险分析 |
 
 两份文档使用**中文**编写，是本项目开发的核心依据。
