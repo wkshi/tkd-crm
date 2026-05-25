@@ -12,6 +12,10 @@ const pageTitleMap: Record<string, string> = {
   "/classes/new": "新增班级",
   "/calendar": "课表日历",
   "/attendance": "考勤查询",
+  "/grading": "考级管理",
+  "/competition": "比赛管理",
+  "/camp": "集训管理",
+  "/recharges": "充值管理",
   "/backup": "数据备份",
   "/ai": "AI 助手",
 };
