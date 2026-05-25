@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Search, Bell } from "lucide-react";
 
 const pageTitleMap: Record<string, string> = {
   "/": "仪表盘",
@@ -38,23 +37,9 @@ export function Header() {
   const title = getPageTitle(pathname);
 
   return (
-    <header className="h-[52px] border-b border-black/[0.06] backdrop-blur-xl bg-white/78 flex items-center justify-between px-7 sticky top-0 z-30">
-      {/* 左侧：当前页面标题 */}
+    <header className="h-[52px] border-b border-black/[0.06] backdrop-blur-xl bg-white/78 flex items-center px-7 sticky top-0 z-30">
+      {/* 当前页面标题 */}
       <h1 className="text-[17px] font-semibold text-[#1D1D1F]">{title}</h1>
-
-      {/* 右侧操作区 */}
-      <div className="flex items-center gap-2">
-        <button className="w-9 h-9 rounded-[10px] flex items-center justify-center text-[#1D1D1F]/60 hover:text-[#1D1D1F] hover:bg-black/[0.04] transition-all">
-          <Search className="w-5 h-5" />
-        </button>
-        <button className="w-9 h-9 rounded-[10px] flex items-center justify-center text-[#1D1D1F]/60 hover:text-[#1D1D1F] hover:bg-black/[0.04] transition-all relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF3B30] rounded-full" />
-        </button>
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0071E3] to-[#5856D6] flex items-center justify-center text-white text-[12px] font-bold ml-1 cursor-pointer">
-          张
-        </div>
-      </div>
     </header>
   );
 }

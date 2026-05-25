@@ -384,11 +384,8 @@ export default async function DashboardPage() {
 
       {/* ==================== 最近动态 ==================== */}
       <Card className="bg-white rounded-[14px] border-black/[0.06]">
-        <CardHeader className="px-5 pt-5 pb-3 flex flex-row items-center justify-between">
+        <CardHeader className="px-5 pt-5 pb-3">
           <CardTitle className="text-[15px] font-semibold text-[#1D1D1F]">最近动态</CardTitle>
-          <button className="text-[13px] font-medium text-[#0071E3] hover:underline bg-transparent border-none cursor-pointer">
-            更多
-          </button>
         </CardHeader>
         <CardContent className="px-5 pb-5">
           {activities.length === 0 ? (
