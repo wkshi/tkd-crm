@@ -137,7 +137,6 @@
 │   ├── students/                     # 学员照片
 │   └── coaches/                      # 教练照片
 ├── scripts/
-│   ├── dev-server.js                 # 开发服务器守护进程
 │   └── start-local-prod.sh           # 本地生产环境启动脚本
 ├── .github/workflows/ci.yml          # GitHub Actions CI
 ├── docker-compose.yml                # PostgreSQL + pgAdmin 容器配置
@@ -212,9 +211,6 @@ npx prisma generate
 ```bash
 # 前台运行（Turbopack）
 npm run dev
-
-# 或守护进程模式（自动重启 + 心跳保活 + Turbopack 崩溃回退）
-npm run dev:daemon
 ```
 
 访问 `http://localhost:3000` 即可使用系统。

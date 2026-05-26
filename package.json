@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:daemon": "node scripts/dev-server.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

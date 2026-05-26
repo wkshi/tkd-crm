@@ -125,7 +125,6 @@ tkd-crm/
 ├── public/
 │   └── uploads/                    # 照片本地存储（students/ + coaches/）
 ├── scripts/
-│   ├── dev-server.js               # 开发服务器守护进程（自动重启、健康检查、Turbopack 崩溃回退）
 │   └── start-local-prod.sh         # 本地生产环境启动脚本
 ├── docs/                           # 开发参考文档
 │   ├── 跆拳道馆CRM系统_PRD.md      # 产品需求文档
@@ -277,9 +276,6 @@ npx prisma generate
 
 # 启动开发服务器（Turbopack，前台运行）
 npm run dev
-
-# 启动开发服务器（守护进程模式，自动重启 + 心跳保活 + Turbopack 崩溃回退）
-npm run dev:daemon
 
 # 构建生产版本
 npm run build
