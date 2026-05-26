@@ -51,6 +51,7 @@ interface Course {
   description: string | null;
   coach?: { name: string } | null;
   class?: { name: string } | null;
+  hasAttendanceChecked?: boolean;
 }
 
 // 预定义颜色池，相同（班级+教练）组合始终使用同一种颜色
@@ -130,7 +131,9 @@ export default function CalendarPage() {
   }
 
   async function fetchCourses() {
-    const res = await fetch("/api/courses?pageSize=9999");
+    const res = await fetch(
+      "/api/courses?pageSize=9999&includeAttendanceStatus=true"
+    );
     const data = await res.json();
     setCourses((data.courses || []) as Course[]);
   }
@@ -141,16 +144,38 @@ export default function CalendarPage() {
     setCoaches(data.coaches || []);
   }
 
-  // 根据筛选条件生成日历事件
+  // 根据筛选条件生成日历事件，根据点名状态调整样式
   const events = courses.map((course) => {
-    const color = getCourseColor(course.class?.name || "", course.coach?.name);
+    const baseColor = getCourseColor(
+      course.class?.name || "",
+      course.coach?.name
+    );
+    const isPast = new Date(course.endTime) < new Date();
+    const hasChecked = course.hasAttendanceChecked;
+
+    let bgColor = baseColor;
+    let borderColor = baseColor;
+    let textColor = "#fff";
+    let suffix = "";
+
+    if (isPast && !hasChecked) {
+      bgColor = "#d1d5db";
+      borderColor = "#9ca3af";
+      textColor = "#6b7280";
+      suffix = " ⚠️ 未点名";
+    } else if (hasChecked) {
+      borderColor = "#34C759";
+      suffix = " ✅";
+    }
+
     return {
       id: course.id,
-      title: `${course.class?.name || "未命名课程"}${course.coach?.name ? " · " + course.coach.name : ""}`,
+      title: `${course.class?.name || "未命名课程"}${course.coach?.name ? " · " + course.coach.name : ""}${suffix}`,
       start: course.startTime,
       end: course.endTime,
-      backgroundColor: color,
-      borderColor: color,
+      backgroundColor: bgColor,
+      borderColor: borderColor,
+      textColor: textColor,
       extendedProps: { course },
     };
   });
@@ -797,26 +822,53 @@ function WeeklySchedule({
               {byDay.map((dayCourses, i) => (
                 <td key={i} className="p-1 align-top">
                   {dayCourses.map((c) => {
-                    const color = getCourseColor(
+                    const baseColor = getCourseColor(
                       c.class?.name || "",
                       c.coach?.name
                     );
+                    const isPast = new Date(c.endTime) < new Date();
+                    const hasChecked = c.hasAttendanceChecked;
+
+                    let bgColor = baseColor;
+                    let hoverBgColor = baseColor;
+                    let textColor = "#fff";
+                    let suffix = "";
+
+                    if (isPast && !hasChecked) {
+                      bgColor = "#d1d5db";
+                      hoverBgColor = "#c4c8ce";
+                      textColor = "#6b7280";
+                      suffix = " ⚠️ 未点名";
+                    } else if (hasChecked) {
+                      suffix = " ✅";
+                    }
+
                     return (
                       <button
                         key={c.id}
                         onClick={() => onCourseClick(c)}
                         className="w-full text-left mb-1 p-1.5 rounded-lg transition-colors cursor-pointer"
-                        style={{ backgroundColor: color + "1A" }}
+                        style={{
+                          backgroundColor: bgColor,
+                          borderLeft: hasChecked
+                            ? "3px solid #34C759"
+                            : isPast && !hasChecked
+                              ? "3px solid #9ca3af"
+                              : undefined,
+                        }}
                         onMouseEnter={(e) => {
                           (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                            color + "33";
+                            hoverBgColor;
                         }}
                         onMouseLeave={(e) => {
                           (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                            color + "1A";
+                            bgColor;
                         }}
                       >
-                        <div className="text-xs font-medium text-[#1D1D1F]">
+                        <div
+                          className="text-xs font-medium"
+                          style={{ color: textColor }}
+                        >
                           {new Date(c.startTime).toLocaleTimeString("zh-CN", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -827,6 +879,7 @@ function WeeklySchedule({
                             minute: "2-digit",
                           })}
                           {c.coach?.name && ` · ${c.coach.name}`}
+                          {suffix}
                         </div>
                         {c.location && (
                           <div className="text-[10px] text-[#6E6E73] mt-0.5 flex items-center gap-0.5">
