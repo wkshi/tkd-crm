@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { beltLevelMap } from "@/lib/belt-level";
 
 export interface ClassFormData {
   name: string;
@@ -109,12 +110,18 @@ export function ClassForm({ initialData, classId }: ClassFormProps) {
           </div>
           <div className="space-y-2">
             <Label>级别/段位</Label>
-            <Input
+            <select
               value={form.level}
               onChange={(e) => setForm({ ...form, level: e.target.value })}
-              placeholder="如：白带、黄带"
-              className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
-            />
+              className="w-full h-10 px-3 bg-black/[0.06] border-0 rounded-[10px] text-sm text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none appearance-none cursor-pointer"
+            >
+              <option value="">请选择级别</option>
+              {Object.entries(beltLevelMap).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-2">
             <Label>人数上限</Label>
