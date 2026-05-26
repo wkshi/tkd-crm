@@ -49,6 +49,8 @@ export default function CoachesPage() {
   const [selectedCoachIds, setSelectedCoachIds] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedMonthNums, setSelectedMonthNums] = useState<number[]>([]);
+  // 课时统计月份列的自定义排序
+  const [monthOrder, setMonthOrder] = useState<string[]>([]);
 
   const pageSize = 20;
 
@@ -135,7 +137,7 @@ export default function CoachesPage() {
         if (!m) return 0;
         return Number(m[1]) * 12 + Number(m[2]);
       };
-      return parse(b) - parse(a); // 倒序，最近月份在前
+      return parse(a) - parse(b); // 正序，从小到大
     });
 
     // 月份筛选（按月份数字）
@@ -201,6 +203,14 @@ export default function CoachesPage() {
 
     return { months, coachStats, monthlyTotals };
   }, [coaches, courses, selectedCoachIds, selectedYear, selectedMonthNums]);
+
+  // 最终月份列顺序：优先使用用户拖动顺序，新月份自动追加到末尾
+  const orderedMonths = useMemo(() => {
+    const currentSet = new Set(statsData.months);
+    const preserved = monthOrder.filter((m) => currentSet.has(m));
+    const added = statsData.months.filter((m) => !monthOrder.includes(m));
+    return [...preserved, ...added];
+  }, [monthOrder, statsData.months]);
 
   return (
     <div className="space-y-6">
@@ -490,7 +500,7 @@ export default function CoachesPage() {
           </div>
 
           <div className="bg-white rounded-[20px] overflow-hidden">
-            {statsData.months.length === 0 ? (
+            {orderedMonths.length === 0 ? (
               <div className="text-center py-12 text-[#A1A1A6]">
                 暂无课程数据
               </div>
@@ -502,10 +512,29 @@ export default function CoachesPage() {
                     <TableHead className="sticky left-0 bg-white text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal min-w-[100px]">
                       教练姓名
                     </TableHead>
-                    {statsData.months.map((m) => (
+                    {orderedMonths.map((m) => (
                       <TableHead
                         key={m}
-                        className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal text-center min-w-[80px]"
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("month", m);
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const draggedMonth = e.dataTransfer.getData("month");
+                          if (!draggedMonth || draggedMonth === m) return;
+                          setMonthOrder((prev) => {
+                            const fromIndex = prev.indexOf(draggedMonth);
+                            const toIndex = prev.indexOf(m);
+                            if (fromIndex === -1 || toIndex === -1) return prev;
+                            const next = [...prev];
+                            next.splice(fromIndex, 1);
+                            next.splice(toIndex, 0, draggedMonth);
+                            return next;
+                          });
+                        }}
+                        className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal text-center min-w-[80px] cursor-move select-none"
                       >
                         {m}
                       </TableHead>
@@ -524,7 +553,7 @@ export default function CoachesPage() {
                       <TableCell className="sticky left-0 bg-white font-medium text-[#1D1D1F]">
                         {s.coach.name}
                       </TableCell>
-                      {statsData.months.map((m) => (
+                      {orderedMonths.map((m) => (
                         <TableCell
                           key={m}
                           className="text-[14px] text-[#1D1D1F] text-center"
@@ -568,7 +597,7 @@ export default function CoachesPage() {
                     <TableCell className="sticky left-0 bg-black/[0.02] font-semibold text-[#1D1D1F]">
                       合计
                     </TableCell>
-                    {statsData.months.map((m) => (
+                    {orderedMonths.map((m) => (
                       <TableCell
                         key={m}
                         className="text-[14px] font-semibold text-[#1D1D1F] text-center"
