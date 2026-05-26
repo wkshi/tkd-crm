@@ -573,6 +573,68 @@ export const deleteClass = tool({
   },
 });
 
+// ==================== 学员班级关联工具 ====================
+
+export const addStudentsToClass = tool({
+  description: "将学员添加到指定班级",
+  inputSchema: zodSchema(
+    z.object({
+      classId: z.string().describe("班级 ID"),
+      studentIds: z
+        .array(z.string())
+        .describe("要添加的学员 ID 列表"),
+    })
+  ),
+  execute: async ({ classId, studentIds }) => {
+    const cls = await prisma.class.findUnique({
+      where: { id: classId },
+      select: { id: true, name: true },
+    });
+    if (!cls) return { error: "班级不存在" };
+
+    await prisma.class.update({
+      where: { id: classId },
+      data: {
+        students: { connect: studentIds.map((id) => ({ id })) },
+      },
+    });
+    return {
+      success: true,
+      message: `已将 ${studentIds.length} 名学员添加到班级「${cls.name}」`,
+    };
+  },
+});
+
+export const removeStudentsFromClass = tool({
+  description: "将学员从指定班级移除",
+  inputSchema: zodSchema(
+    z.object({
+      classId: z.string().describe("班级 ID"),
+      studentIds: z
+        .array(z.string())
+        .describe("要移除的学员 ID 列表"),
+    })
+  ),
+  execute: async ({ classId, studentIds }) => {
+    const cls = await prisma.class.findUnique({
+      where: { id: classId },
+      select: { id: true, name: true },
+    });
+    if (!cls) return { error: "班级不存在" };
+
+    await prisma.class.update({
+      where: { id: classId },
+      data: {
+        students: { disconnect: studentIds.map((id) => ({ id })) },
+      },
+    });
+    return {
+      success: true,
+      message: `已将 ${studentIds.length} 名学员从班级「${cls.name}」移除`,
+    };
+  },
+});
+
 // ==================== 充值管理工具 ====================
 
 export const createRecharge = tool({
