@@ -562,21 +562,32 @@ RUN apk add --no-cache postgresql-client
 
 ## 提交前检查流程（强制）
 
-**每次修改代码后，必须按以下顺序执行：**
+**每次修改代码后，必须按以下顺序执行（与 CI 保持一致）：**
 
-1. **Lint 检查**：`npm run lint`
-   - 必须 0 errors、0 warnings
-   - 如有 warning，先修复或添加合理的 eslint-disable 注释
+1. **生成 Prisma Client**：`npx prisma generate`
+   - 确保 Prisma Client 类型与 Schema 同步
 
-2. **运行所有测试**：`npm test`
+2. **数据库迁移**：`npx prisma migrate deploy`
+   - 确保数据库 Schema 为最新
+   - 本地开发使用 `.env.local` 中的 `DATABASE_URL`
+
+3. **运行所有测试**：`npm test`
    - 所有测试必须通过
    - 如测试失败，先修复代码或更新测试
 
-3. **生产构建检查**：`npm run build`
+4. **类型检查**：`npm run typecheck`
+   - 必须 0 errors
+   - 如有类型错误，先修复
+
+5. **Lint 检查**：`npm run lint`
+   - 必须 0 errors、0 warnings
+   - 如有 warning，先修复或添加合理的 eslint-disable 注释
+
+6. **生产构建检查**：`npm run build`
    - 必须构建成功，0 errors
    - 如构建失败（例如 `useSearchParams` 未包裹 `Suspense`），先修复
 
-4. **用户确认**：**必须经用户确认修改无误后，才能执行后续步骤**
+7. **用户确认**：**必须经用户确认修改无误后，才能执行后续步骤**
    - 向用户展示修改摘要（改了哪些文件、核心变更点）
    - 等待用户明确回复"可以提交"或类似确认
    - **未经用户确认，不得擅自 commit**

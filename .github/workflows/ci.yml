@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://taekwondo:taekwondo123@localhost:5432/taekwondo_crm
 
     services:
       postgres:
@@ -41,13 +43,9 @@ jobs:
         run: npx prisma generate
 
       - name: Run database migrations
-        env:
-          DATABASE_URL: postgresql://taekwondo:taekwondo123@localhost:5432/taekwondo_crm
         run: npx prisma migrate deploy
 
       - name: Run tests
-        env:
-          DATABASE_URL: postgresql://taekwondo:taekwondo123@localhost:5432/taekwondo_crm
         run: npm test
 
       - name: Type check
