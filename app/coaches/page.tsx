@@ -32,6 +32,7 @@ interface Course {
   coachId: string | null;
   startTime: string;
   title: string | null;
+  hasAttendanceChecked?: boolean;
 }
 
 export default function CoachesPage() {
@@ -43,6 +44,11 @@ export default function CoachesPage() {
   const [activeTab, setActiveTab] = useState<"list" | "stats">("list");
   const [courses, setCourses] = useState<Course[]>([]);
   const router = useRouter();
+
+  // 课时统计筛选状态
+  const [selectedCoachIds, setSelectedCoachIds] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedMonthNums, setSelectedMonthNums] = useState<number[]>([]);
 
   const pageSize = 20;
 
@@ -62,10 +68,24 @@ export default function CoachesPage() {
 
   // 加载课程列表（用于课时统计）
   const fetchCourses = useCallback(async () => {
-    const res = await fetch("/api/courses?pageSize=9999");
+    const res = await fetch(
+      "/api/courses?pageSize=9999&includeAttendanceStatus=true"
+    );
     const data = await res.json();
     setCourses(data.courses || []);
   }, []);
+
+  // 提取所有有课程的年份（用于年份筛选）
+  const allYears = useMemo(() => {
+    const yearSet = new Set<number>();
+    courses.forEach((c) => {
+      const d = new Date(c.startTime);
+      if (!isNaN(d.getTime()) && c.coachId) {
+        yearSet.add(d.getFullYear());
+      }
+    });
+    return Array.from(yearSet).sort((a, b) => b - a);
+  }, [courses]);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -88,10 +108,18 @@ export default function CoachesPage() {
     inactive: { label: "已离职", className: "bg-[#8E8E93]/10 text-[#8E8E93]" },
   };
 
-  // 课时统计：按教练+月份聚合计数
+  // 课时统计：按教练+月份聚合计数，区分已完成点名和未完成点名
+  // 支持按教练、年份、月份筛选
   const statsData = useMemo(() => {
     // 只统计有教练的课程
-    const validCourses = courses.filter((c) => c.coachId);
+    let validCourses = courses.filter((c) => c.coachId);
+
+    // 年份筛选
+    if (selectedYear) {
+      validCourses = validCourses.filter(
+        (c) => new Date(c.startTime).getFullYear() === selectedYear
+      );
+    }
 
     // 提取所有有课程的月份，格式："2025年5月"
     const monthSet = new Set<string>();
@@ -101,7 +129,7 @@ export default function CoachesPage() {
         monthSet.add(`${d.getFullYear()}年${d.getMonth() + 1}月`);
       }
     });
-    const months = Array.from(monthSet).sort((a, b) => {
+    let months = Array.from(monthSet).sort((a, b) => {
       const parse = (s: string) => {
         const m = s.match(/(\d+)年(\d+)月/);
         if (!m) return 0;
@@ -110,11 +138,29 @@ export default function CoachesPage() {
       return parse(b) - parse(a); // 倒序，最近月份在前
     });
 
-    // 按教练统计每月课时
-    const coachStats = coaches.map((coach) => {
-      const monthly: Record<string, number> = {};
+    // 月份筛选（按月份数字）
+    if (selectedMonthNums.length > 0) {
+      months = months.filter((m) => {
+        const match = m.match(/(\d+)年(\d+)月/);
+        if (!match) return false;
+        return selectedMonthNums.includes(Number(match[2]));
+      });
+    }
+
+    // 教练筛选
+    let displayCoaches = coaches;
+    if (selectedCoachIds.length > 0) {
+      displayCoaches = coaches.filter((c) =>
+        selectedCoachIds.includes(c.id)
+      );
+    }
+
+    // 按教练统计每月课时（区分已点名 / 未点名）
+    const coachStats = displayCoaches.map((coach) => {
+      const monthly: Record<string, { checked: number; unchecked: number }> =
+        {};
       months.forEach((m) => {
-        monthly[m] = 0;
+        monthly[m] = { checked: 0, unchecked: 0 };
       });
       validCourses
         .filter((c) => c.coachId === coach.id)
@@ -122,21 +168,39 @@ export default function CoachesPage() {
           const d = new Date(c.startTime);
           const key = `${d.getFullYear()}年${d.getMonth() + 1}月`;
           if (monthly[key] !== undefined) {
-            monthly[key] += 1;
+            if (c.hasAttendanceChecked) {
+              monthly[key].checked += 1;
+            } else {
+              monthly[key].unchecked += 1;
+            }
           }
         });
-      const total = Object.values(monthly).reduce((sum, n) => sum + n, 0);
-      return { coach, monthly, total };
+      const totalChecked = Object.values(monthly).reduce(
+        (sum, n) => sum + n.checked,
+        0
+      );
+      const totalUnchecked = Object.values(monthly).reduce(
+        (sum, n) => sum + n.unchecked,
+        0
+      );
+      return { coach, monthly, totalChecked, totalUnchecked };
     });
 
     // 每月合计
-    const monthlyTotals: Record<string, number> = {};
+    const monthlyTotals: Record<string, { checked: number; unchecked: number }> =
+      {};
     months.forEach((m) => {
-      monthlyTotals[m] = coachStats.reduce((sum, s) => sum + s.monthly[m], 0);
+      monthlyTotals[m] = {
+        checked: coachStats.reduce((sum, s) => sum + s.monthly[m].checked, 0),
+        unchecked: coachStats.reduce(
+          (sum, s) => sum + s.monthly[m].unchecked,
+          0
+        ),
+      };
     });
 
     return { months, coachStats, monthlyTotals };
-  }, [coaches, courses]);
+  }, [coaches, courses, selectedCoachIds, selectedYear, selectedMonthNums]);
 
   return (
     <div className="space-y-6">
@@ -323,13 +387,115 @@ export default function CoachesPage() {
       )}
 
       {activeTab === "stats" && (
-        <div className="bg-white rounded-[20px] overflow-hidden">
-          {statsData.months.length === 0 ? (
-            <div className="text-center py-12 text-[#A1A1A6]">
-              暂无课程数据
+        <div className="space-y-4">
+          {/* 筛选栏 */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 p-4 bg-white rounded-[20px]">
+            {/* 教练筛选 */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[14px] text-[#6E6E73] shrink-0">
+                教练：
+              </span>
+              <div className="flex flex-wrap gap-1">
+                <button
+                  onClick={() => setSelectedCoachIds([])}
+                  className={`px-3 py-1 rounded-[8px] text-[13px] transition-all ${
+                    selectedCoachIds.length === 0
+                      ? "bg-[#1D1D1F] text-white"
+                      : "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
+                  }`}
+                >
+                  全部
+                </button>
+                {coaches.map((coach) => (
+                  <button
+                    key={coach.id}
+                    onClick={() => {
+                      setSelectedCoachIds((prev) =>
+                        prev.includes(coach.id)
+                          ? prev.filter((id) => id !== coach.id)
+                          : [...prev, coach.id]
+                      );
+                    }}
+                    className={`px-3 py-1 rounded-[8px] text-[13px] transition-all ${
+                      selectedCoachIds.includes(coach.id)
+                        ? "bg-[#1D1D1F] text-white"
+                        : "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
+                    }`}
+                  >
+                    {coach.name}
+                  </button>
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
+
+            {/* 年份筛选 */}
+            <div className="flex items-center gap-2">
+              <span className="text-[14px] text-[#6E6E73] shrink-0">
+                年份：
+              </span>
+              <select
+                value={selectedYear ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedYear(val ? Number(val) : null);
+                }}
+                className="bg-black/[0.06] border-0 rounded-[10px] px-3 py-1.5 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white focus:outline-none"
+              >
+                <option value="">全部</option>
+                {allYears.map((y) => (
+                  <option key={y} value={y}>
+                    {y}年
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 月份筛选 */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[14px] text-[#6E6E73] shrink-0">
+                月份：
+              </span>
+              <div className="flex flex-wrap gap-1">
+                <button
+                  onClick={() => setSelectedMonthNums([])}
+                  className={`px-2.5 py-1 rounded-[8px] text-[13px] transition-all ${
+                    selectedMonthNums.length === 0
+                      ? "bg-[#1D1D1F] text-white"
+                      : "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
+                  }`}
+                >
+                  全部
+                </button>
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => {
+                      setSelectedMonthNums((prev) =>
+                        prev.includes(m)
+                          ? prev.filter((n) => n !== m)
+                          : [...prev, m]
+                      );
+                    }}
+                    className={`px-2.5 py-1 rounded-[8px] text-[13px] transition-all ${
+                      selectedMonthNums.includes(m)
+                        ? "bg-[#1D1D1F] text-white"
+                        : "bg-black/[0.06] text-[#1D1D1F] hover:bg-black/[0.1]"
+                    }`}
+                  >
+                    {m}月
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-[20px] overflow-hidden">
+            {statsData.months.length === 0 ? (
+              <div className="text-center py-12 text-[#A1A1A6]">
+                暂无课程数据
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-black/[0.04]">
@@ -363,11 +529,37 @@ export default function CoachesPage() {
                           key={m}
                           className="text-[14px] text-[#1D1D1F] text-center"
                         >
-                          {s.monthly[m] > 0 ? s.monthly[m] : "—"}
+                          {(() => {
+                            const { checked, unchecked } = s.monthly[m];
+                            if (checked === 0 && unchecked === 0) return "—";
+                            return (
+                              <div className="flex flex-col items-center gap-0.5">
+                                <span>{checked}</span>
+                                {unchecked > 0 && (
+                                  <span className="text-[11px] text-[#A1A1A6]">
+                                    {unchecked} 未点名
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </TableCell>
                       ))}
                       <TableCell className="text-[14px] font-semibold text-[#1D1D1F] text-center">
-                        {s.total}
+                        {(() => {
+                          if (s.totalChecked === 0 && s.totalUnchecked === 0)
+                            return "—";
+                          return (
+                            <div className="flex flex-col items-center gap-0.5">
+                              <span>{s.totalChecked}</span>
+                              {s.totalUnchecked > 0 && (
+                                <span className="text-[11px] text-[#A1A1A6]">
+                                  {s.totalUnchecked} 未点名
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -381,14 +573,44 @@ export default function CoachesPage() {
                         key={m}
                         className="text-[14px] font-semibold text-[#1D1D1F] text-center"
                       >
-                        {statsData.monthlyTotals[m]}
+                        {(() => {
+                          const { checked, unchecked } =
+                            statsData.monthlyTotals[m];
+                          if (checked === 0 && unchecked === 0) return "—";
+                          return (
+                            <div className="flex flex-col items-center gap-0.5">
+                              <span>{checked}</span>
+                              {unchecked > 0 && (
+                                <span className="text-[11px] text-[#A1A1A6]">
+                                  {unchecked} 未点名
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                     ))}
                     <TableCell className="text-[14px] font-semibold text-[#1D1D1F] text-center">
-                      {Object.values(statsData.monthlyTotals).reduce(
-                        (sum, n) => sum + n,
-                        0
-                      )}
+                      {(() => {
+                        const totalChecked = Object.values(
+                          statsData.monthlyTotals
+                        ).reduce((sum, n) => sum + n.checked, 0);
+                        const totalUnchecked = Object.values(
+                          statsData.monthlyTotals
+                        ).reduce((sum, n) => sum + n.unchecked, 0);
+                        if (totalChecked === 0 && totalUnchecked === 0)
+                          return "—";
+                        return (
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span>{totalChecked}</span>
+                            {totalUnchecked > 0 && (
+                              <span className="text-[11px] text-[#A1A1A6]">
+                                {totalUnchecked} 未点名
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -396,6 +618,7 @@ export default function CoachesPage() {
             </div>
           )}
         </div>
+      </div>
       )}
     </div>
   );

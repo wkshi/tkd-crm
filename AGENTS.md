@@ -1,3 +1,4 @@
+<!-- From: /Users/wkshi/git/github/wkshi/tkd-crm/AGENTS.md -->
 # 跆拳道馆 CRM 系统 —— AI 代理指南
 
 > 本文档供 AI 编码代理阅读。如果你正在阅读此文件，说明你对本项目一无所知——本文档将告诉你需要了解的一切。
@@ -10,7 +11,7 @@
 
 **当前状态**：项目已完成核心功能编码，包括数据库 Schema、REST API、前端页面、AI 对话流、照片上传、数据备份与恢复，以及完整的测试基础设施。`docs/` 目录下保留有产品需求文档（PRD）和 UI 设计文档作为参考。
 
-> **注意**：仪表盘首页（`/`）的快捷入口包含"/grading"（考级录入）和"/competition"（比赛录入）链接，但对应的前端页面尚未创建，目前仅有 API 路由（`/api/grading`、`/api/competition`、`/api/camp`）可用。
+前端页面已完整实现：学员管理、教练管理、班级管理、课表日历、考勤查询与点名、充值管理、考级记录、比赛记录、集训记录、AI 助手对话、数据备份管理。
 
 ---
 
@@ -56,7 +57,7 @@ tkd-crm/
 ├── app/                            # Next.js App Router
 │   ├── page.tsx                    # 仪表盘首页（Server Component，直接查 Prisma）
 │   ├── layout.tsx                  # 根布局（侧边栏导航 + Header + ThemeProvider）
-│   ├── globals.css                 # Tailwind CSS 入口 + CSS 变量主题
+│   ├── globals.css                 # Tailwind CSS 入口 + CSS 变量主题 + FullCalendar 覆盖
 │   ├── ai/
 │   │   └── page.tsx                # AI 助手对话页面（Client Component，支持语音输入、文本矫正、localStorage 历史持久化）
 │   ├── api/                        # API 路由
@@ -70,14 +71,22 @@ tkd-crm/
 │   │   ├── courses/[id]/route.ts
 │   │   ├── attendance/route.ts
 │   │   ├── attendance/batch/route.ts   # 批量点名（事务扣减课时）
+│   │   ├── recharges/route.ts          # 充值记录列表与创建
+│   │   ├── recharges/[id]/route.ts     # 充值记录详情与删除
 │   │   ├── grading/route.ts
+│   │   ├── grading/[id]/route.ts
+│   │   ├── grading/batch/route.ts      # 批量创建考级记录
 │   │   ├── competition/route.ts
+│   │   ├── competition/[id]/route.ts
+│   │   ├── competition/batch/route.ts  # 批量创建比赛记录
 │   │   ├── camp/route.ts
-│   │   ├── chat/route.ts           # AI 对话流式接口
-│   │   ├── correct/route.ts        # 语音输入文本矫正
-│   │   ├── config/route.ts         # 返回客户端可用的系统配置（当前模型名）
-│   │   ├── upload/route.ts         # 照片上传/删除
-│   │   └── backup/route.ts         # 数据备份/恢复（ZIP + pg_dump/psql）
+│   │   ├── camp/[id]/route.ts
+│   │   ├── camp/batch/route.ts         # 批量创建集训记录
+│   │   ├── chat/route.ts               # AI 对话流式接口
+│   │   ├── correct/route.ts            # 语音输入文本矫正
+│   │   ├── config/route.ts             # 返回客户端可用的系统配置（当前模型名）
+│   │   ├── upload/route.ts             # 照片上传/删除
+│   │   └── backup/route.ts             # 数据备份/恢复（ZIP + pg_dump/psql）
 │   ├── students/                   # 学员列表、新增、详情、编辑页面
 │   ├── coaches/                    # 教练管理（双Tab：教练列表 + 课时统计）、新增、详情、编辑页面
 │   ├── classes/                    # 班级列表、新增、详情、编辑页面
@@ -86,22 +95,26 @@ tkd-crm/
 │   │   ├── page.tsx                # 考勤查询（按学员/班级/年月筛选）
 │   │   ├── rollcall/page.tsx       # 课程点名（?courseId 参数）
 │   │   └── students/[id]/page.tsx  # 学员个人考勤详情
+│   ├── recharges/                  # 充值管理页面（列表 + 创建弹窗）
+│   ├── grading/                    # 考级记录管理页面（列表 + 创建/编辑弹窗）
+│   ├── competition/                # 比赛记录管理页面（列表 + 创建/编辑弹窗）
+│   ├── camp/                       # 集训记录管理页面（列表 + 创建/编辑弹窗）
 │   └── backup/                     # 数据备份管理页面
 ├── components/                     # 可复用组件
 │   ├── ui/                         # shadcn/ui 组件（badge, button, card, dialog, input, label, select, table）
 │   ├── layout/                     # sidebar.tsx, header.tsx
 │   ├── students/                   # student-form.tsx（含拍照上传、班级多选）
 │   ├── coaches/                    # coach-form.tsx（基本信息、在职状态切换）
-│   ├── classes/                    # class-form.tsx（基本信息、学员多选）
-│   └── theme-provider.tsx          # next-themes 封装，默认 light，支持 D 键切换 dark/light
+│   └── classes/                    # class-form.tsx（基本信息、学员多选）
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
 │   ├── ai-model.ts                 # AI Provider Registry + getModel()
 │   ├── ai-tools.ts                 # AI 工具函数封装（供 chat route 调用）
+│   ├── belt-level.tsx              # 腰带级别中文映射、样式映射、BeltBadge 组件
 │   └── utils.ts                    # cn() 工具（clsx + tailwind-merge）
 ├── __tests__/                      # 测试文件
-│   ├── api/                        # API 路由测试（students, coaches, classes, courses, attendance, grading, competition, camp, config）
-│   ├── components/                 # 组件测试（sidebar, student-form）
+│   ├── api/                        # API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, config）
+│   ├── components/                 # 组件测试（sidebar, coaches-page, student-form）
 │   ├── lib/                        # 工具函数测试（prisma 单例, utils, ai-tools）
 │   ├── helpers.ts                  # 备用测试辅助函数
 │   └── setup.ts                    # Vitest 全局 setup（mock next/navigation、next/head）
@@ -109,10 +122,11 @@ tkd-crm/
 │   └── helpers.ts                  # cleanupTestData, createTestStudent 等（API 测试从此导入）
 ├── prisma/
 │   ├── schema.prisma               # 数据库 Schema
-│   └── migrations/                 # 数据库迁移文件（init → add_course_students → add_class_model → remove_course_type → make_course_title_optional）
+│   └── migrations/                 # 数据库迁移文件
 ├── public/
 │   └── uploads/                    # 照片本地存储（students/ + coaches/）
 ├── scripts/
+│   ├── dev-server.js               # 开发服务器守护进程（自动重启、健康检查、Turbopack 崩溃回退）
 │   └── start-local-prod.sh         # 本地生产环境启动脚本
 ├── docs/                           # 开发参考文档
 │   ├── 跆拳道馆CRM系统_PRD.md      # 产品需求文档
@@ -141,6 +155,7 @@ tkd-crm/
 - **Class**（班级）：名称、级别、最大人数、关联学员和课程
 - **Course**（课程）：名称（可空，自动生成默认名称）、时间、关联教练和班级
 - **Attendance**（考勤）：课程-学员关联、出勤状态
+- **Recharge**（充值记录）：学员课时变动记录，包含增加/减少操作和有效期
 - **Grading**（考级晋升记录）
 - **Competition**（比赛记录）
 - **Camp**（集训与拓展记录）
@@ -151,6 +166,7 @@ tkd-crm/
 Student (1) ──────< (N) Grading
 Student (1) ──────< (N) Competition
 Student (1) ──────< (N) Camp
+Student (1) ──────< (N) Recharge
 Student (1) ──────< (N) Attendance
 Student (N) ──────< (M) Class      (@relation("ClassToStudent"))
 Coach   (1) ──────< (N) Course
@@ -161,13 +177,14 @@ Course  (1) ──────< (N) Attendance
 
 - Coach 删除时，`Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
 - Class 删除时，关联 Course 级联删除（`onDelete: Cascade`）
-- Student/Course 删除时，关联 Attendance/Grading/Competition/Camp 级联删除（`onDelete: Cascade`）
+- Student/Course 删除时，关联 Attendance/Grading/Competition/Camp/Recharge 级联删除（`onDelete: Cascade`）
 
 ### 索引设计
 
 - 每个可列表实体均对 `name` 和 `status` 建立索引
 - `Course` 对 `startTime`、`coachId`、`classId` 建立索引
 - `Attendance` 对 `studentId`、`courseId` 建立索引
+- `Grading` 对 `studentId`、`examDate` 建立复合索引
 
 ### 唯一索引与约束
 
@@ -260,7 +277,7 @@ npx prisma generate
 # 启动开发服务器（Turbopack，前台运行）
 npm run dev
 
-# 启动开发服务器（守护进程模式，自动重启 + 心跳保活）
+# 启动开发服务器（守护进程模式，自动重启 + 心跳保活 + Turbopack 崩溃回退）
 npm run dev:daemon
 
 # 构建生产版本
@@ -318,6 +335,7 @@ npm run test:ui
 - 并行：`fileParallelism: false`（避免数据库并发冲突）
 - 包含路径：`__tests__/**/*.test.ts` 和 `__tests__/**/*.test.tsx`
 - Setup 文件：`__tests__/setup.ts`（mock `next/navigation`、`next/head`）
+- 覆盖率：`v8` provider，输出 text / json / html，排除 `node_modules/`、`__tests__/`、配置文件、`prisma/`、`.next/`
 
 ---
 
@@ -388,7 +406,7 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 - 列表查询：`GET /api/students?search=xxx&status=xxx&page=1&pageSize=20`
 - 详情/更新/删除：`GET/PUT/DELETE /api/students/[id]`
-- 批量操作：`POST /api/attendance/batch`
+- 批量操作：`POST /api/attendance/batch`、`POST /api/grading/batch`、`POST /api/competition/batch`、`POST /api/camp/batch`
 - 使用 Zod 进行请求体验证，schema 定义在文件顶部
 - 分页标准：`skip: (page - 1) * pageSize`，返回 `{ data, total, page, pageSize }`
 - 搜索使用 Prisma `contains` + `mode: "insensitive"`
@@ -424,6 +442,8 @@ await prisma.$transaction(async (tx) => {
   }
 });
 ```
+
+充值操作同样使用事务，保证 Recharge 记录创建与 Student 课时/到期时间更新的一致性。
 
 ### AI 流式响应（AI SDK 6）
 
@@ -467,8 +487,8 @@ const { messages, sendMessage, setMessages, status } = useChat({
 
 ### 测试目录结构
 
-- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, grading, competition, camp, config）
-- `__tests__/components/` —— 组件测试（sidebar, student-form）
+- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, config）
+- `__tests__/components/` —— 组件测试（sidebar, coaches-page, student-form）
 - `__tests__/lib/` —— 工具函数测试（prisma 单例, utils, ai-tools）
 - `__tests__/setup.ts` —— 全局 setup，mock `next/navigation` 和 `next/head`
 - `tests/helpers.ts` —— **主要**测试辅助函数（API 测试从此文件导入）
@@ -487,7 +507,7 @@ const { messages, sendMessage, setMessages, status } = useChat({
 
 | 函数 | 用途 |
 |------|------|
-| `cleanupTestData()` | 删除所有名称以 `[test]` 开头的记录（按依赖顺序：attendance → grading/competition/camp → course → student → coach → class） |
+| `cleanupTestData()` | 删除所有名称以 `[test]` 开头的记录（按依赖顺序：attendance → grading/competition/camp/recharge → course → student → coach → class） |
 | `createTestStudent(data?)` | 创建测试学员，名称自动加 `[test]` 前缀 |
 | `createTestCoach(data?)` | 创建测试教练 |
 | `createTestClass(data?)` | 创建测试班级 |

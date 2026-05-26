@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
   const end = searchParams.get("end") || undefined;
   const page = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("pageSize") || "100");
+  const includeAttendanceStatus = searchParams.get("includeAttendanceStatus") === "true";
 
   const where: Prisma.CourseWhereInput = {};
   if (coachId) {
@@ -53,7 +54,33 @@ export async function GET(req: NextRequest) {
     prisma.course.count({ where }),
   ]);
 
-  return Response.json({ courses, total, page, pageSize });
+  // 如果请求包含点名状态，为每个课程附加 hasAttendanceChecked 字段
+  let coursesResult = courses;
+  if (includeAttendanceStatus) {
+    const courseIds = courses.map((c) => c.id);
+    const checkedAttendances = await prisma.attendance.findMany({
+      where: {
+        courseId: { in: courseIds },
+        checkedAt: { not: null },
+      },
+      select: { courseId: true },
+      distinct: ["courseId"],
+    });
+    const checkedCourseIds = new Set(
+      checkedAttendances.map((a) => a.courseId)
+    );
+    coursesResult = courses.map((c) => ({
+      ...c,
+      hasAttendanceChecked: checkedCourseIds.has(c.id),
+    }));
+  }
+
+  return Response.json({
+    courses: coursesResult,
+    total,
+    page,
+    pageSize,
+  });
 }
 
 // 创建新课程
