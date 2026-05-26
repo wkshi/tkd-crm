@@ -1065,7 +1065,10 @@ function WeeklySchedule({
                           {suffix}
                         </div>
                         {c.location && (
-                          <div className="text-[10px] text-[#6E6E73] mt-0.5 flex items-center gap-0.5">
+                          <div
+                            className="text-[10px] mt-0.5 flex items-center gap-0.5"
+                            style={{ color: textColor }}
+                          >
                             <MapPin className="w-2.5 h-2.5" />
                             {c.location}
                           </div>
