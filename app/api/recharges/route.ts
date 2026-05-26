@@ -6,7 +6,7 @@ import { z } from "zod";
 const createSchema = z.object({
   studentId: z.string().min(1),
   action: z.enum(["increment", "decrement"]),
-  sessions: z.number().int().min(1),
+  sessions: z.number().int().min(0),
   durationDays: z.number().int().min(0),
   notes: z.string().optional(),
 });

@@ -26,7 +26,7 @@ export default function EditStudentPage() {
 
   return (
     <div className="space-y-6">
-      <StudentForm key={student.id} initialData={student} studentId={student.id} hideSessionFields={true} />
+      <StudentForm key={student.id} initialData={student} studentId={student.id} />
     </div>
   );
 }

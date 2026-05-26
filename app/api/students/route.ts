@@ -93,11 +93,12 @@ export async function POST(req: Request) {
   const student = await prisma.student.create({
     data: {
       ...data,
+      remainingSessions: 0,
+      expiryDate: new Date(),
       birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
       enrollmentDate: data.enrollmentDate
         ? new Date(data.enrollmentDate)
         : new Date(),
-      expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
       classes: classIds?.length
         ? { connect: classIds.map((id) => ({ id })) }
         : undefined,

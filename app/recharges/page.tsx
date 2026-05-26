@@ -27,6 +27,8 @@ interface Student {
   id: string
   name: string
   gender: string
+  remainingSessions: number
+  expiryDate: string | null
   classes: { id: string; name: string }[]
 }
 
@@ -156,7 +158,7 @@ export default function RechargePage() {
 
   async function handleSubmit() {
     if (selectedIds.size === 0) return
-    if (sessions === "" || Number(sessions) < 1) {
+    if (sessions === "" || Number(sessions) < 0) {
       alert("请输入有效的变动次数")
       return
     }
@@ -374,8 +376,11 @@ export default function RechargePage() {
                     <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal">
                       性别
                     </TableHead>
-                    <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal">
-                      当前带位
+                    <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal text-center">
+                      剩余课时
+                    </TableHead>
+                    <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal text-center">
+                      有效期
                     </TableHead>
                     <TableHead className="text-[13px] font-medium text-[#6E6E73] normal-case tracking-normal">
                       班级
@@ -407,8 +412,13 @@ export default function RechargePage() {
                         <TableCell className="text-[14px] text-[#6E6E73]">
                           {student.gender === "male" ? "男" : "女"}
                         </TableCell>
-                        <TableCell>
-                          <span className="text-[#A1A1A6] text-[13px]">—</span>
+                        <TableCell className="text-[14px] text-[#1D1D1F] text-center">
+                          {student.remainingSessions}
+                        </TableCell>
+                        <TableCell className="text-[14px] text-[#6E6E73] text-center">
+                          {student.expiryDate
+                            ? new Date(student.expiryDate).toLocaleDateString("zh-CN")
+                            : "—"}
                         </TableCell>
                         <TableCell>
                           {student.classes && student.classes.length > 0 ? (
@@ -433,7 +443,7 @@ export default function RechargePage() {
                   {filteredStudents.length === 0 && !loading && (
                     <TableRow>
                       <TableCell
-                        colSpan={6}
+                        colSpan={7}
                         className="text-center py-12 text-[#A1A1A6]"
                       >
                         {search || classFilter
@@ -478,7 +488,7 @@ export default function RechargePage() {
                   </label>
                   <Input
                     type="number"
-                    min={1}
+                    min={0}
                     placeholder="请输入变动次数"
                     value={sessions}
                     onChange={(e) =>
@@ -537,7 +547,7 @@ export default function RechargePage() {
                   disabled={
                     selectedIds.size === 0 ||
                     sessions === "" ||
-                    Number(sessions) < 1 ||
+                    Number(sessions) < 0 ||
                     durationDays === "" ||
                     Number(durationDays) < 0 ||
                     submitting

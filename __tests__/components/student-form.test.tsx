@@ -17,7 +17,6 @@ describe("StudentForm 学员表单", () => {
     // 通过 label 文本和 input 标签名查找
     expect(screen.getByText(/姓名/i)).toBeInTheDocument();
     expect(screen.getByText(/性别/i)).toBeInTheDocument();
-    expect(screen.getByText(/剩余课时/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /保存/i })).toBeInTheDocument();
 
     // 验证存在多个输入框
@@ -31,7 +30,6 @@ describe("StudentForm 学员表单", () => {
         initialData={{
           name: "编辑学员",
           gender: "male",
-          remainingSessions: 15,
           phone: "13900139000",
           status: "active",
         }}
@@ -54,13 +52,9 @@ describe("StudentForm 学员表单", () => {
     const { container } = render(<StudentForm />);
 
     // 第一个 input 是姓名
-    const textInputs = container.querySelectorAll('input:not([type="number"]):not([type="date"]):not([type="file"])');
+    const textInputs = container.querySelectorAll('input:not([type="date"]):not([type="file"])');
     const nameInput = textInputs[0] as HTMLInputElement;
     fireEvent.change(nameInput, { target: { value: "新学员" } });
-
-    // number input 是剩余课时
-    const numberInput = container.querySelector('input[type="number"]') as HTMLInputElement;
-    fireEvent.change(numberInput, { target: { value: "20" } });
 
     fireEvent.click(screen.getByRole("button", { name: /保存/i }));
 

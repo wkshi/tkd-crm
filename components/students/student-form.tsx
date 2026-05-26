@@ -13,8 +13,6 @@ export interface StudentFormData {
   idCard: string;
   phone: string;
   enrollmentDate: string;
-  remainingSessions: number;
-  expiryDate: string;
   status: "active" | "inactive" | "suspended";
   classIds: string[];
 }
@@ -27,10 +25,9 @@ interface AvailableClass {
 interface StudentFormProps {
   initialData?: Partial<StudentFormData & { photoUrl?: string | null }>;
   studentId?: string;
-  hideSessionFields?: boolean;
 }
 
-export function StudentForm({ initialData, studentId, hideSessionFields }: StudentFormProps) {
+export function StudentForm({ initialData, studentId }: StudentFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -58,10 +55,6 @@ export function StudentForm({ initialData, studentId, hideSessionFields }: Stude
     enrollmentDate: initialData?.enrollmentDate
       ? new Date(initialData.enrollmentDate).toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0],
-    remainingSessions: initialData?.remainingSessions ?? 0,
-    expiryDate: initialData?.expiryDate
-      ? new Date(initialData.expiryDate).toISOString().split("T")[0]
-      : "",
     status: initialData?.status || "active",
     classIds: initialData?.classIds || [],
   });
@@ -81,10 +74,6 @@ export function StudentForm({ initialData, studentId, hideSessionFields }: Stude
         enrollmentDate: initialData.enrollmentDate
           ? new Date(initialData.enrollmentDate).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
-        remainingSessions: initialData.remainingSessions ?? 0,
-        expiryDate: initialData.expiryDate
-          ? new Date(initialData.expiryDate).toISOString().split("T")[0]
-          : "",
         status: initialData.status || "active",
         classIds: initialData.classIds || [],
       });
@@ -226,16 +215,10 @@ export function StudentForm({ initialData, studentId, hideSessionFields }: Stude
       const url = studentId ? `/api/students/${studentId}` : "/api/students";
       const method = studentId ? "PUT" : "POST";
 
-      const submitData = { ...form };
-      if (hideSessionFields) {
-        delete (submitData as Record<string, unknown>).remainingSessions;
-        delete (submitData as Record<string, unknown>).expiryDate;
-      }
-
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submitData),
+        body: JSON.stringify(form),
       });
 
       const data = await res.json();
@@ -442,36 +425,7 @@ export function StudentForm({ initialData, studentId, hideSessionFields }: Stude
               className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
             />
           </div>
-          {!hideSessionFields && (
-            <>
-              <div className="space-y-2">
-                <Label>剩余课时 *</Label>
-                <Input
-                  type="number"
-                  required
-                  value={form.remainingSessions}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      remainingSessions: parseInt(e.target.value) || 0,
-                    })
-                  }
-                  className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>到期时间</Label>
-                <Input
-                  type="date" max="9999-12-31"
-                  value={form.expiryDate}
-                  onChange={(e) =>
-                    setForm({ ...form, expiryDate: e.target.value })
-                  }
-                  className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
-                />
-              </div>
-            </>
-          )}
+
           <div className="space-y-2">
             <Label>在籍状态</Label>
             <div className="bg-black/[0.06] rounded-[10px] p-1 flex">

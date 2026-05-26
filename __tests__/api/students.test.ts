@@ -26,14 +26,13 @@ describe("学员 API", () => {
             name: "[test]张小明",
             gender: "male",
             phone: "13800138001",
-            remainingSessions: 24,
           }),
         });
         const json = await res.json();
         expect(res.status).toBe(200);
         expect(json.name).toBe("[test]张小明");
         expect(json.gender).toBe("male");
-        expect(json.remainingSessions).toBe(24);
+        expect(json.remainingSessions).toBe(0);
         expect(json.status).toBe("active");
       },
     });
@@ -165,12 +164,11 @@ describe("学员 API", () => {
         const res = await fetch({
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: "[test]更新后", remainingSessions: 10 }),
+          body: JSON.stringify({ name: "[test]更新后" }),
         });
         const json = await res.json();
         expect(res.status).toBe(200);
         expect(json.name).toBe("[test]更新后");
-        expect(json.remainingSessions).toBe(10);
       },
     });
   });

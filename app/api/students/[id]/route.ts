@@ -8,8 +8,6 @@ const updateSchema = z.object({
   idCard: z.string().optional(),
   phone: z.string().optional(),
   enrollmentDate: z.string().optional(),
-  remainingSessions: z.number().optional(),
-  expiryDate: z.string().optional(),
   status: z.enum(["active", "inactive", "suspended"]).optional(),
   classIds: z.array(z.string()).optional(),
 });
@@ -58,7 +56,6 @@ export async function PUT(
         enrollmentDate: data.enrollmentDate
           ? new Date(data.enrollmentDate)
           : undefined,
-        expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
         classes:
           classIds !== undefined
             ? { set: classIds.map((cid) => ({ id: cid })) }
