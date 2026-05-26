@@ -313,11 +313,12 @@ describe("考勤 API", () => {
     const student = await createTestStudent({});
     const course = await createTestCourse({});
     const { prisma } = await import("@/lib/prisma");
+    const currentYear = new Date().getFullYear();
     await prisma.attendance.create({
       data: {
         courseId: course.id,
         studentId: student.id,
-        attendanceDate: new Date("2024-06-15"),
+        attendanceDate: new Date(currentYear, 5, 15),
         status: "present",
       },
     });
