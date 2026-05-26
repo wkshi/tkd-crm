@@ -209,6 +209,100 @@ export default function CalendarPage() {
     setEditMode(true);
   }
 
+  // 将 Date 对象格式化为 datetime-local 所需的 YYYY-MM-DDTHH:MM 格式（本地时间）
+  function formatDateTimeLocal(d: Date) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hour = String(d.getHours()).padStart(2, "0");
+    const minute = String(d.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  }
+
+  // 点击日历空白处：根据点击时间创建课程（默认 90 分钟）
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function handleDateClick(info: any) {
+    const start = info.date as Date;
+    const startStr = formatDateTimeLocal(start);
+    const endStr = computeEndTime(startStr, 90);
+    resetForm();
+    setDurationMinutes(90);
+    setForm((prev) => ({
+      ...prev,
+      startTime: startStr,
+      endTime: endStr,
+    }));
+    setCreateDialogOpen(true);
+  }
+
+  // 拖拽选择时间段创建课程
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function handleSelect(info: any) {
+    const start = info.start as Date;
+    const end = info.end as Date;
+    const startStr = formatDateTimeLocal(start);
+    const endStr = formatDateTimeLocal(end);
+    const diff = Math.round((end.getTime() - start.getTime()) / 60000);
+    resetForm();
+    setDurationMinutes(diff > 0 ? diff : 90);
+    setForm((prev) => ({
+      ...prev,
+      startTime: startStr,
+      endTime: endStr,
+    }));
+    setCreateDialogOpen(true);
+  }
+
+  // 拖动课程调整时间
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function handleEventDrop(info: any) {
+    const courseId = info.event.id as string;
+    const newStart = info.event.start as Date;
+    const newEnd = info.event.end as Date;
+    if (!newStart || !newEnd) return;
+
+    const startStr = formatDateTimeLocal(newStart);
+    const endStr = formatDateTimeLocal(newEnd);
+
+    const res = await fetch(`/api/courses/${courseId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ startTime: startStr, endTime: endStr }),
+    });
+
+    if (!res.ok) {
+      alert("调整课程时间失败");
+      info.revert();
+    } else {
+      fetchCourses();
+    }
+  }
+
+  // 调整课程时长
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function handleEventResize(info: any) {
+    const courseId = info.event.id as string;
+    const newStart = info.event.start as Date;
+    const newEnd = info.event.end as Date;
+    if (!newStart || !newEnd) return;
+
+    const startStr = formatDateTimeLocal(newStart);
+    const endStr = formatDateTimeLocal(newEnd);
+
+    const res = await fetch(`/api/courses/${courseId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ startTime: startStr, endTime: endStr }),
+    });
+
+    if (!res.ok) {
+      alert("调整课程时长失败");
+      info.revert();
+    } else {
+      fetchCourses();
+    }
+  }
+
   // 新建课程
   async function handleCreateCourse(e: React.FormEvent) {
     e.preventDefault();
@@ -579,6 +673,13 @@ export default function CalendarPage() {
             events={events}
             eventClick={handleEventClick}
             height="100%"
+            editable={true}
+            selectable={true}
+            selectMirror={true}
+            dateClick={handleDateClick}
+            select={handleSelect}
+            eventDrop={handleEventDrop}
+            eventResize={handleEventResize}
             customButtons={{
               createCourse: {
                 text: "新建课程",
@@ -605,6 +706,52 @@ export default function CalendarPage() {
               setSelectedCourse(course);
               setEditMode(false);
               setDialogOpen(true);
+            }}
+            onCellClick={(date, classId) => {
+              const startStr = formatDateTimeLocal(date);
+              const endStr = computeEndTime(startStr, 90);
+              resetForm();
+              setDurationMinutes(90);
+              setForm((prev) => ({
+                ...prev,
+                classId,
+                startTime: startStr,
+                endTime: endStr,
+                title: generateAutoTitle(classId, startStr),
+              }));
+              setCreateDialogOpen(true);
+            }}
+            onCourseDrop={async (course, newDate, newClassId) => {
+              const oldStart = new Date(course.startTime);
+              const oldEnd = new Date(course.endTime);
+              const diff = oldEnd.getTime() - oldStart.getTime();
+
+              const newStart = new Date(newDate);
+              newStart.setHours(oldStart.getHours(), oldStart.getMinutes(), 0, 0);
+              const newEnd = new Date(newStart.getTime() + diff);
+
+              const startStr = formatDateTimeLocal(newStart);
+              const endStr = formatDateTimeLocal(newEnd);
+
+              const payload: Record<string, unknown> = {
+                startTime: startStr,
+                endTime: endStr,
+              };
+              if (newClassId && newClassId !== course.classId) {
+                payload.classId = newClassId;
+              }
+
+              const res = await fetch(`/api/courses/${course.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+
+              if (!res.ok) {
+                alert("调整课程失败");
+              } else {
+                fetchCourses();
+              }
             }}
           />
         )}
@@ -741,10 +888,14 @@ function WeeklySchedule({
   courses,
   weekStart,
   onCourseClick,
+  onCellClick,
+  onCourseDrop,
 }: {
   courses: Course[];
   weekStart: Date;
   onCourseClick: (course: Course) => void;
+  onCellClick: (date: Date, classId: string) => void;
+  onCourseDrop: (course: Course, newDate: Date, newClassId: string) => void;
 }) {
   const weekDays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
   const weekEnd = new Date(weekStart);
@@ -758,13 +909,14 @@ function WeeklySchedule({
   const scheduleData = useMemo(() => {
     const map = new Map<
       string,
-      { className: string; byDay: Course[][] }
+      { classId: string; className: string; byDay: Course[][] }
     >();
     weekCourses.forEach((course) => {
       const classId = course.classId;
       const className = course.class?.name || "未命名班级";
       if (!map.has(classId)) {
         map.set(classId, {
+          classId,
           className,
           byDay: Array.from({ length: 7 }, () => []),
         });
@@ -776,6 +928,13 @@ function WeeklySchedule({
     });
     return Array.from(map.values());
   }, [weekCourses]);
+
+  // 获取某单元格对应的日期
+  function getCellDate(dayIndex: number) {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + dayIndex);
+    return d;
+  }
 
   return (
     <div className="overflow-auto flex-1">
@@ -814,13 +973,33 @@ function WeeklySchedule({
               </td>
             </tr>
           )}
-          {scheduleData.map(({ className, byDay }) => (
-            <tr key={className} className="border-b border-black/[0.04]">
+          {scheduleData.map(({ classId, className, byDay }) => (
+            <tr key={classId} className="border-b border-black/[0.04]">
               <td className="p-2 font-medium text-[#1D1D1F] align-top">
                 {className}
               </td>
               {byDay.map((dayCourses, i) => (
-                <td key={i} className="p-1 align-top">
+                <td
+                  key={i}
+                  className="p-1 align-top min-h-[3rem]"
+                  onClick={(e) => {
+                    // 仅点击空白处时触发创建，避免点击课程卡片时冒泡
+                    if (e.target === e.currentTarget) {
+                      onCellClick(getCellDate(i), classId);
+                    }
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const courseId = e.dataTransfer.getData("courseId");
+                    const droppedCourse = weekCourses.find(
+                      (c) => c.id === courseId
+                    );
+                    if (droppedCourse) {
+                      onCourseDrop(droppedCourse, getCellDate(i), classId);
+                    }
+                  }}
+                >
                   {dayCourses.map((c) => {
                     const baseColor = getCourseColor(
                       c.class?.name || "",
@@ -846,6 +1025,10 @@ function WeeklySchedule({
                     return (
                       <button
                         key={c.id}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("courseId", c.id);
+                        }}
                         onClick={() => onCourseClick(c)}
                         className="w-full text-left mb-1 p-1.5 rounded-lg transition-colors cursor-pointer"
                         style={{
