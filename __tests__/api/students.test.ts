@@ -200,6 +200,161 @@ describe("学员 API", () => {
     });
   });
 
+  it("GET /api/students?sessions= 支持剩余课时筛选", async () => {
+    await createTestStudent({ name: "充足课时", remainingSessions: 25 });
+    await createTestStudent({ name: "正常课时", remainingSessions: 15 });
+    await createTestStudent({ name: "偏少课时", remainingSessions: 7 });
+    await createTestStudent({ name: "临界课时", remainingSessions: 3 });
+    await createTestStudent({ name: "无课时", remainingSessions: 0 });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?sessions=plenty",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]充足课时")).toBe(true);
+        expect(json.students.every((s: { remainingSessions: number }) => s.remainingSessions > 20)).toBe(true);
+      },
+    });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?sessions=normal",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]正常课时")).toBe(true);
+        expect(json.students.every((s: { remainingSessions: number }) => s.remainingSessions >= 10 && s.remainingSessions <= 20)).toBe(true);
+      },
+    });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?sessions=low",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]偏少课时")).toBe(true);
+        expect(json.students.every((s: { remainingSessions: number }) => s.remainingSessions >= 6 && s.remainingSessions <= 9)).toBe(true);
+      },
+    });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?sessions=critical",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]临界课时")).toBe(true);
+        expect(json.students.every((s: { remainingSessions: number }) => s.remainingSessions <= 5)).toBe(true);
+      },
+    });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?sessions=empty",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]无课时")).toBe(true);
+        expect(json.students.every((s: { remainingSessions: number }) => s.remainingSessions <= 0)).toBe(true);
+      },
+    });
+  });
+
+  it("GET /api/students?expiry= 支持到期时间筛选", async () => {
+    const now = new Date();
+    const fiveDaysLater = new Date(now);
+    fiveDaysLater.setDate(fiveDaysLater.getDate() + 5);
+    const thirtyFiveDaysLater = new Date(now);
+    thirtyFiveDaysLater.setDate(thirtyFiveDaysLater.getDate() + 35);
+
+    await createTestStudent({ name: "快到期", remainingSessions: 10, expiryDate: fiveDaysLater });
+    await createTestStudent({ name: "已过期", remainingSessions: 10, expiryDate: new Date(now.getTime() - 86400000) });
+    await createTestStudent({ name: "无到期日", remainingSessions: 10 });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?expiry=7days",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]快到期")).toBe(true);
+      },
+    });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?expiry=30days",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]快到期")).toBe(true);
+      },
+    });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?expiry=expired",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]已过期")).toBe(true);
+      },
+    });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?expiry=unset",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.some((s: { name: string }) => s.name === "[test]无到期日")).toBe(true);
+      },
+    });
+  });
+
+  it("GET /api/students?classId= 支持班级筛选", async () => {
+    const cls = await createTestClass({ name: "筛选班级" });
+    const student = await createTestStudent({ name: "班级学员" });
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.student.update({
+      where: { id: student.id },
+      data: { classes: { connect: { id: cls.id } } },
+    });
+    await createTestStudent({ name: "其他学员" });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: `/api/students?classId=${cls.id}`,
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.length).toBe(1);
+        expect(json.students[0].name).toBe("[test]班级学员");
+      },
+    });
+  });
+
+  it("GET /api/students?page=&pageSize= 支持分页", async () => {
+    await createTestStudent({ name: "分页A" });
+    await createTestStudent({ name: "分页B" });
+
+    await testApiHandler({
+      appHandler: studentListHandler,
+      url: "/api/students?page=1&pageSize=1",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.students.length).toBe(1);
+        expect(json.page).toBe(1);
+        expect(json.pageSize).toBe(1);
+        expect(json.total).toBeGreaterThanOrEqual(2);
+      },
+    });
+  });
+
   it("DELETE /api/students/[id] 软删除学员", async () => {
     const student = await createTestStudent({ name: "待删除" });
 

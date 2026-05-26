@@ -6,6 +6,7 @@ import {
   cleanupTestData,
   createTestStudent,
   createTestCourse,
+  createTestClass,
 } from "@/tests/helpers";
 
 describe("考勤 API", () => {
@@ -172,6 +173,162 @@ describe("考勤 API", () => {
         expect(res.status).toBe(200);
         expect(json.attendances).toHaveLength(1);
         expect(json.attendances[0].status).toBe("late");
+      },
+    });
+  });
+
+  it("GET /api/attendance?studentName= 支持按学员姓名筛选", async () => {
+    const student = await createTestStudent({ name: "考勤张三" });
+    const course = await createTestCourse({});
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.attendance.create({
+      data: {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: new Date(),
+        status: "present",
+      },
+    });
+
+    await testApiHandler({
+      appHandler: attendanceHandler,
+      url: "/api/attendance?studentName=张三",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.attendances.length).toBeGreaterThanOrEqual(1);
+        expect(json.attendances[0].student.name).toBe("[test]考勤张三");
+      },
+    });
+  });
+
+  it("GET /api/attendance?className= 支持按班级名称筛选", async () => {
+    const cls = await createTestClass({ name: "考勤班级" });
+    const student = await createTestStudent({});
+    const { prisma } = await import("@/lib/prisma");
+    const course = await prisma.course.create({
+      data: {
+        title: "[test]考勤课程",
+        startTime: new Date(Date.now() + 86400000),
+        endTime: new Date(Date.now() + 90000000),
+        classId: cls.id,
+        location: "主训练馆",
+      },
+    });
+    await prisma.attendance.create({
+      data: {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: new Date(),
+        status: "present",
+      },
+    });
+
+    await testApiHandler({
+      appHandler: attendanceHandler,
+      url: "/api/attendance?className=考勤班级",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.attendances.length).toBeGreaterThanOrEqual(1);
+        expect(json.attendances[0].course.class.name).toBe("[test]考勤班级");
+      },
+    });
+  });
+
+  it("GET /api/attendance?startDate=&endDate= 支持日期范围筛选", async () => {
+    const student = await createTestStudent({});
+    const course = await createTestCourse({});
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.attendance.create({
+      data: {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: new Date("2024-06-15"),
+        status: "present",
+      },
+    });
+
+    await testApiHandler({
+      appHandler: attendanceHandler,
+      url: "/api/attendance?startDate=2024-06-01&endDate=2024-06-30",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.attendances.length).toBeGreaterThanOrEqual(1);
+      },
+    });
+  });
+
+  it("GET /api/attendance?year=&month= 支持年月筛选", async () => {
+    const student = await createTestStudent({});
+    const course = await createTestCourse({});
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.attendance.create({
+      data: {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: new Date("2024-06-15"),
+        status: "present",
+      },
+    });
+
+    await testApiHandler({
+      appHandler: attendanceHandler,
+      url: "/api/attendance?year=2024&month=6",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.attendances.length).toBeGreaterThanOrEqual(1);
+        expect(json.availableYears).toContain(2024);
+      },
+    });
+  });
+
+  it("GET /api/attendance?year= 支持仅按年筛选", async () => {
+    const student = await createTestStudent({});
+    const course = await createTestCourse({});
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.attendance.create({
+      data: {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: new Date("2024-03-01"),
+        status: "present",
+      },
+    });
+
+    await testApiHandler({
+      appHandler: attendanceHandler,
+      url: "/api/attendance?year=2024",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.attendances.length).toBeGreaterThanOrEqual(1);
+      },
+    });
+  });
+
+  it("GET /api/attendance?month= 支持仅按月筛选", async () => {
+    const student = await createTestStudent({});
+    const course = await createTestCourse({});
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.attendance.create({
+      data: {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: new Date("2024-06-15"),
+        status: "present",
+      },
+    });
+
+    await testApiHandler({
+      appHandler: attendanceHandler,
+      url: "/api/attendance?month=6",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(json.attendances.length).toBeGreaterThanOrEqual(1);
       },
     });
   });

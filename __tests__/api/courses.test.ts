@@ -174,6 +174,89 @@ describe("课程 API", () => {
     });
   });
 
+  it("GET /api/courses?coachId= 支持按教练筛选", async () => {
+    const coach = await createTestCoach({ name: "筛选教练" });
+    await createTestCourse({ title: "有教练课程", coachId: coach.id });
+    await createTestCourse({ title: "无教练课程" });
+
+    await testApiHandler({
+      appHandler: courseListHandler,
+      url: `/api/courses?coachId=${coach.id}`,
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        expect(json.courses.length).toBeGreaterThanOrEqual(1);
+        expect(json.courses.every((c: { coachId: string | null }) => c.coachId === coach.id)).toBe(true);
+      },
+    });
+  });
+
+  it("GET /api/courses?includeAttendanceStatus=true 返回点名状态", async () => {
+    const cls = await createTestClass({ name: "点名班级" });
+    const student = await createTestStudent({});
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.class.update({
+      where: { id: cls.id },
+      data: { students: { connect: { id: student.id } } },
+    });
+    const course = await prisma.course.create({
+      data: {
+        title: "[test]点名课程",
+        startTime: new Date(Date.now() + 86400000),
+        endTime: new Date(Date.now() + 90000000),
+        classId: cls.id,
+        location: "主训练馆",
+      },
+    });
+    await prisma.attendance.create({
+      data: {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: new Date(),
+        status: "present",
+        checkedAt: new Date(),
+      },
+    });
+
+    await testApiHandler({
+      appHandler: courseListHandler,
+      url: "/api/courses?includeAttendanceStatus=true",
+      test: async ({ fetch }) => {
+        const res = await fetch();
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        const found = json.courses.find((c: { id: string }) => c.id === course.id);
+        expect(found).toBeDefined();
+        expect(found.hasAttendanceChecked).toBe(true);
+      },
+    });
+  });
+
+  it("POST /api/courses 未传 title 时自动生成课程名称", async () => {
+    const cls = await createTestClass({ name: "自动生成班" });
+    const startTime = new Date(Date.now() + 86400000);
+    const endTime = new Date(Date.now() + 90000000);
+
+    await testApiHandler({
+      appHandler: courseListHandler,
+      test: async ({ fetch }) => {
+        const res = await fetch({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString(),
+            classId: cls.id,
+          }),
+        });
+        const json = await res.json();
+        expect(res.status).toBe(200);
+        expect(json.title).toContain("[test]自动生成班");
+      },
+    });
+  });
+
   it("DELETE /api/courses/[id] 删除课程", async () => {
     const course = await createTestCourse({ title: "待删除" });
 

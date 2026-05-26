@@ -25,8 +25,13 @@ import {
   updateCamp,
   deleteCamp,
   searchCamps,
+  takeAttendance,
+  getAttendance,
+  getCurrentTime,
+  addStudentsToClass,
+  removeStudentsFromClass,
 } from "@/lib/ai-tools";
-import { createTestStudent, createTestCoach } from "@/tests/helpers"; 
+import { createTestStudent, createTestCoach, createTestCourse } from "@/tests/helpers"; 
 import type { Grading, Competition, Camp, Recharge } from "@prisma/client";
 
 const mockOptions: ToolExecutionOptions = { toolCallId: "test", messages: [] };
@@ -196,6 +201,106 @@ describe("AI 工具", () => {
   });
 });
 
+
+  describe("考勤工具", () => {
+    it("takeAttendance 登记考勤", async () => {
+      const student = await createTestStudent({ name: "考勤学员" });
+      const course = await createTestCourse({ title: "考勤课程" });
+      const result = await execTool<{ status: string; courseId: string; studentId: string }>(takeAttendance, {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: "2024-06-01",
+        status: "present",
+      });
+      expect(result.status).toBe("present");
+      expect(result.courseId).toBe(course.id);
+      expect(result.studentId).toBe(student.id);
+    });
+
+    it("getAttendance 查询考勤记录", async () => {
+      const student = await createTestStudent({ name: "查询考勤学员" });
+      const course = await createTestCourse({ title: "查询考勤课程" });
+      await execTool(takeAttendance, {
+        courseId: course.id,
+        studentId: student.id,
+        attendanceDate: "2024-06-01",
+        status: "present",
+      });
+
+      const result = await execTool<{ attendances: { status: string }[]; total: number }>(getAttendance, {
+        courseId: course.id,
+        studentId: student.id,
+        page: 1,
+        pageSize: 10,
+      });
+      expect(result.total).toBeGreaterThanOrEqual(1);
+      expect(result.attendances[0].status).toBe("present");
+    });
+
+    it("getAttendance 支持分页", async () => {
+      const result = await execTool<{ attendances: unknown[]; total: number; page: number; pageSize: number }>(getAttendance, {
+        page: 1,
+        pageSize: 10,
+      });
+      expect(result.page).toBe(1);
+      expect(result.pageSize).toBe(10);
+    });
+  });
+
+  describe("时间工具", () => {
+    it("getCurrentTime 返回当前时间信息", async () => {
+      const result = await execTool<{ iso: string; date: string; time: string; weekday: string; timezone: string; timestamp: number }>(getCurrentTime, {});
+      expect(result.iso).toBeDefined();
+      expect(result.date).toBeDefined();
+      expect(result.time).toBeDefined();
+      expect(result.weekday).toMatch(/星期[一二三四五六日]/);
+      expect(result.timezone).toBeDefined();
+      expect(typeof result.timestamp).toBe("number");
+    });
+  });
+
+  describe("班级学员管理工具", () => {
+    it("addStudentsToClass 将学员添加到班级", async () => {
+      const cls = await execTool<Class>(createClass, { name: "[test]添加学员班级", maxStudents: 30, status: "active" });
+      const student = await createTestStudent({ name: "待添加学员" });
+
+      const result = await execTool<{ success: boolean; message: string }>(addStudentsToClass, {
+        classId: cls.id,
+        studentIds: [student.id],
+      });
+      expect(result.success).toBe(true);
+      expect(result.message).toContain("添加");
+    });
+
+    it("addStudentsToClass 班级不存在返回错误", async () => {
+      const result = await execTool<{ error: string }>(addStudentsToClass, {
+        classId: "non-existent-id",
+        studentIds: ["student-id"],
+      });
+      expect(result.error).toContain("不存在");
+    });
+
+    it("removeStudentsFromClass 将学员从班级移除", async () => {
+      const cls = await execTool<Class>(createClass, { name: "[test]移除学员班级", maxStudents: 30, status: "active" });
+      const student = await createTestStudent({ name: "待移除学员" });
+      await execTool(addStudentsToClass, { classId: cls.id, studentIds: [student.id] });
+
+      const result = await execTool<{ success: boolean; message: string }>(removeStudentsFromClass, {
+        classId: cls.id,
+        studentIds: [student.id],
+      });
+      expect(result.success).toBe(true);
+      expect(result.message).toContain("移除");
+    });
+
+    it("removeStudentsFromClass 班级不存在返回错误", async () => {
+      const result = await execTool<{ error: string }>(removeStudentsFromClass, {
+        classId: "non-existent-id",
+        studentIds: ["student-id"],
+      });
+      expect(result.error).toContain("不存在");
+    });
+  });
 
   describe("教练工具", () => {
     it("deleteCoach 软删除教练", async () => {
