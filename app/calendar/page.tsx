@@ -340,7 +340,7 @@ export default function CalendarPage() {
         <div className="space-y-1">
           <Label className="text-[13px]">开始时间 *</Label>
           <Input
-            type="datetime-local"
+            type="datetime-local" max="9999-12-31T23:59"
             required
             value={form.startTime}
             onChange={(e) => {
@@ -378,7 +378,7 @@ export default function CalendarPage() {
         <div className="space-y-1">
           <Label className="text-[13px]">结束时间</Label>
           <Input
-            type="datetime-local"
+            type="datetime-local" max="9999-12-31T23:59"
             value={form.endTime}
             disabled
             className="h-8 text-sm bg-black/[0.06] border-0 rounded-[10px] disabled:opacity-60 disabled:cursor-not-allowed"

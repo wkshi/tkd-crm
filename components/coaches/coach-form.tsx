@@ -148,7 +148,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
           <div className="space-y-2">
             <Label>出生日期</Label>
             <Input
-              type="date"
+              type="date" max="9999-12-31"
               value={form.birthDate}
               onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
               className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
@@ -173,7 +173,7 @@ export function CoachForm({ initialData, coachId }: CoachFormProps) {
           <div className="space-y-2">
             <Label>入职日期 *</Label>
             <Input
-              type="date"
+              type="date" max="9999-12-31"
               required
               value={form.joinDate}
               onChange={(e) => setForm({ ...form, joinDate: e.target.value })}

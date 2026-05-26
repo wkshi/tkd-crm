@@ -554,7 +554,7 @@ export default function GradingPage() {
                   考试日期 *
                 </label>
                 <Input
-                  type="date"
+                  type="date" max="9999-12-31"
                   value={examDate}
                   onChange={(e) => setExamDate(e.target.value)}
                   className="bg-black/[0.06] border-0 rounded-[10px] h-10 px-3 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
@@ -805,7 +805,7 @@ export default function GradingPage() {
                 考试日期 *
               </label>
               <Input
-                type="date"
+                type="date" max="9999-12-31"
                 value={editExamDate}
                 onChange={(e) => setEditExamDate(e.target.value)}
                 className="bg-black/[0.06] border-0 rounded-[10px] h-10 px-3 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"

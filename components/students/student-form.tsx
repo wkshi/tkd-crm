@@ -398,7 +398,7 @@ export function StudentForm({ initialData, studentId, hideSessionFields }: Stude
           <div className="space-y-2">
             <Label>出生日期</Label>
             <Input
-              type="date"
+              type="date" max="9999-12-31"
               value={form.birthDate}
               onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
               className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
@@ -433,7 +433,7 @@ export function StudentForm({ initialData, studentId, hideSessionFields }: Stude
           <div className="space-y-2">
             <Label>入学时间 *</Label>
             <Input
-              type="date"
+              type="date" max="9999-12-31"
               required
               value={form.enrollmentDate}
               onChange={(e) =>
@@ -462,7 +462,7 @@ export function StudentForm({ initialData, studentId, hideSessionFields }: Stude
               <div className="space-y-2">
                 <Label>到期时间</Label>
                 <Input
-                  type="date"
+                  type="date" max="9999-12-31"
                   value={form.expiryDate}
                   onChange={(e) =>
                     setForm({ ...form, expiryDate: e.target.value })

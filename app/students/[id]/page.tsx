@@ -343,7 +343,7 @@ export default function StudentDetailPage() {
  <div className="space-y-2">
  <Label>考级日期 *</Label>
  <Input
- type="date"
+ type="date" max="9999-12-31"
  required
  value={gradingForm.examDate}
  onChange={(e) => setGradingForm({ ...gradingForm, examDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
@@ -402,7 +402,7 @@ export default function StudentDetailPage() {
  <div className="space-y-2">
  <Label>比赛日期 *</Label>
  <Input
- type="date"
+ type="date" max="9999-12-31"
  required
  value={competitionForm.competitionDate}
  onChange={(e) => setCompetitionForm({ ...competitionForm, competitionDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
@@ -455,7 +455,7 @@ export default function StudentDetailPage() {
  <div className="space-y-2">
  <Label>活动日期 *</Label>
  <Input
- type="date"
+ type="date" max="9999-12-31"
  required
  value={campForm.activityDate}
  onChange={(e) => setCampForm({ ...campForm, activityDate: e.target.value })} className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"

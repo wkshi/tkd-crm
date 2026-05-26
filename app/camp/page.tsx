@@ -603,7 +603,7 @@ export default function CampPage() {
                     活动日期 *
                   </label>
                   <Input
-                    type="date"
+                    type="date" max="9999-12-31"
                     value={activityDate}
                     onChange={(e) => setActivityDate(e.target.value)}
                     className="bg-black/[0.06] border-0 rounded-[10px] h-10 px-3 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
@@ -894,7 +894,7 @@ export default function CampPage() {
                 活动日期 *
               </label>
               <Input
-                type="date"
+                type="date" max="9999-12-31"
                 value={editDate}
                 onChange={(e) => setEditDate(e.target.value)}
                 className="bg-black/[0.06] border-0 rounded-[10px] h-10 px-3 text-[14px] text-[#1D1D1F] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"

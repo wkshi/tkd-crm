@@ -1,4 +1,3 @@
-<!-- From: /Users/wkshi/git/github/wkshi/tkd-crm/AGENTS.md -->
 # 跆拳道馆 CRM 系统 —— AI 代理指南
 
 > 本文档供 AI 编码代理阅读。如果你正在阅读此文件，说明你对本项目一无所知——本文档将告诉你需要了解的一切。
@@ -116,7 +115,7 @@ tkd-crm/
 │   ├── api/                        # API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, config）
 │   ├── components/                 # 组件测试（sidebar, coaches-page, student-form）
 │   ├── lib/                        # 工具函数测试（prisma 单例, utils, ai-tools）
-│   ├── helpers.ts                  # 备用测试辅助函数
+│   ├── helpers.ts                  # 备用测试辅助函数（与 tests/helpers.ts 内容重叠）
 │   └── setup.ts                    # Vitest 全局 setup（mock next/navigation、next/head）
 ├── tests/                          # 主要测试辅助函数
 │   └── helpers.ts                  # cleanupTestData, createTestStudent 等（API 测试从此导入）
@@ -216,7 +215,7 @@ MODEL=openai:gpt-4o
 # 至少配置一个 API Key
 OPENAI_API_KEY=sk-your-openai-api-key-here
 # ANTHROPIC_API_KEY=sk-ant-your-key
-# GOOGLE_GENERATIVE_AI_API_KEY=your-google-key
+# GOOGLE_API_KEY=your-google-key
 # DEEPSEEK_API_KEY=your-deepseek-key
 # GROQ_API_KEY=gsk-your-groq-key
 
@@ -224,6 +223,8 @@ OPENAI_API_KEY=sk-your-openai-api-key-here
 # CUSTOM_OPENAI_BASE_URL=http://localhost:1234/v1
 # CUSTOM_OPENAI_API_KEY=your-custom-key
 ```
+
+> **注意**：`lib/ai-model.ts` 中 Google 提供商读取的是 `GOOGLE_API_KEY` 环境变量（不是 `GOOGLE_GENERATIVE_AI_API_KEY`）。
 
 客户端可通过 `process.env.APP_NAME` 和 `process.env.APP_VERSION` 访问应用名称和版本（在 `next.config.mjs` 中定义）。
 
