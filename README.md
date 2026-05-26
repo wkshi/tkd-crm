@@ -137,7 +137,8 @@
 │   ├── students/                     # 学员照片
 │   └── coaches/                      # 教练照片
 ├── scripts/
-│   └── start-local-prod.sh           # 本地生产环境启动脚本
+│   ├── start-local-prod.sh           # 本地生产环境启动脚本（Linux/macOS）
+│   └── start-local-prod.ps1          # 本地生产环境启动脚本（Windows）
 ├── .github/workflows/ci.yml          # GitHub Actions CI
 ├── docker-compose.yml                # PostgreSQL + pgAdmin 容器配置
 ├── .env.local                        # 环境变量（开发）
@@ -214,6 +215,25 @@ npm run dev
 ```
 
 访问 `http://localhost:3000` 即可使用系统。
+
+### 常用命令
+
+```bash
+# 运行测试
+npm test
+
+# 运行测试并生成覆盖率报告
+npm run test:coverage
+
+# 类型检查
+npm run typecheck
+
+# 代码检查
+npm run lint
+
+# 生产构建
+npm run build
+```
 
 ---
 
@@ -468,6 +488,20 @@ Course  (1) ──────< (N) Attendance     一个课程有多条考勤�
 - 学员/教练删除为软删除（status → inactive），保留历史记录
 
 ---
+
+## 持续集成
+
+GitHub Actions 工作流（`.github/workflows/ci.yml`）每次 push/PR 时自动执行：
+
+1. 安装依赖
+2. 生成 Prisma Client
+3. 执行数据库迁移
+4. **运行测试**（143+ 测试用例）并发布测试报告到 GitHub Checks
+5. 类型检查
+6. Lint 检查
+7. 生产构建验证
+
+测试报告可在 PR / Commit 的 **Checks → Vitest Tests** 标签页查看。
 
 ## 开发规范
 

@@ -20,7 +20,7 @@
 
 | 层级 | 技术方案 | 选型理由 |
 |------|----------|----------|
-| **前端框架** | Next.js 15 + App Router | React 生态标杆，App Router 提供更优雅的 API 路由与页面组织方式，内置 SSR/SSG 支持 |
+| **前端框架** | Next.js 16 + App Router + React 19 | React 生态标杆，App Router 提供更优雅的 API 路由与页面组织方式，内置 SSR/SSG 支持 |
 | **UI 组件库** | shadcn/ui + Tailwind CSS | 基于 Radix UI 的无头组件，Tailwind 提供原子化样式能力，快速搭建专业界面 |
 | **日历组件** | @fullcalendar/react | 业界标准日历库，支持月/周/日视图、事件拖拽、点击交互，适合课表展示 |
 | **数据库** | PostgreSQL 14+ | 关系型数据库完美契合学员-课程-考勤等多表关联场景，ACID 事务保证数据一致性 |
@@ -47,16 +47,16 @@
 | | `phone` | String | 否 | 联系电话 |
 | **照片** | `photoUrl` | String | 否 | 学员照片文件路径（本地存储），支持摄像头拍摄或文件上传 |
 | **课务信息** | `enrollmentDate` | Date | 是 | 入学时间 |
-| | `remainingSessions` | Number | 是 | 剩余课时次数，默认 0 |
-| | `expiryDate` | Date | 否 | 课程到期时间 |
+| | `remainingSessions` | Number | 是 | 剩余课时次数，**创建时强制为 0**，仅通过充值管理维护 |
+| | `expiryDate` | Date | 否 | 课程到期时间，**创建时强制为当天**，仅通过充值管理维护 |
 | | `status` | Enum | 是 | 在籍状态：`active`（在籍）/`inactive`（已结业）/`suspended`（暂停） |
 | | `classes` | Class[] | 否 | 所属班级（多对多关联） |
 | **元数据** | `createdAt` / `updatedAt` | Date | 自动 | 创建与更新时间 |
 
 #### 2.1.2 功能操作
 
-- **新增学员**：填写表单后提交，系统自动生成 `_id` 与时间戳。支持为学员拍照或上传照片
-- **编辑学员**：支持全部字段的修改，身份证号编辑需二次确认。可更换学员照片
+- **新增学员**：填写表单后提交，系统自动生成 `_id` 与时间戳。支持为学员拍照或上传照片。**学员表单中不显示剩余课时和到期时间字段**，创建后统一通过充值管理维护
+- **编辑学员**：支持基本资料的修改，身份证号编辑需二次确认。可更换学员照片。**编辑时不可直接修改剩余课时和到期时间**
 - **删除学员**：软删除（将 `status` 置为 `inactive`），保留历史记录。同步删除照片文件
 - **查询学员**：支持按姓名模糊搜索、按状态筛选、分页展示
 - **学员拍照**：新增/编辑学员时，可调起系统摄像头拍照，或从本地选择文件上传
@@ -164,7 +164,9 @@
 - **视图模式切换**：月视图（默认）/ 周视图 / 日视图
 - **课程事件展示**：日历格中以色块卡片展示课程，显示课程名称、时间段、教练
 - **点击交互**：点击日历空白区域 → 弹出创建课程表单；点击已有课程 → 弹出课程详情与编辑面板
-- **课程拖拽**：支持拖拽调整课程时间（可选）
+- **课程拖拽**：FullCalendar 支持事件拖拽移动时间、拉伸调整时长
+- **日历框选**：在月/周视图中框选日期区域快速创建课程
+- **点击创建**：点击日历空白区域直接创建课程
 
 #### 2.4.2 课程数据模型
 
@@ -578,7 +580,7 @@ model Coach {
 model Class {
   id          String   @id @default(uuid())
   name        String
-  level       String?  // 段位/级别，如"白带","黄带"
+  level       String?  // 段位/级别，使用下拉选择（beltLevelMap：白带/白黄带/黄带/黄绿带/绿带/绿蓝带/蓝带/蓝红带/红带/红黑带/黑带）
   description String?
   maxStudents Int      @default(30) @map("max_students")
   status      Status   @default(active)
@@ -2131,16 +2133,24 @@ taekwondo-crm/
 ├── prisma/                         # Prisma 配置
 │   ├── schema.prisma               # 数据库 Schema 定义
 │   └── migrations/                 # 数据库迁移文件
-├── hooks/                          # 自定义 React Hooks
-│   ├── use-students.ts             # 学员数据查询
-│   ├── use-courses.ts              # 课程数据查询
-│   └── use-attendance.ts           # 考勤数据查询
-├── types/                          # TypeScript 类型定义
-│   └── index.ts
+├── __tests__/                        # 测试文件
+│   ├── api/                          # API 路由测试
+│   ├── components/                   # 组件测试
+│   ├── lib/                          # 工具函数测试
+│   └── setup.ts                      # Vitest 全局 setup
+├── tests/                            # 测试辅助函数
+│   └── helpers.ts                    # cleanupTestData, createTestStudent 等
+├── scripts/
+│   ├── start-local-prod.sh           # 本地生产环境启动脚本（Linux/macOS）
+│   └── start-local-prod.ps1          # 本地生产环境启动脚本（Windows）
+├── .github/workflows/ci.yml          # GitHub Actions CI
+├── prisma/                         # Prisma 配置
+│   ├── schema.prisma               # 数据库 Schema 定义
+│   └── migrations/                 # 数据库迁移文件
 ├── public/                         # 静态资源
+│   └── uploads/                    # 照片本地存储
 ├── .env.local                      # 环境变量（API Key 等）
-├── next.config.js                  # Next.js 配置
-├── tailwind.config.ts              # Tailwind 配置
+├── next.config.mjs                 # Next.js 配置
 ├── tsconfig.json                   # TypeScript 配置
 └── package.json
 ```
@@ -2380,19 +2390,49 @@ services:
       - ./uploads:/app/public/uploads  # 照片持久化
 ```
 
-### 8.5 AI Agent 流式响应
+### 8.5 AI Agent 流式响应（AI SDK v6）
 
-AI 对话接口必须使用流式响应，以提供良好的交互体验：
+AI 对话接口必须使用流式响应，以提供良好的交互体验。当前使用 Vercel AI SDK v6，关键 API 差异：
 
 ```typescript
-// 服务端：返回流
-return result.toDataStreamResponse();
+// 服务端：使用 stopWhen 控制多步推理（不是 maxSteps）
+const result = streamText({
+  model: getModel(),
+  system: SYSTEM_PROMPT,
+  messages: await convertToModelMessages(messages),
+  stopWhen: stepCountIs(10),
+  tools: { searchStudents, createStudent, ... },
+});
+return result.toUIMessageStreamResponse();
 
-// 客户端：useChat 自动处理流式消费
-const { messages, input, handleInputChange, handleSubmit } = useChat();
+// 客户端：useChat + DefaultChatTransport
+const { messages, sendMessage, setMessages, status } = useChat({
+  transport: new DefaultChatTransport({ api: "/api/chat" }),
+  messages: loadMessages(),
+});
 ```
 
-### 8.6 错误处理
+### 8.6 Next.js 16 静态生成注意事项
+
+Next.js 16 对静态页面生成有更严格的要求。使用 `useSearchParams()`、`useRouter()` 等 CSR hook 的页面必须包裹在 `<Suspense>` 边界内，否则生产构建会失败：
+
+```tsx
+// 正确做法
+export default function PageWrapper() {
+  return (
+    <Suspense fallback={<div>加载中...</div>}>
+      <Page />
+    </Suspense>
+  );
+}
+
+function Page() {
+  const searchParams = useSearchParams();
+  // ...
+}
+```
+
+### 8.7 错误处理
 
 API 层统一错误响应格式：
 
@@ -2402,9 +2442,9 @@ return Response.json({ error: '学员不存在' }, { status: 404 });
 return Response.json({ error: '数据库操作失败', detail: err.message }, { status: 500 });
 ```
 
-### 8.7 数据备份与导入实现
+### 8.8 数据备份与导入实现
 
-#### 8.7.1 备份导出 API（`GET /api/backup`）
+#### 8.8.1 备份导出 API（`GET /api/backup`）
 
 备份导出使用 `pg_dump` 命令行工具导出数据库，使用 `archiver` 库打包 ZIP。
 
@@ -2511,7 +2551,7 @@ export async function GET() {
 RUN apk add --no-cache postgresql-client
 ```
 
-#### 8.7.2 备份导入 API（`POST /api/backup`）
+#### 8.8.2 备份导入 API（`POST /api/backup`）
 
 ```typescript
 // app/api/backup/route.ts（续）
@@ -2605,7 +2645,7 @@ export async function POST(req: NextRequest) {
 - 临时文件 30 秒后自动清理
 - 大文件使用流式处理，避免内存溢出
 
-#### 8.7.3 客户端下载与上传实现
+#### 8.8.3 客户端下载与上传实现
 
 **备份下载（客户端）**：
 ```typescript
@@ -2738,10 +2778,11 @@ export async function importBackup(file: File, onProgress?: (percent: number) =>
 | `@fullcalendar/react` | ^6 | 日历组件 |
 | `@fullcalendar/daygrid` | ^6 | 月视图 |
 | `@fullcalendar/timegrid` | ^6 | 周/日视图 |
-| `@fullcalendar/interaction` | ^6 | 拖拽/点击交互 |
+| `@fullcalendar/interaction` | ^6 | 拖拽/点击交互、框选创建 |
 | `@tanstack/react-table` | ^8 | 数据表格 |
-| `recharts` | ^2 | 图表 |
-| `lucide-react` | ^0.400 | 图标库 |
+| `recharts` | ^3 | 图表 |
+| `lucide-react` | latest | 图标库 |
+| `@vitest/coverage-v8` | ^4 | 测试覆盖率 |
 | `class-variance-authority` | ^0.7 | shadcn 依赖 |
 | `clsx` / `tailwind-merge` | latest | 样式工具 |
 
@@ -2749,10 +2790,11 @@ export async function importBackup(file: File, onProgress?: (percent: number) =>
 
 | 包名 | 版本 | 用途 |
 |------|------|------|
-| `typescript` | ^5 | 类型系统 |
-| `@types/react` / `@types/node` | ^19 / ^20 | 类型定义 |
-| `tailwindcss` | ^3 | 原子化 CSS |
-| `eslint` / `eslint-config-next` | ^9 | 代码检查 |
+| `typescript` | ^5.9 | 类型系统 |
+| `@types/react` / `@types/node` | ^19 | 类型定义 |
+| `tailwindcss` | ^4 | 原子化 CSS |
+| `eslint` | ^9 | 代码检查 |
+| `vitest` | ^4 | 测试框架 |
 
 ---
 
@@ -2772,9 +2814,9 @@ echo "my-app" | npx shadcn@latest init --yes --template next --base-color slate
 
 cd my-app
 
-# 2. 安装核心依赖（Prisma + AI SDK + 所需的 Provider）
+# 2. 安装核心依赖（Prisma + AI SDK + 所需的 Provider + 测试）
 npm install @prisma/client ai @ai-sdk/openai zod
-npm install -D prisma
+npm install -D prisma vitest @vitest/coverage-v8
 
 # 按需安装其他 LLM Provider（可选，用不到的可不装）
 npm install @ai-sdk/anthropic @ai-sdk/google @ai-sdk/deepseek @ai-sdk/groq

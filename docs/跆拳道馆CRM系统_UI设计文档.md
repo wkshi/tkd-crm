@@ -55,8 +55,10 @@ Apple 风格通过背景色的细微差异构建层级，而非依赖阴影。
 
 | 名称 | 色值 | Tailwind 实现 | 用途 |
 |------|------|---------------|------|
-| **accent** | `#0071E3` | `bg-[#0071E3]` / `text-[#0071E3]` | 主按钮、选中状态、链接、激活指示器 |
-| **accent-light** | `rgba(0,113,227,0.08)` | `bg-[#0071E3]/8` | 选中项背景、hover 高亮底 |
+| **primary** | `#1D1D1F` | `bg-[#1D1D1F]` / `text-[#1D1D1F]` | 主按钮、关键文字、选中高亮 |
+| **primary-hover** | `bg-black/80` | `hover:bg-black/80` | 主按钮 hover 态 |
+| **secondary** | `bg-black/[0.06]` | `bg-black/[0.06]` | 次要按钮背景 |
+| **secondary-hover** | `bg-black/[0.1]` | `hover:bg-black/[0.1]` | 次要按钮 hover 态 |
 
 #### 功能色（Semantic Colors）
 
@@ -495,8 +497,8 @@ Tab 2: 课时统计
 #### 课时统计 Tab
 
 - **数据来源**：`Course` 表，按 `coachId` + `startTime` 月份聚合计数
-- **展示方式**：矩阵表格，行=教练，列=月份（最近有数据的月份，倒序排列）
-- **月份列**：显示格式为 "2025年5月"，横向可滚动
+- **展示方式**：矩阵表格，行=教练，列=月份（默认正序排列，支持拖拽调整列顺序）
+- **月份列**：显示格式为 "2025年5月"，横向可滚动，**支持拖拽排序**
 - **最后一列**：每位教练的课时总计
 - **最后一行**：每月所有教练的课时合计
 - **空值**：无课时显示 `—`
@@ -1657,9 +1659,9 @@ Tab 2: 课时统计
 
 | 变体 | 默认 | Hover | 禁用 |
 |------|------|-------|------|
-| **Primary** | `bg-accent text-white rounded-full px-5 py-2.5 text-[14px] font-medium` | `opacity-90` | `opacity-50 cursor-not-allowed` |
-| **Secondary** | `bg-black/[0.06] text-[#1D1D1F] rounded-full px-5 py-2.5 text-[14px] font-medium` | `bg-black/[0.1]` | `opacity-50 cursor-not-allowed` |
-| **Ghost** | `bg-transparent text-accent rounded-full px-4 py-2 text-[14px] font-medium` | `bg-accent/10` | `opacity-50 cursor-not-allowed` |
+| **Primary** | `bg-[#1D1D1F] text-white rounded-[10px] px-5 py-2.5 text-[14px] font-medium` | `bg-black/80` | `opacity-50 cursor-not-allowed` |
+| **Secondary** | `bg-black/[0.06] text-[#1D1D1F] rounded-[10px] px-5 py-2.5 text-[14px] font-medium` | `bg-black/[0.1]` | `opacity-50 cursor-not-allowed` |
+| **Ghost** | `bg-transparent text-[#1D1D1F] rounded-[10px] px-4 py-2 text-[14px] font-medium` | `bg-black/[0.06]` | `opacity-50 cursor-not-allowed` |
 | **Danger** | `bg-red-500/10 text-red-500 rounded-full px-5 py-2.5 text-[14px] font-medium` | `bg-red-500/20` | `opacity-50 cursor-not-allowed` |
 | **Icon** | `w-9 h-9 rounded-full bg-transparent flex items-center justify-center` | `bg-black/[0.06]` | `opacity-50 cursor-not-allowed` |
 
