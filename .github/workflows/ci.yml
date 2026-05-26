@@ -9,6 +9,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     env:
       DATABASE_URL: postgresql://taekwondo:taekwondo123@localhost:5432/taekwondo_crm
 
