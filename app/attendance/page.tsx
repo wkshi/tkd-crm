@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,14 @@ const statusMap: Record<string, { label: string; color: string }> = {
 };
 
 export default function AttendancePage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[#A1A1A6]">加载中...</div>}>
+      <AttendancePageContent />
+    </Suspense>
+  );
+}
+
+function AttendancePageContent() {
   const searchParams = useSearchParams();
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
   const [classes, setClasses] = useState<ClassItem[]>([]);

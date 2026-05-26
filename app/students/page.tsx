@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,14 @@ interface ClassItem {
 }
 
 export default function StudentsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[#A1A1A6]">加载中...</div>}>
+      <StudentsPageContent />
+    </Suspense>
+  );
+}
+
+function StudentsPageContent() {
   const searchParams = useSearchParams();
   const [students, setStudents] = useState<Student[]>([]);
   const [total, setTotal] = useState(0);

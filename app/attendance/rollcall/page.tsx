@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -84,6 +84,14 @@ function isSameDay(d1: Date, d2: Date): boolean {
 }
 
 export default function RollCallPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[#A1A1A6]">加载中...</div>}>
+      <RollCallPageContent />
+    </Suspense>
+  );
+}
+
+function RollCallPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const courseId = searchParams.get("courseId");
