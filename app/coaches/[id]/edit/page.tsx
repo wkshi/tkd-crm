@@ -6,7 +6,7 @@ import { CoachForm } from "@/components/coaches/coach-form";
 
 export default function EditCoachPage() {
  const { id } = useParams();
- const [coach, setCoach] = useState<(Partial<import("@/components/coaches/coach-form").CoachFormData> & { id?: string }) | null>(null);
+ const [coach, setCoach] = useState<(Partial<import("@/components/coaches/coach-form").CoachFormData> & { id?: string; photoUrl?: string | null }) | null>(null);
  const [loading, setLoading] = useState(true);
 
  useEffect(() => {
