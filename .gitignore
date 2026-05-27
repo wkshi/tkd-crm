@@ -38,3 +38,6 @@ public/uploads/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ansible
+.ansible/

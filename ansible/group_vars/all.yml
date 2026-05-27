@@ -1,0 +1,42 @@
+# ─── 跆拳道馆 CRM 全局变量 ───
+# 修改此文件中的变量值，或在命令行通过 -e 参数覆盖
+
+# ── 应用配置 ──
+app_name: "跆拳道馆 CRM"
+app_version: "1.0.0"
+
+# ── 部署目录 ──
+deploy_dir: /opt/tkd-crm
+
+# ── 服务端口 ──
+app_port: 3000
+db_port: 5432
+
+# ── 数据库配置 ──
+postgres_user: taekwondo
+postgres_password: taekwondo123
+postgres_db: taekwondo_crm
+
+# Docker 方案的数据库连接地址（使用容器名作为主机名）
+database_url: "postgresql://{{ postgres_user }}:{{ postgres_password }}@postgres:5432/{{ postgres_db }}"
+
+# ── AI 模型配置 ──
+# 格式：provider:model-id，例如 openai:gpt-4o
+model: "openai:gpt-4o"
+
+# ── AI 提供商 API Key（至少配置一个）───
+openai_api_key: ""
+anthropic_api_key: ""
+google_api_key: ""
+deepseek_api_key: ""
+groq_api_key: ""
+
+# ── 自定义 OpenAI 兼容端点（可选）───
+custom_openai_base_url: ""
+custom_openai_api_key: ""
+
+# ── 健康检查配置 ──
+# 健康检查重试次数
+health_check_retries: 12
+# 每次重试间隔（秒）
+health_check_delay: 5

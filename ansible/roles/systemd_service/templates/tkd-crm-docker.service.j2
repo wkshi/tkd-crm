@@ -1,0 +1,22 @@
+[Unit]
+Description={{ app_name }} (Docker)
+Documentation=https://github.com/wkshi/tkd-crm
+Requires=docker.service
+After=docker.service network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory={{ deploy_dir }}
+
+# 启动：构建并启动所有容器
+ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up --build -d
+
+# 停止：优雅停止所有容器
+ExecStop=/usr/bin/docker compose -f docker-compose.prod.yml down
+
+# 重载：重新构建并启动
+ExecReload=/usr/bin/docker compose -f docker-compose.prod.yml up --build -d
+
+[Install]
+WantedBy=multi-user.target

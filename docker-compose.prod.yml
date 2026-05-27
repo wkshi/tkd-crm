@@ -1,0 +1,82 @@
+version: "3.8"
+
+# 跆拳道馆 CRM 生产环境 Docker Compose
+# 用法：docker compose -f docker-compose.prod.yml up --build -d
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tkd-crm-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - DOCKER_DEPLOY=true
+      - DATABASE_URL=${DATABASE_URL}
+      - MODEL=${MODEL:-openai:gpt-4o}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - CUSTOM_OPENAI_BASE_URL=${CUSTOM_OPENAI_BASE_URL:-}
+      - CUSTOM_OPENAI_API_KEY=${CUSTOM_OPENAI_API_KEY:-}
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      # 照片持久化：宿主机目录挂载到容器
+      - tkd_uploads:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tkd-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/config"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: tkd-crm-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-taekwondo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-taekwondo123}
+      POSTGRES_DB: ${POSTGRES_DB:-taekwondo_crm}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - tkd_postgres_data:/var/lib/postgresql/data
+    networks:
+      - tkd-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-taekwondo} -d ${POSTGRES_DB:-taekwondo_crm}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 可选：自动更新容器镜像（如果配合 Registry 使用）
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   container_name: tkd-crm-watchtower
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: --interval 300 --cleanup
+  #   networks:
+  #     - tkd-network
+
+volumes:
+  tkd_postgres_data:
+    driver: local
+  tkd_uploads:
+    driver: local
+
+networks:
+  tkd-network:
+    driver: bridge

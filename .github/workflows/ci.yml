@@ -69,3 +69,62 @@ jobs:
 
       - name: Build check
         run: npm run build
+
+  # ─── Ansible 部署脚本测试 ───
+  ansible-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible and ansible-lint
+        run: |
+          pip install ansible ansible-lint
+
+      - name: Run ansible-lint
+        run: ansible-lint ansible/
+
+      - name: Run ansible-playbook syntax check
+        run: |
+          cd ansible && ansible-playbook -i inventory.yml playbook.yml --syntax-check
+          ansible-playbook -i inventory.yml deploy-only.yml --syntax-check
+
+      # 可选：在 CI 中启动容器做完整部署测试（时间较长，默认注释）
+      # 如需启用，取消下面注释并配置 inventory-ci.yml
+      # - name: Start test container
+      #   run: |
+      #     docker run -d --name ansible-target --privileged \
+      #       -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+      #       geerlingguy/docker-ubuntu2404-ansible
+      # - name: Setup SSH to container
+      #   run: |
+      #     ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+      #     docker exec ansible-target mkdir -p /root/.ssh
+      #     cat ~/.ssh/id_rsa.pub | docker exec -i ansible-target tee /root/.ssh/authorized_keys
+      #     docker exec ansible-target bash -c "apt-get update -qq && apt-get install -y -qq openssh-server && service ssh start"
+      # - name: Create CI inventory
+      #   run: |
+      #     TARGET_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ansible-target)
+      #     cat > ansible/inventory-ci.yml <<EOF
+      #     all:
+      #       children:
+      #         tkd_crm_servers:
+      #           hosts:
+      #             ci-target:
+      #               ansible_host: $TARGET_IP
+      #               ansible_user: root
+      #               ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      #               ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+      #               app_port: 3000
+      #               postgres_password: testpassword123
+      #               openai_api_key: sk-test-key
+      #     EOF
+      # - name: Run ansible-playbook dry-run
+      #   run: cd ansible && ansible-playbook -i inventory-ci.yml playbook.yml --check

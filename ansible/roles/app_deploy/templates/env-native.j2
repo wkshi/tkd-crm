@@ -1,0 +1,23 @@
+# 跆拳道馆 CRM 生产环境配置（软件包方案）
+# 此文件由 Ansible 自动生成，请勿手动修改
+
+# ─── 数据库 ───
+DATABASE_URL="postgresql://{{ postgres_user }}:{{ postgres_password }}@localhost:5432/{{ postgres_db }}"
+
+# ─── AI 模型配置 ───
+MODEL={{ model }}
+
+# ─── AI 提供商 API Key ───
+OPENAI_API_KEY={{ openai_api_key }}
+ANTHROPIC_API_KEY={{ anthropic_api_key }}
+GOOGLE_API_KEY={{ google_api_key }}
+DEEPSEEK_API_KEY={{ deepseek_api_key }}
+GROQ_API_KEY={{ groq_api_key }}
+CUSTOM_OPENAI_BASE_URL={{ custom_openai_base_url }}
+CUSTOM_OPENAI_API_KEY={{ custom_openai_api_key }}
+
+# ─── 其他 ───
+NODE_ENV=production
+DOCKER_DEPLOY=true
+NEXT_TELEMETRY_DISABLED=1
+PORT={{ app_port }}

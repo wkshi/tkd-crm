@@ -1,0 +1,102 @@
+---
+# app_deploy role：同步代码、渲染环境变量文件
+
+- name: 创建部署目录
+  ansible.builtin.file:
+    path: "{{ deploy_dir }}"
+    state: directory
+    owner: "{{ 'root' if use_docker else 'tkd-crm' }}"
+    group: "{{ 'root' if use_docker else 'tkd-crm' }}"
+    mode: "0755"
+
+- name: 同步项目代码到目标服务器
+  ansible.builtin.command:
+    cmd: >
+      rsync -avz --delete
+      --exclude=.git
+      --exclude=node_modules
+      --exclude=.next
+      --exclude=coverage
+      --exclude=__tests__
+      --exclude=tests
+      --exclude=.env.local
+      --exclude=*.log
+      --exclude=ansible
+      --exclude=.kimi
+      --exclude=.DS_Store
+      --exclude=scripts
+      {{ playbook_dir | dirname }}/
+      {{ ansible_user | default(ansible_ssh_user) }}@{{ inventory_hostname }}:{{ deploy_dir }}/
+  delegate_to: localhost
+  changed_when: true
+
+- name: 设置部署目录权限
+  ansible.builtin.file:
+    path: "{{ deploy_dir }}"
+    state: directory
+    owner: "{{ 'root' if use_docker else 'tkd-crm' }}"
+    group: "{{ 'root' if use_docker else 'tkd-crm' }}"
+    recurse: true
+
+- name: 创建 uploads 目录（软件包方案）
+  ansible.builtin.file:
+    path: "{{ deploy_dir }}/public/uploads"
+    state: directory
+    owner: tkd-crm
+    group: tkd-crm
+    mode: "0755"
+  when: not use_docker
+
+- name: 渲染 .env 配置文件（Docker 方案）
+  ansible.builtin.template:
+    src: env-docker.j2
+    dest: "{{ deploy_dir }}/.env"
+    owner: root
+    group: root
+    mode: "0600"
+  when: use_docker
+
+- name: 渲染 .env 配置文件（软件包方案）
+  ansible.builtin.template:
+    src: env-native.j2
+    dest: "{{ deploy_dir }}/.env"
+    owner: tkd-crm
+    group: tkd-crm
+    mode: "0600"
+  when: not use_docker
+
+# ─── 软件包方案特有步骤：本地构建 ───
+- name: 安装 npm 依赖并构建（软件包方案）
+  when: not use_docker
+  block:
+    - name: 安装 npm 依赖
+      ansible.builtin.command: npm ci
+      args:
+        chdir: "{{ deploy_dir }}"
+      become: true
+      become_user: tkd-crm
+      environment:
+        HOME: "{{ deploy_dir }}"
+      changed_when: true
+
+    - name: 生成 Prisma Client
+      ansible.builtin.command: npx prisma generate
+      args:
+        chdir: "{{ deploy_dir }}"
+      become: true
+      become_user: tkd-crm
+      environment:
+        HOME: "{{ deploy_dir }}"
+      changed_when: true
+
+    - name: 构建生产版本
+      ansible.builtin.command: npm run build
+      args:
+        chdir: "{{ deploy_dir }}"
+      become: true
+      become_user: tkd-crm
+      environment:
+        HOME: "{{ deploy_dir }}"
+        NODE_ENV: production
+        DOCKER_DEPLOY: "true"
+      changed_when: true

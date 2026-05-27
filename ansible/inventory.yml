@@ -1,0 +1,23 @@
+# 跆拳道馆 CRM 部署主机清单
+# 复制此文件为 inventory.yml 并填写实际服务器信息
+
+all:
+  children:
+    tkd_crm_servers:
+      hosts:
+        # 示例：单台服务器部署
+        tkd-crm-prod:
+          ansible_host: 192.168.1.100
+          ansible_user: root
+          # 如使用密钥登录，指定私钥路径
+          # ansible_ssh_private_key_file: ~/.ssh/id_rsa
+          # 如使用密码登录
+          # ansible_password: your_password
+
+      vars:
+        # 部署目录
+        deploy_dir: /opt/tkd-crm
+        # 应用对外端口
+        app_port: 3000
+        # 数据库对外端口（如不需要外部访问可注释）
+        db_port: 5432

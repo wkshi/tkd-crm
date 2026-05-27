@@ -1,0 +1,31 @@
+# Ansible Lint 配置文件
+# 文档: https://ansible-lint.readthedocs.io/configuring/
+
+# 排除目录
+exclude_paths:
+  - .git/
+  - node_modules/
+  - .next/
+  - coverage/
+
+# 解析 Ansible 文件时使用的配置
+quiet: false
+strict: true
+verbosity: 1
+
+# 跳过的规则
+skip_list:
+  # 跳过命名规范检查（中文注释和任务名会被误报）
+  - name[casing]
+  - name[template]
+  # 跳过 role 变量前缀检查（本项目变量名已足够清晰）
+  - var-naming[no-role-prefix]
+  # 跳过 rsync 模块检查（使用 command 执行 rsync 是故意为之，避免额外 collection 依赖）
+  - command-instead-of-module
+
+# 警告级别的规则（不会导致失败）
+warn_list:
+  - experimental
+
+# 使用默认规则集
+use_default_rules: true

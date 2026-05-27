@@ -1,0 +1,26 @@
+---
+# 跆拳道馆 CRM 完整部署 Playbook
+# 执行完整安装流程：环境检测 → 基础准备 → 应用部署 → systemd 服务封装
+# 用法: ansible-playbook ansible/playbook.yml
+
+- name: "部署 跆拳道馆 CRM"
+  hosts: tkd_crm_servers
+  gather_facts: true
+
+  roles:
+    - role: precheck
+      tags: [precheck, setup]
+
+    - role: docker_setup
+      tags: [docker, setup]
+      when: use_docker
+
+    - role: nodejs_setup
+      tags: [nodejs, setup]
+      when: not use_docker
+
+    - role: app_deploy
+      tags: [deploy, app]
+
+    - role: systemd_service
+      tags: [systemd, service]

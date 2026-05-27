@@ -1,0 +1,40 @@
+# 依赖与构建产物
+node_modules
+npm-debug.log
+.next
+out
+build
+dist
+
+# 版本控制
+.git
+.gitignore
+
+# 测试与覆盖率
+__tests__
+coverage
+*.test.ts
+*.test.tsx
+
+# 本地环境配置
+.env.local
+.env.*.local
+
+# 开发工具
+.vscode
+.idea
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 文档（可选，如果需要在容器内查看文档可删除此行）
+docs
+
+# 上传文件（宿主机挂载，无需打包进镜像）
+public/uploads
+
+# 脚本（部署脚本在宿主机执行，不需要进镜像）
+scripts

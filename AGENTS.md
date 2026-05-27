@@ -1,3 +1,4 @@
+<!-- From: /Users/wkshi/git/github/wkshi/tkd-crm/AGENTS.md -->
 # 跆拳道馆 CRM 系统 —— AI 代理指南
 
 > 本文档供 AI 编码代理阅读。如果你正在阅读此文件，说明你对本项目一无所知——本文档将告诉你需要了解的一切。
@@ -46,6 +47,8 @@
 - Groq (`@ai-sdk/groq`)
 
 模型通过环境变量 `MODEL=provider:model-id` 格式指定，例如 `openai:gpt-4o`。额外支持 `custom:` 前缀，通过 `CUSTOM_OPENAI_BASE_URL` 和 `CUSTOM_OPENAI_API_KEY` 接入自定义 OpenAI 兼容端点。
+
+> **注意**：`lib/ai-model.ts` 中 Google 提供商读取的是 `GOOGLE_API_KEY` 环境变量（不是 `GOOGLE_GENERATIVE_AI_API_KEY`）。
 
 ---
 
@@ -125,6 +128,7 @@ tkd-crm/
 ├── public/
 │   └── uploads/                    # 照片本地存储（students/ + coaches/）
 ├── scripts/
+│   ├── start-local-prod.ps1
 │   └── start-local-prod.sh         # 本地生产环境启动脚本
 ├── docs/                           # 开发参考文档
 │   ├── 跆拳道馆CRM系统_PRD.md      # 产品需求文档
@@ -359,7 +363,7 @@ npm run test:ui
 
 使用 ESLint v9 flat config（`eslint.config.mjs`）：
 - 继承 `eslint-config-next/core-web-vitals` 和 `eslint-config-next/typescript`
-- 忽略 `.next/`、`out/`、`build/`、`next-env.d.ts`
+- 忽略 `.next/`、`out/`、`build/`、`next-env.d.ts`、`coverage/`
 
 ### Prisma Client 单例模式
 
@@ -377,7 +381,7 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 - 学员照片：`public/uploads/students/{studentId}.jpg`
 - 教练照片：`public/uploads/coaches/{coachId}.jpg`
 - 数据库只存相对路径（如 `/uploads/students/abc123.jpg`）
-- 上传 API 校验文件类型（仅 `image/*`）和大小（最大 5MB）
+- 上传 API 校验文件类型（仅 `image/*`）和大小（最大 5MB），固定存储为 `.jpg` 格式
 - Docker 部署时必须挂载 `uploads` 目录到宿主机持久化存储
 
 ### UI 风格（Apple HIG）
@@ -520,9 +524,11 @@ GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
 2. 安装依赖：`npm ci`
 3. 生成 Prisma Client：`npx prisma generate`
 4. 执行数据库迁移：`npx prisma migrate deploy`
-5. 运行测试：`npm test`
-6. 类型检查：`npm run typecheck`
-7. 代码检查：`npm run lint`
+5. 运行测试：`npx vitest run --reporter=default --reporter=junit --outputFile=./test-results/junit.xml`
+6. 发布测试报告（使用 dorny/test-reporter）
+7. 类型检查：`npm run typecheck`
+8. 代码检查：`npm run lint`
+9. 构建检查：`npm run build`
 
 ---
 
@@ -534,18 +540,184 @@ GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
 - 在 Vercel Dashboard 中配置环境变量：`DATABASE_URL`、`MODEL`、`OPENAI_API_KEY` 等
 - 执行 `vercel --prod` 部署
 
-### Docker 部署
+### Docker 生产部署（一键脚本）
 
-`next.config.mjs` 中已配置：当 `DOCKER_DEPLOY=true` 时使用 `output: "standalone"`。
+项目已内置 Dockerfile 和 `docker-compose.prod.yml`，可通过 Ansible 自动化部署（推荐）或手动 Docker 部署。
 
-由于备份功能依赖 `pg_dump` 和 `psql` 命令，Docker 镜像需要内置 PostgreSQL 客户端：
+#### 文件说明
 
-```dockerfile
-FROM node:22-alpine
-RUN apk add --no-cache postgresql-client
+| 文件 | 用途 |
+|------|------|
+| `Dockerfile` | 多阶段构建，最终镜像基于 `node:22-alpine`，内置 `postgresql-client` |
+| `docker-compose.prod.yml` | 生产编排：App + PostgreSQL + 持久化卷 |
+| `.dockerignore` | 构建排除规则 |
+
+#### 持久化说明
+
+- **数据库数据**：`tkd_postgres_data` Docker Volume
+- **照片文件**：`tkd_uploads` Docker Volume（挂载到 `/app/public/uploads`）
+- 容器重启或更新后数据不会丢失
+
+#### 手动 Docker 运维（在目标服务器执行）
+
+```bash
+# 查看日志
+docker logs -f tkd-crm-app
+docker logs -f tkd-crm-db
+
+# 重启服务
+cd /opt/tkd-crm
+docker compose -f docker-compose.prod.yml restart
+
+# 停止服务
+docker compose -f docker-compose.prod.yml down
+
+# 完全删除（包括数据卷，慎用）
+docker compose -f docker-compose.prod.yml down -v
+
+# 进入应用容器执行命令
+docker exec -it tkd-crm-app sh
 ```
 
-**重要**：`./uploads:/app/public/uploads` 挂载必须配置，否则容器重启后照片数据将丢失。项目根目录**没有 Dockerfile**，需自行创建。
+### Ansible 自动化部署（推荐）
+
+项目内置完整的 Ansible 自动化部署方案，支持**智能路径选择**：
+
+- **首选 Docker 方案**：目标系统为 Linux x86_64/aarch64 且内核 >= 3.10 时，自动使用 Docker 部署
+- **自动降级软件包方案**：目标架构不支持 Docker（如 ARMv7、32 位系统、旧内核）时，自动降级为 Node.js + PostgreSQL 本地部署
+
+**两种方案都将应用封装为 systemd 服务**，可通过 `systemctl` 统一管理。
+
+#### 文件结构
+
+```
+ansible/
+├── ansible.cfg                  # Ansible 配置
+├── inventory.yml                # 主机清单（需配置目标服务器）
+├── playbook.yml                 # 主入口：完整部署
+├── deploy-only.yml              # 仅更新应用（不安装基础环境）
+├── group_vars/
+│   └── all.yml                  # 全局变量（数据库、API Keys 等）
+└── roles/
+    ├── precheck/                # 环境检测，自动选择部署路径
+    ├── docker_setup/            # 安装 Docker Engine + Compose（路径 A）
+    ├── nodejs_setup/            # 安装 Node.js 22 + PostgreSQL（路径 B）
+    ├── app_deploy/              # 同步代码、渲染 .env、构建
+    └── systemd_service/         # 创建 systemd 服务并启动
+```
+
+#### 前置要求
+
+- 控制机（你的电脑）已安装 **Ansible >= 2.12**
+- 控制机已安装 **rsync**
+- 目标服务器可通过 SSH 登录（支持密码或密钥）
+
+```bash
+# macOS
+brew install ansible rsync
+
+# Ubuntu/Debian
+sudo apt install ansible rsync
+
+# CentOS/RHEL
+sudo yum install ansible rsync
+```
+
+#### 配置部署
+
+**1. 配置目标服务器**
+
+编辑 `ansible/inventory.yml`：
+
+```yaml
+tkd_crm_servers:
+  hosts:
+    tkd-crm-prod:
+      ansible_host: 192.168.1.100
+      ansible_user: root
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+```
+
+**2. 配置环境变量**
+
+编辑 `ansible/group_vars/all.yml`，填写数据库密码和 API Keys：
+
+```yaml
+postgres_password: "your-secure-password"
+openai_api_key: "sk-your-key"
+model: "openai:gpt-4o"
+```
+
+**3. 执行部署**
+
+```bash
+# 完整部署（首次安装，含 Docker/Node.js 安装）
+ansible-playbook ansible/playbook.yml
+
+# 仅更新应用（代码有变更时，不重复安装基础环境）
+ansible-playbook ansible/deploy-only.yml
+
+# 查看服务状态
+ansible tkd_crm_servers -a "systemctl status tkd-crm"
+
+# 查看应用日志
+ansible tkd_crm_servers -a "journalctl -u tkd-crm -f"
+```
+
+#### 部署路径说明
+
+**路径 A：Docker 方案（自动选择）**
+
+- 安装 Docker Engine + Docker Compose Plugin（如未安装）
+- 同步代码到 `/opt/tkd-crm/`
+- 创建 systemd service：`/etc/systemd/system/tkd-crm.service`
+- systemd 管理 `docker compose up/down`，开机自启
+- 持久化：数据库和照片通过 Docker Volume 保存
+
+**路径 B：软件包方案（自动降级）**
+
+- 安装 Node.js 22（NodeSource 官方仓库）
+- 安装 PostgreSQL 16（本地数据库）
+- 同步代码到 `/opt/tkd-crm/`
+- 在目标机器上执行 `npm ci` + `npm run build`
+- 创建专用用户 `tkd-crm`
+- 创建 systemd service 直接管理 Node.js 进程
+- 持久化：数据库在本地 PostgreSQL，照片在 `/opt/tkd-crm/public/uploads`
+
+#### 运维命令（部署后在目标机器执行）
+
+两种方案统一使用 systemd 管理：
+
+```bash
+systemctl start tkd-crm       # 启动应用
+systemctl stop tkd-crm        # 停止应用
+systemctl restart tkd-crm     # 重启应用
+systemctl status tkd-crm      # 查看状态
+journalctl -u tkd-crm -f      # 查看日志
+```
+
+Docker 方案额外命令：
+
+```bash
+docker logs -f tkd-crm-app    # 查看应用容器日志
+docker logs -f tkd-crm-db     # 查看数据库容器日志
+```
+
+#### 独立 Docker 镜像构建（不使用 Ansible）
+
+```bash
+# 本地构建并测试
+DOCKER_DEPLOY=true docker build -t tkd-crm:latest .
+
+# 本地启动（需外部 PostgreSQL）
+docker run -d \
+  -p 3000:3000 \
+  -e DATABASE_URL="postgresql://..." \
+  -e MODEL="openai:gpt-4o" \
+  -e OPENAI_API_KEY="sk-..." \
+  -v tkd_uploads:/app/public/uploads \
+  tkd-crm:latest
+```
 
 ---
 
@@ -592,9 +764,9 @@ RUN apk add --no-cache postgresql-client
    - 等待用户明确回复"可以提交"或类似确认
    - **未经用户确认，不得擅自 commit**
 
-4. **Commit**：`git commit`
+8. **Commit**：`git commit`
 
-5. **推送**：`git push origin main`
+9. **推送**：`git push origin main`
    - 仅在 lint、测试全部通过且用户确认后推送
 
 ---
