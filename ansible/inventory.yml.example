@@ -1,0 +1,16 @@
+# 跆拳道馆 CRM 部署主机清单
+# 复制 inventory.yml.example 为 inventory.yml 并填写实际服务器信息
+# 此文件已被 .gitignore 排除，请勿手动添加到 Git
+
+all:
+  children:
+    tkd_crm_servers:
+      hosts:
+        # 生产服务器 —— 替换为实际 IP 或域名
+        tkd-crm-prod:
+          ansible_host: YOUR_SERVER_IP_HERE
+          ansible_user: root
+          # 如使用密钥登录，指定私钥路径
+          # ansible_ssh_private_key_file: ~/.ssh/id_rsa
+          # 如使用密码登录（不推荐）
+          # ansible_password: YOUR_PASSWORD_HERE

@@ -19,7 +19,7 @@ RUN npx prisma generate
 
 # 复制源码并构建
 COPY . .
-ENV DOCKER_DEPLOY=true
+ENV NEXT_OUTPUT=standalone
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
@@ -32,7 +32,7 @@ RUN apk add --no-cache postgresql-client
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV DOCKER_DEPLOY=true
+ENV NEXT_OUTPUT=standalone
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 

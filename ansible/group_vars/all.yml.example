@@ -1,5 +1,6 @@
 # ─── 跆拳道馆 CRM 全局变量 ───
-# 修改此文件中的变量值，或在命令行通过 -e 参数覆盖
+# 复制 all.yml.example 为 all.yml 并填写实际值
+# 此文件已被 .gitignore 排除，请勿手动添加到 Git
 
 # ── 应用配置 ──
 app_name: "跆拳道馆 CRM"
@@ -14,14 +15,19 @@ db_port: 5432
 
 # ── 数据库配置 ──
 postgres_user: taekwondo
-postgres_password: taekwondo123
+# ⚠️ 请修改为强密码
+postgres_password: CHANGE_ME_TO_STRONG_PASSWORD
 postgres_db: taekwondo_crm
+# ── PostgreSQL 系统路径配置 ──
+# 以下默认值为 Fedora 默认仓库路径，其他 RedHat 系发行版请按实际情况覆盖
+postgresql_service_name: postgresql
+postgresql_data_dir: "/var/lib/pgsql/data"
+postgresql_bin_dir: "/usr/bin"
+postgresql_packages:
+  - postgresql-server
+  - postgresql-contrib
 
-# Docker 方案的数据库连接地址（使用容器名作为主机名）
-database_url: "postgresql://{{ postgres_user }}:{{ postgres_password }}@postgres:5432/{{ postgres_db }}"
-
-# ── AI 模型配置 ──
-# 格式：provider:model-id，例如 openai:gpt-4o
+# ── AI 模型配置 ───
 model: "openai:gpt-4o"
 
 # ── AI 提供商 API Key（至少配置一个）───
@@ -36,7 +42,5 @@ custom_openai_base_url: ""
 custom_openai_api_key: ""
 
 # ── 健康检查配置 ──
-# 健康检查重试次数
 health_check_retries: 12
-# 每次重试间隔（秒）
 health_check_delay: 5

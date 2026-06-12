@@ -1,0 +1,144 @@
+---
+# system_setup role：通过 RPM 包安装 Node.js 与 PostgreSQL，初始化运行环境
+
+- name: 安装 Node.js
+  ansible.builtin.dnf:
+    name: nodejs
+    state: present
+
+- name: 安装 PostgreSQL
+  ansible.builtin.dnf:
+    name: "{{ postgresql_packages }}"
+    state: present
+
+- name: 停止 PostgreSQL 服务
+  ansible.builtin.systemd:
+    name: "{{ postgresql_service_name }}"
+    state: stopped
+  failed_when: false
+
+- name: 检查 PostgreSQL 是否已初始化
+  ansible.builtin.stat:
+    path: "{{ postgresql_data_dir }}/PG_VERSION"
+  register: pg_version_file
+
+- name: 生成 PostgreSQL 超级用户密码文件
+  ansible.builtin.shell: |
+    set -euo pipefail
+    printf '%s' '{{ postgres_password }}' > /tmp/postgres_pwfile
+    chown postgres:postgres /tmp/postgres_pwfile
+    chmod 600 /tmp/postgres_pwfile
+  args:
+    executable: /bin/bash
+  when: not pg_version_file.stat.exists
+  no_log: true
+  changed_when: not pg_version_file.stat.exists
+
+- name: 初始化 PostgreSQL 数据库
+  ansible.builtin.command: >
+    {{ postgresql_bin_dir }}/initdb
+    -D {{ postgresql_data_dir }}
+    --auth-local=trust
+    --auth-host=scram-sha-256
+    --pwfile=/tmp/postgres_pwfile
+    --encoding=UTF8
+    --locale=C.UTF-8
+  become: true
+  become_user: postgres
+  when: not pg_version_file.stat.exists
+  changed_when: not pg_version_file.stat.exists
+
+- name: 删除 PostgreSQL 超级用户密码文件
+  ansible.builtin.file:
+    path: /tmp/postgres_pwfile
+    state: absent
+  when: not pg_version_file.stat.exists
+
+- name: 检查 pg_hba.conf 是否仍为 ident/peer 认证
+  ansible.builtin.shell: |
+    set -uo pipefail
+    grep -E "^(local|host)\s+all\s+all" {{ postgresql_data_dir }}/pg_hba.conf | grep -E "(peer|ident)" | wc -l || true
+  register: pg_hba_ident_count
+  changed_when: false
+
+- name: 将 pg_hba.conf 本地认证改为 scram-sha-256
+  ansible.builtin.replace:
+    path: "{{ postgresql_data_dir }}/pg_hba.conf"
+    regexp: '^(local|host)\s+all\s+all\s+.*\s+(peer|ident)$'
+    replace: '\1   all             all                                     scram-sha-256'
+    backup: true
+  when: pg_hba_ident_count.stdout | int > 0
+  notify: 重启 PostgreSQL
+
+- name: 启动并启用 PostgreSQL
+  ansible.builtin.systemd:
+    name: "{{ postgresql_service_name }}"
+    state: started
+    enabled: true
+
+- name: 确保 PostgreSQL 配置变更已生效
+  ansible.builtin.meta: flush_handlers
+
+- name: 创建应用数据库用户
+  ansible.builtin.shell: |
+    set -euo pipefail
+    sudo -u postgres psql -v ON_ERROR_STOP=1 <<'EOSQL'
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='{{ postgres_user }}') THEN
+        CREATE USER {{ postgres_user }} WITH LOGIN PASSWORD '{{ postgres_password }}';
+      ELSE
+        ALTER USER {{ postgres_user }} WITH LOGIN PASSWORD '{{ postgres_password }}';
+      END IF;
+    END $$;
+    EOSQL
+  args:
+    executable: /bin/bash
+  changed_when: true
+  no_log: true
+
+- name: 创建应用数据库并授权
+  ansible.builtin.shell: |
+    set -euo pipefail
+    sudo -u postgres psql -v ON_ERROR_STOP=1 <<'EOSQL'
+    SELECT 'CREATE DATABASE {{ postgres_db }}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '{{ postgres_db }}')\gexec
+    GRANT ALL PRIVILEGES ON DATABASE {{ postgres_db }} TO {{ postgres_user }};
+    \c {{ postgres_db }}
+    GRANT ALL ON SCHEMA public TO {{ postgres_user }};
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {{ postgres_user }};
+    EOSQL
+  args:
+    executable: /bin/bash
+  changed_when: true
+
+- name: 创建应用运行组
+  ansible.builtin.group:
+    name: tkd-crm
+    system: true
+    state: present
+
+- name: 创建应用运行用户
+  ansible.builtin.user:
+    name: tkd-crm
+    group: tkd-crm
+    system: true
+    home: "{{ deploy_dir }}"
+    shell: /bin/bash
+    create_home: false
+    state: present
+
+- name: 验证 Node.js 安装
+  ansible.builtin.command: node --version
+  register: node_version
+  changed_when: false
+
+- name: 验证 npm 安装
+  ansible.builtin.command: npm --version
+  register: npm_version
+  changed_when: false
+
+- name: 输出 Node.js 版本
+  ansible.builtin.debug:
+    msg:
+      - "Node.js: {{ node_version.stdout }}"
+      - "npm: {{ npm_version.stdout }}"

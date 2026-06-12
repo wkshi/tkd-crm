@@ -1,0 +1,17 @@
+# Ansible 敏感配置文件
+# 以下文件包含服务器 IP、密码、API Keys 等隐私信息，切勿提交到 Git
+
+# 主机清单（包含服务器 IP/域名）
+inventory.yml
+inventory-*.yml
+
+# 全局变量（包含密码和 API Keys）
+group_vars/all.yml
+group_vars/*.yml
+
+# 本地测试生成的临时 inventory
+inventory-ci.yml
+inventory-test.yml
+
+# Ansible 运行时缓存
+.ansible/

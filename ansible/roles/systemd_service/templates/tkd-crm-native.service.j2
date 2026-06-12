@@ -1,8 +1,8 @@
 [Unit]
 Description={{ app_name }} (Node.js)
 Documentation=https://github.com/wkshi/tkd-crm
-After=network.target postgresql.service
-Wants=postgresql.service
+After=network.target {{ postgresql_service_name }}.service
+Wants={{ postgresql_service_name }}.service
 
 [Service]
 Type=simple
@@ -12,7 +12,7 @@ WorkingDirectory={{ deploy_dir }}
 
 # 环境变量
 Environment=NODE_ENV=production
-Environment=DOCKER_DEPLOY=true
+Environment=NEXT_OUTPUT=standalone
 Environment=PORT={{ app_port }}
 Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 

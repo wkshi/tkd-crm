@@ -91,6 +91,9 @@ jobs:
       - name: Run ansible-lint
         run: ansible-lint ansible/
 
+      - name: Prepare Ansible inventory for syntax check
+        run: cp ansible/inventory.yml.example ansible/inventory.yml
+
       - name: Run ansible-playbook syntax check
         run: |
           cd ansible && ansible-playbook -i inventory.yml playbook.yml --syntax-check

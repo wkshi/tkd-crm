@@ -1,5 +1,5 @@
 ---
-# precheck role：检测目标环境，决定部署路径
+# precheck role：收集目标系统信息，确认 RPM 包管理环境
 
 - name: 收集目标系统信息
   ansible.builtin.setup:
@@ -9,46 +9,18 @@
       - ansible_system
       - ansible_distribution
       - ansible_distribution_major_version
+      - ansible_os_family
 
-- name: 检测内核版本是否满足 Docker 要求（>= 3.10）
-  ansible.builtin.set_fact:
-    kernel_meets_requirement: "{{ ansible_kernel is version('3.10', '>=') }}"
+- name: 确认目标系统为 RedHat 系（RPM 包管理）
+  ansible.builtin.fail:
+    msg: "本部署方案仅支持 RedHat 系操作系统（CentOS/RHEL/Rocky/AlmaLinux/Fedora），当前系统为 {{ ansible_facts['distribution'] }}"
+  when: ansible_facts['os_family'] != "RedHat"
 
-- name: 检测架构是否支持 Docker
-  ansible.builtin.set_fact:
-    arch_supported: "{{ ansible_architecture in ['x86_64', 'aarch64'] }}"
-
-- name: 检测系统是否为 Linux
-  ansible.builtin.set_fact:
-    is_linux: "{{ ansible_system == 'Linux' }}"
-
-- name: 综合判断使用 Docker 方案
-  ansible.builtin.set_fact:
-    use_docker: "{{ is_linux and arch_supported and kernel_meets_requirement }}"
-
-- name: 检查 Docker 是否已安装
-  ansible.builtin.command: docker --version
-  register: docker_installed_check
-  ignore_errors: true
-  changed_when: false
-
-- name: 检查 Docker Compose 是否已安装
-  ansible.builtin.command: docker compose version
-  register: compose_installed_check
-  ignore_errors: true
-  changed_when: false
-
-- name: 设置 Docker 已安装标记
-  ansible.builtin.set_fact:
-    docker_already_installed: "{{ docker_installed_check.rc == 0 and compose_installed_check.rc == 0 }}"
-
-- name: 输出部署路径决策
+- name: 输出系统信息与部署方式
   ansible.builtin.debug:
     msg:
       - "目标主机: {{ inventory_hostname }}"
-      - "系统: {{ ansible_system }} {{ ansible_distribution }} {{ ansible_distribution_major_version }}"
-      - "架构: {{ ansible_architecture }}"
-      - "内核: {{ ansible_kernel }}"
-      - "Docker 支持: {{ use_docker | ternary('是', '否') }}"
-      - "Docker 已安装: {{ docker_already_installed | ternary('是', '否') }}"
-      - "最终路径: {{ use_docker | ternary('Docker 方案', '软件包方案') }}"
+      - "系统: {{ ansible_facts['system'] }} {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_major_version'] }}"
+      - "架构: {{ ansible_facts['architecture'] }}"
+      - "内核: {{ ansible_facts['kernel'] }}"
+      - "部署方式: RPM 包安装 + systemd 服务"

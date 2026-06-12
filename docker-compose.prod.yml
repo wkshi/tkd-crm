@@ -14,7 +14,7 @@ services:
       - "${APP_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
-      - DOCKER_DEPLOY=true
+      - NEXT_OUTPUT=standalone
       - DATABASE_URL=${DATABASE_URL}
       - MODEL=${MODEL:-openai:gpt-4o}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Docker 部署时使用 standalone 输出，减小镜像体积
-  output: process.env.DOCKER_DEPLOY === "true" ? "standalone" : undefined,
+  // 通过环境变量控制构建输出模式，生产环境建议设置为 standalone
+  output: process.env.NEXT_OUTPUT || undefined,
 
   // 图片优化配置
   images: {

@@ -1,6 +1,6 @@
 ---
-# 跆拳道馆 CRM 完整部署 Playbook
-# 执行完整安装流程：环境检测 → 基础准备 → 应用部署 → systemd 服务封装
+# 跆拳道馆 CRM 部署 Playbook
+# 在 RedHat 系服务器上通过 RPM 包安装 Node.js + PostgreSQL，并封装为 systemd 服务
 # 用法: ansible-playbook ansible/playbook.yml
 
 - name: "部署 跆拳道馆 CRM"
@@ -11,13 +11,8 @@
     - role: precheck
       tags: [precheck, setup]
 
-    - role: docker_setup
-      tags: [docker, setup]
-      when: use_docker
-
-    - role: nodejs_setup
-      tags: [nodejs, setup]
-      when: not use_docker
+    - role: system_setup
+      tags: [system, setup]
 
     - role: app_deploy
       tags: [deploy, app]

@@ -1,5 +1,5 @@
 ---
-# 仅执行应用更新部署（不安装 Docker/Node.js 等基础环境）
+# 仅执行应用更新部署（不安装基础环境）
 # 适用于：已配置好环境，仅需更新/重新部署应用
 # 用法: ansible-playbook ansible/deploy-only.yml
 
@@ -7,19 +7,10 @@
   hosts: tkd_crm_servers
   gather_facts: true
 
-  pre_tasks:
-    - name: 快速检测部署路径
-      ansible.builtin.setup:
-        filter:
-          - ansible_architecture
-          - ansible_kernel
-          - ansible_system
-
-    - name: 设置部署路径变量
-      ansible.builtin.set_fact:
-        use_docker: "{{ ansible_system == 'Linux' and ansible_architecture in ['x86_64', 'aarch64'] and ansible_kernel is version('3.10', '>=') }}"
-
   roles:
+    - role: precheck
+      tags: [precheck]
+
     - role: app_deploy
       tags: [deploy, app]
 

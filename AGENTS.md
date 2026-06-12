@@ -1,4 +1,3 @@
-<!-- From: /Users/wkshi/git/github/wkshi/tkd-crm/AGENTS.md -->
 # 跆拳道馆 CRM 系统 —— AI 代理指南
 
 > 本文档供 AI 编码代理阅读。如果你正在阅读此文件，说明你对本项目一无所知——本文档将告诉你需要了解的一切。
@@ -7,48 +6,100 @@
 
 ## 项目概述
 
-本项目是一个为跆拳道馆量身打造的客户关系管理（CRM）平台，覆盖学员全生命周期管理——从个人基本资料的录入，到课务与时间的精细化管理，再到成长与活动的完整记录，以及课表排期与考勤点名的一体化操作。系统深度集成 AI Agent 能力，用户可通过自然语言对话完成学员与课程的增删改查、课程点名等核心操作。
+本项目是一个为跆拳道馆量身打造的客户关系管理（CRM）平台，覆盖学员全生命周期管理：从个人基本资料录入、课务与时间精细化管理、成长与活动记录，到课表排期与考勤点名的一体化操作。系统深度集成 AI Agent 能力，用户可通过自然语言对话完成学员、教练、班级、课程、考勤、充值、考级、比赛、集训等全模块的增删改查。
 
 **当前状态**：项目已完成核心功能编码，包括数据库 Schema、REST API、前端页面、AI 对话流、照片上传、数据备份与恢复，以及完整的测试基础设施。`docs/` 目录下保留有产品需求文档（PRD）和 UI 设计文档作为参考。
 
-前端页面已完整实现：学员管理、教练管理、班级管理、课表日历、考勤查询与点名、充值管理、考级记录、比赛记录、集训记录、AI 助手对话、数据备份管理。
+前端已实现的页面包括：仪表盘首页、学员管理、教练管理、班级管理、课表日历、考勤查询与点名、充值管理、考级记录、比赛记录、集训记录、AI 助手对话、数据备份管理。
 
 ---
 
 ## 技术栈
 
-| 层级 | 技术方案 |
-|------|----------|
-| **前端框架** | Next.js 16.1.7 + App Router + React 19.2.4 |
-| **语言** | TypeScript 5.9.3 |
-| **样式** | Tailwind CSS 4.2.1 + shadcn/ui（base-nova 风格） |
-| **UI 底层** | `@base-ui/react`（shadcn/ui 组件基于此构建） |
-| **日历组件** | `@fullcalendar/react`（daygrid / timegrid / interaction / list） |
-| **数据库** | PostgreSQL 16 |
-| **ORM** | Prisma 6.19.3 |
-| **AI SDK** | Vercel AI SDK 6.0.190 + Provider Registry |
-| **数据表格** | TanStack Table 8.21.3 |
-| **图表** | Recharts 3.8.1 |
-| **图标** | Lucide React |
-| **容器化** | Docker + Docker Compose |
-| **校验** | Zod 4.4.3 |
-| **测试** | Vitest 4.1.7 + jsdom + `@testing-library/react` + `next-test-api-route-handler` |
-| **构建工具** | Turbopack（开发模式） |
-| **其他** | `react-markdown` + `remark-gfm`（AI 消息渲染）、`archiver` + `decompress`（备份 ZIP）、`@faker-js/faker`（测试数据） |
+| 层级 | 技术方案 | 版本/说明 |
+|------|----------|-----------|
+| **前端框架** | Next.js + App Router + React | 16.1.7 / 19.2.4 |
+| **语言** | TypeScript | 5.9.3 |
+| **样式** | Tailwind CSS + shadcn/ui | 4.2.1 / base-nova 风格 |
+| **UI 底层** | `@base-ui/react` | shadcn/ui 组件基于此构建 |
+| **日历组件** | `@fullcalendar/react` | daygrid / timegrid / interaction / list |
+| **状态/主题** | `next-themes` | 默认 light，支持 `D` 键切换 dark/light |
+| **数据库** | PostgreSQL | 16 |
+| **ORM** | Prisma | 6.19.3 |
+| **AI SDK** | Vercel AI SDK + Provider Registry | 6.0.190 |
+| **数据表格** | TanStack Table | 8.21.3 |
+| **图表** | Recharts | 3.8.1 |
+| **图标** | Lucide React | latest |
+| **校验** | Zod | 4.4.3 |
+| **测试** | Vitest + jsdom + `@testing-library/react` + `next-test-api-route-handler` | 4.1.7 |
+| **容器化** | Docker + Docker Compose | — |
+| **构建工具** | Turbopack（开发模式） | — |
+| **其他** | `react-markdown` + `remark-gfm`（AI 消息渲染）、`archiver` + `decompress`（备份 ZIP）、`@faker-js/faker`（测试数据） | — |
 
 ### 支持的 LLM 提供商
 
 通过 Vercel AI SDK 的 Provider Registry 支持多提供商动态切换：
 
-- OpenAI (`@ai-sdk/openai`)
-- Anthropic Claude (`@ai-sdk/anthropic`)
-- Google Gemini (`@ai-sdk/google`)
-- DeepSeek (`@ai-sdk/deepseek`)
-- Groq (`@ai-sdk/groq`)
+- OpenAI（`@ai-sdk/openai`）
+- Anthropic Claude（`@ai-sdk/anthropic`）
+- Google Gemini（`@ai-sdk/google`）
+- DeepSeek（`@ai-sdk/deepseek`）
+- Groq（`@ai-sdk/groq`）
 
-模型通过环境变量 `MODEL=provider:model-id` 格式指定，例如 `openai:gpt-4o`。额外支持 `custom:` 前缀，通过 `CUSTOM_OPENAI_BASE_URL` 和 `CUSTOM_OPENAI_API_KEY` 接入自定义 OpenAI 兼容端点。
+模型通过环境变量 `MODEL=provider:model-id` 指定，例如 `openai:gpt-4o`。额外支持 `custom:` 前缀，通过 `CUSTOM_OPENAI_BASE_URL` 和 `CUSTOM_OPENAI_API_KEY` 接入自定义 OpenAI 兼容端点。
 
 > **注意**：`lib/ai-model.ts` 中 Google 提供商读取的是 `GOOGLE_API_KEY` 环境变量（不是 `GOOGLE_GENERATIVE_AI_API_KEY`）。
+
+---
+
+## 关键配置文件
+
+| 文件 | 用途 |
+|------|------|
+| `package.json` | 项目依赖与 npm 脚本定义 |
+| `next.config.mjs` | Next.js 配置：Docker 部署时输出 `standalone`、客户端可访问环境变量 `APP_NAME`/`APP_VERSION`、图片优化、`trailingSlash: false` |
+| `vitest.config.ts` | 测试配置：`jsdom` 环境、全局模式、`fileParallelism: false`、别名 `@` 指向项目根目录 |
+| `tsconfig.json` | TypeScript 编译配置，`baseUrl: "."`，`@/*` 映射到 `./*` |
+| `eslint.config.mjs` | ESLint v9 flat config，继承 `eslint-config-next/core-web-vitals` 和 `eslint-config-next/typescript` |
+| `.prettierrc` | 代码格式化：无分号、双引号、2 空格缩进、printWidth 80、`prettier-plugin-tailwindcss` |
+| `postcss.config.mjs` | PostCSS 配置（Tailwind CSS v4） |
+| `components.json` | shadcn/ui 项目配置，`style: base-nova`，`iconLibrary: lucide` |
+| `docker-compose.yml` | 开发环境：PostgreSQL 16 + pgAdmin + 本地生产数据库（`postgres-prod`） |
+| `docker-compose.prod.yml` | 生产环境编排：App + PostgreSQL + 持久化卷 |
+| `Dockerfile` | 多阶段构建（builder + runner），基于 `node:22-alpine`，内置 `postgresql-client` |
+| `.github/workflows/ci.yml` | GitHub Actions：测试 + 类型检查 + Lint + 构建 + Ansible 语法检查 |
+| `ansible/` | Ansible 自动化部署方案：在 RedHat 系服务器上通过 RPM 包安装 Node.js + PostgreSQL，并封装为 systemd 服务 |
+
+---
+
+## 运行时架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        前端层 (Next.js 16)                    │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐ │
+│  │ 学员管理页 │  │ 日历/课表 │  │ 学员详情页 │  │  AI 对话页   │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────────┘ │
+│  shadcn/ui + Tailwind CSS 4 + FullCalendar + Recharts        │
+├─────────────────────────────────────────────────────────────┤
+│                       API 路由层 (App Router)                 │
+│  /api/students  /api/coaches  /api/classes  /api/courses     │
+│  /api/attendance/batch  /api/recharges  /api/grading/batch   │
+│  /api/competition/batch  /api/camp/batch  /api/chat          │
+│  /api/backup  /api/upload  /api/config  /api/correct         │
+├─────────────────────────────────────────────────────────────┤
+│                      数据处理层                               │
+│  Prisma ORM + Zod Validation + PostgreSQL 事务               │
+├─────────────────────────────────────────────────────────────┤
+│                      数据存储层                               │
+│  PostgreSQL 16 (Docker)  +  本地文件系统照片存储             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- **开发服务器**：`npm run dev` 启动 Turbopack（前台运行），监听 `localhost:3000`
+- **生产服务器**：`npm run build` 构建后，`npm start` 启动；生产部署时设置 `NEXT_OUTPUT=standalone` 输出 standalone 包
+- **数据库连接**：通过 `DATABASE_URL` 环境变量，Prisma Client 单例模式管理连接（见 `lib/prisma.ts`）
+- **照片存储**：本地文件系统 `public/uploads/{students,coaches}/{id}.jpg`，数据库只存相对路径
 
 ---
 
@@ -73,8 +124,8 @@ tkd-crm/
 │   │   ├── courses/[id]/route.ts
 │   │   ├── attendance/route.ts
 │   │   ├── attendance/batch/route.ts   # 批量点名（事务扣减课时）
-│   │   ├── recharges/route.ts          # 充值记录列表与创建
-│   │   ├── recharges/[id]/route.ts     # 充值记录详情与删除
+│   │   ├── recharges/route.ts          # 充值记录列表（按学员过滤）与创建
+│   │   ├── recharges/[id]/route.ts     # 充值记录详情、备注更新、删除并回滚课时
 │   │   ├── grading/route.ts
 │   │   ├── grading/[id]/route.ts
 │   │   ├── grading/batch/route.ts      # 批量创建考级记录
@@ -121,21 +172,23 @@ tkd-crm/
 │   ├── helpers.ts                  # 备用测试辅助函数（与 tests/helpers.ts 内容重叠）
 │   └── setup.ts                    # Vitest 全局 setup（mock next/navigation、next/head）
 ├── tests/                          # 主要测试辅助函数
-│   └── helpers.ts                  # cleanupTestData, createTestStudent 等（API 测试从此导入）
+│   └── helpers.ts                  # cleanupTestData, createTestStudent 等（API 测试从此文件导入）
 ├── prisma/
 │   ├── schema.prisma               # 数据库 Schema
 │   └── migrations/                 # 数据库迁移文件
 ├── public/
 │   └── uploads/                    # 照片本地存储（students/ + coaches/）
 ├── scripts/
-│   ├── start-local-prod.ps1
-│   └── start-local-prod.sh         # 本地生产环境启动脚本
+│   ├── start-local-prod.ps1        # Windows 本地生产环境启动脚本
+│   └── start-local-prod.sh         # Linux/macOS 本地生产环境启动脚本
 ├── docs/                           # 开发参考文档
 │   ├── 跆拳道馆CRM系统_PRD.md      # 产品需求文档
 │   ├── 跆拳道馆CRM系统_UI设计文档.md # UI 设计文档
 │   └── 实施计划.md                 # 分阶段实施计划
 ├── .github/workflows/ci.yml        # GitHub Actions CI 工作流
 ├── docker-compose.yml              # PostgreSQL 16 + pgAdmin + 本地生产数据库容器配置
+├── docker-compose.prod.yml         # 生产环境 Docker Compose 配置
+├── Dockerfile                      # 多阶段生产镜像构建
 ├── .env                            # 默认环境变量模板
 ├── .env.local                      # 本地环境变量（Git 忽略）
 ├── next.config.mjs
@@ -157,10 +210,10 @@ tkd-crm/
 - **Class**（班级）：名称、级别、最大人数、关联学员和课程
 - **Course**（课程）：名称（可空，自动生成默认名称）、时间、关联教练和班级
 - **Attendance**（考勤）：课程-学员关联、出勤状态
-- **Recharge**（充值记录）：学员课时变动记录，包含增加/减少操作和有效期
+- **Recharge**（充值记录）：学员课时变动记录，包含 `increment`/`decrement` 操作和有效期
 - **Grading**（考级晋升记录）
 - **Competition**（比赛记录）
-- **Camp**（集训与拓展记录）
+- **Camp**（集训与拓展活动记录）
 
 ### 关键关联关系
 
@@ -177,9 +230,10 @@ Class   (1) ──────< (M) Student    (@relation("ClassToStudent"))
 Course  (1) ──────< (N) Attendance
 ```
 
-- Coach 删除时，`Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
-- Class 删除时，关联 Course 级联删除（`onDelete: Cascade`）
+- Coach 删除时，Schema 层面 `Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
+- Class 删除时，Schema 层面关联 Course 级联删除（`onDelete: Cascade`）
 - Student/Course 删除时，关联 Attendance/Grading/Competition/Camp/Recharge 级联删除（`onDelete: Cascade`）
+- **应用层删除行为**：REST API 中 `/api/students/[id]/DELETE`、`/api/coaches/[id]/DELETE`、`/api/classes/[id]/DELETE` 均使用软删除（将 `status` 设为 `inactive`）；AI 工具 `deleteClass` 使用 Prisma 硬删除，会触发上述级联规则
 
 ### 索引设计
 
@@ -206,7 +260,7 @@ Course  (1) ──────< (N) Attendance
 
 ## 环境变量
 
-开发环境需要的 `.env.local`：
+开发环境需要的 `.env.local`（基于 `.env` 模板）：
 
 ```env
 # 数据库（本地 Docker）
@@ -272,7 +326,7 @@ docker compose down -v
 # 安装依赖
 npm install
 
-# 数据库迁移
+# 数据库迁移（开发环境）
 npx prisma migrate dev --name init
 
 # 生成 Prisma Client 类型
@@ -296,6 +350,14 @@ npm run format
 # 代码检查
 npm run lint
 ```
+
+`package.json` 还定义了以下补充脚本：
+
+| 脚本 | 说明 |
+|------|------|
+| `npm run prod` | 等效于 `npm run build && npm start` |
+| `npm run prod:build` | `NODE_ENV=production next build` |
+| `npm run prod:start` | `NODE_ENV=production next start` |
 
 ### 本地生产环境启动
 
@@ -328,6 +390,9 @@ npm run test:watch
 
 # UI 模式
 npm run test:ui
+
+# 覆盖率报告
+npm run test:coverage
 ```
 
 测试配置在 `vitest.config.ts` 中：
@@ -409,9 +474,15 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 - 详情/更新/删除：`GET/PUT/DELETE /api/students/[id]`
 - 批量操作：`POST /api/attendance/batch`、`POST /api/grading/batch`、`POST /api/competition/batch`、`POST /api/camp/batch`
 - 使用 Zod 进行请求体验证，schema 定义在文件顶部
-- 分页标准：`skip: (page - 1) * pageSize`，返回 `{ data, total, page, pageSize }`
+- 分页标准：`skip: (page - 1) * pageSize`，返回 `{ data, total, page, pageSize }`（不同路由字段名可能为 `students`/`courses` 等）
 - 搜索使用 Prisma `contains` + `mode: "insensitive"`
 - 错误响应：`Response.json({ error: "..." }, { status: XXX })`
+
+#### 需要注意的实现细节
+
+- **学员创建**：`POST /api/students` 会强制将 `remainingSessions` 设为 0、`expiryDate` 设为当前日期；课时和有效期应通过充值管理维护
+- **充值记录**：`POST /api/recharges` 创建记录并在事务内更新学员课时和到期时间；`PUT /api/recharges/[id]` 仅允许修改备注；`DELETE /api/recharges/[id]` 会删除记录并回滚学员课时
+- **班级删除**：REST API `/api/classes/[id]/DELETE` 为软删除（`status → inactive`），不会级联删除课程；AI 工具 `deleteClass` 使用硬删除，会级联删除关联课程
 
 ### Server Component vs Client Component
 
@@ -444,7 +515,7 @@ await prisma.$transaction(async (tx) => {
 });
 ```
 
-充值操作同样使用事务，保证 Recharge 记录创建与 Student 课时/到期时间更新的一致性。
+充值操作同样使用事务，保证 `Recharge` 记录创建与 `Student` 课时/到期时间更新的一致性。
 
 ### AI 流式响应（AI SDK 6）
 
@@ -480,11 +551,28 @@ const { messages, sendMessage, setMessages, status } = useChat({
 - 服务端必须用 `convertToModelMessages()` 将 `UIMessage[]` 转为模型消息
 - 服务端返回 `result.toUIMessageStreamResponse()` 供前端消费
 
+### AI 工具覆盖范围
+
+`lib/ai-tools.ts` 中定义的 AI 工具覆盖以下模块：
+
+| 模块 | 工具能力 |
+|------|----------|
+| 学员 | searchStudents、getStudentDetail、createStudent、updateStudent、deleteStudent |
+| 教练 | searchCoaches、getCoachDetail、createCoach、updateCoach、deleteCoach |
+| 班级 | listClasses、createClass、updateClass、deleteClass、addStudentsToClass、removeStudentsFromClass |
+| 课程 | listCourses、createCourse、updateCourse、deleteCourse |
+| 考勤 | takeAttendance、getAttendance |
+| 充值 | createRecharge、searchRecharges |
+| 考级 | createGrading、updateGrading、deleteGrading、searchGradings |
+| 比赛 | createCompetition、updateCompetition、deleteCompetition、searchCompetitions |
+| 集训 | createCamp、updateCamp、deleteCamp、searchCamps |
+| 通用 | getCurrentTime（获取当前时间） |
+
 ---
 
 ## 测试策略
 
-测试基础设施已建立，使用 Vitest + jsdom + `@testing-library/react` + `next-test-api-route-handler`。
+测试基础设施使用 Vitest + jsdom + `@testing-library/react` + `next-test-api-route-handler`。
 
 ### 测试目录结构
 
@@ -529,6 +617,9 @@ GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
 7. 类型检查：`npm run typecheck`
 8. 代码检查：`npm run lint`
 9. 构建检查：`npm run build`
+10. Ansible 语法检查：`ansible-lint ansible/` + `ansible-playbook --syntax-check`
+
+CI 在 `push` 到 `main` 分支或针对 `main` 分支的 `pull_request` 时触发。
 
 ---
 
@@ -540,15 +631,15 @@ GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
 - 在 Vercel Dashboard 中配置环境变量：`DATABASE_URL`、`MODEL`、`OPENAI_API_KEY` 等
 - 执行 `vercel --prod` 部署
 
-### Docker 生产部署（一键脚本）
+### Docker 生产部署
 
-项目已内置 Dockerfile 和 `docker-compose.prod.yml`，可通过 Ansible 自动化部署（推荐）或手动 Docker 部署。
+项目已内置 `Dockerfile` 和 `docker-compose.prod.yml`，支持手动 Docker 部署。
 
 #### 文件说明
 
 | 文件 | 用途 |
 |------|------|
-| `Dockerfile` | 多阶段构建，最终镜像基于 `node:22-alpine`，内置 `postgresql-client` |
+| `Dockerfile` | 多阶段构建，最终镜像基于 `node:22-alpine`，内置 `postgresql-client`，启动时执行 `prisma migrate deploy` |
 | `docker-compose.prod.yml` | 生产编排：App + PostgreSQL + 持久化卷 |
 | `.dockerignore` | 构建排除规则 |
 
@@ -561,6 +652,9 @@ GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
 #### 手动 Docker 运维（在目标服务器执行）
 
 ```bash
+# 构建并启动生产环境
+docker compose -f docker-compose.prod.yml up --build -d
+
 # 查看日志
 docker logs -f tkd-crm-app
 docker logs -f tkd-crm-db
@@ -579,31 +673,49 @@ docker compose -f docker-compose.prod.yml down -v
 docker exec -it tkd-crm-app sh
 ```
 
-### Ansible 自动化部署（推荐）
+#### 独立 Docker 镜像构建
 
-项目内置完整的 Ansible 自动化部署方案，支持**智能路径选择**：
+```bash
+# 本地构建并测试
+NEXT_OUTPUT=standalone docker build -t tkd-crm:latest .
 
-- **首选 Docker 方案**：目标系统为 Linux x86_64/aarch64 且内核 >= 3.10 时，自动使用 Docker 部署
-- **自动降级软件包方案**：目标架构不支持 Docker（如 ARMv7、32 位系统、旧内核）时，自动降级为 Node.js + PostgreSQL 本地部署
+# 本地启动（需外部 PostgreSQL）
+docker run -d \
+  -p 3000:3000 \
+  -e DATABASE_URL="postgresql://..." \
+  -e MODEL="openai:gpt-4o" \
+  -e OPENAI_API_KEY="sk-..." \
+  -v tkd_uploads:/app/public/uploads \
+  tkd-crm:latest
+```
 
-**两种方案都将应用封装为 systemd 服务**，可通过 `systemctl` 统一管理。
+### Ansible 自动化部署
+
+项目内置 Ansible 自动化部署方案，在 **RedHat 系服务器**上直接通过 RPM 包安装 Node.js 与 PostgreSQL，并将应用封装为 systemd 服务。默认配置适配 Fedora 默认仓库路径：
+
+| 组件 | 说明 |
+|------|------|
+| 目标系统 | CentOS/RHEL/Rocky/AlmaLinux/Fedora 等 RedHat 系系统 |
+| Node.js | 通过 NodeSource RPM 仓库安装 Node.js 22 |
+| PostgreSQL | 通过系统默认 RPM 仓库安装（Fedora 默认包为 `postgresql-server`） |
+| 服务管理 | systemd 服务 `tkd-crm.service`，依赖 PostgreSQL 服务 |
+| 持久化 | 数据库数据在 PostgreSQL 默认目录，照片在 `/opt/tkd-crm/public/uploads/` |
 
 #### 文件结构
 
 ```
 ansible/
 ├── ansible.cfg                  # Ansible 配置
-├── inventory.yml                # 主机清单（需配置目标服务器）
-├── playbook.yml                 # 主入口：完整部署
-├── deploy-only.yml              # 仅更新应用（不安装基础环境）
+├── inventory.yml.example        # 主机清单模板（复制为 inventory.yml 后配置）
+├── playbook.yml                 # 主入口：RPM 包安装 + systemd 服务部署
+├── deploy-only.yml              # 仅更新应用（不重复安装基础环境）
 ├── group_vars/
-│   └── all.yml                  # 全局变量（数据库、API Keys 等）
+│   └── all.yml.example          # 全局变量模板（数据库密码、API Keys 等）
 └── roles/
-    ├── precheck/                # 环境检测，自动选择部署路径
-    ├── docker_setup/            # 安装 Docker Engine + Compose（路径 A）
-    ├── nodejs_setup/            # 安装 Node.js 22 + PostgreSQL（路径 B）
-    ├── app_deploy/              # 同步代码、渲染 .env、构建
-    └── systemd_service/         # 创建 systemd 服务并启动
+    ├── precheck/                # 环境检测，校验 RedHat 系系统
+    ├── system_setup/            # 通过 RPM 安装 Node.js + PostgreSQL，创建数据库/用户/运行用户
+    ├── app_deploy/              # 同步代码、渲染 .env、npm ci、构建
+    └── systemd_service/         # 创建并管理 tkd-crm systemd 服务
 ```
 
 #### 前置要求
@@ -619,28 +731,30 @@ brew install ansible rsync
 # Ubuntu/Debian
 sudo apt install ansible rsync
 
-# CentOS/RHEL
-sudo yum install ansible rsync
+# CentOS/RHEL/Fedora
+sudo dnf install ansible rsync
 ```
 
 #### 配置部署
 
 **1. 配置目标服务器**
 
-编辑 `ansible/inventory.yml`：
+复制并编辑 `ansible/inventory.yml`（基于 `inventory.yml.example`）：
 
 ```yaml
-tkd_crm_servers:
-  hosts:
-    tkd-crm-prod:
-      ansible_host: 192.168.1.100
-      ansible_user: root
-      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+all:
+  children:
+    tkd_crm_servers:
+      hosts:
+        tkd-crm-prod:
+          ansible_host: 192.168.1.100
+          ansible_user: root
+          ansible_ssh_private_key_file: ~/.ssh/id_rsa
 ```
 
 **2. 配置环境变量**
 
-编辑 `ansible/group_vars/all.yml`，填写数据库密码和 API Keys：
+复制并编辑 `ansible/group_vars/all.yml`（基于 `all.yml.example`），填写数据库密码和 API Keys：
 
 ```yaml
 postgres_password: "your-secure-password"
@@ -648,10 +762,12 @@ openai_api_key: "sk-your-key"
 model: "openai:gpt-4o"
 ```
 
+> ⚠️ `inventory.yml` 和 `group_vars/all.yml` 已加入 `.gitignore`，请勿提交到 Git。
+
 **3. 执行部署**
 
 ```bash
-# 完整部署（首次安装，含 Docker/Node.js 安装）
+# 完整部署（首次安装，RPM 包 + systemd 服务）
 ansible-playbook ansible/playbook.yml
 
 # 仅更新应用（代码有变更时，不重复安装基础环境）
@@ -664,59 +780,23 @@ ansible tkd_crm_servers -a "systemctl status tkd-crm"
 ansible tkd_crm_servers -a "journalctl -u tkd-crm -f"
 ```
 
-#### 部署路径说明
-
-**路径 A：Docker 方案（自动选择）**
-
-- 安装 Docker Engine + Docker Compose Plugin（如未安装）
-- 同步代码到 `/opt/tkd-crm/`
-- 创建 systemd service：`/etc/systemd/system/tkd-crm.service`
-- systemd 管理 `docker compose up/down`，开机自启
-- 持久化：数据库和照片通过 Docker Volume 保存
-
-**路径 B：软件包方案（自动降级）**
-
-- 安装 Node.js 22（NodeSource 官方仓库）
-- 安装 PostgreSQL 16（本地数据库）
-- 同步代码到 `/opt/tkd-crm/`
-- 在目标机器上执行 `npm ci` + `npm run build`
-- 创建专用用户 `tkd-crm`
-- 创建 systemd service 直接管理 Node.js 进程
-- 持久化：数据库在本地 PostgreSQL，照片在 `/opt/tkd-crm/public/uploads`
-
 #### 运维命令（部署后在目标机器执行）
 
-两种方案统一使用 systemd 管理：
+**通用命令：**
 
 ```bash
-systemctl start tkd-crm       # 启动应用
-systemctl stop tkd-crm        # 停止应用
-systemctl restart tkd-crm     # 重启应用
+systemctl start tkd-crm       # 启动服务
+systemctl stop tkd-crm        # 停止服务
+systemctl restart tkd-crm     # 重启服务
 systemctl status tkd-crm      # 查看状态
 journalctl -u tkd-crm -f      # 查看日志
 ```
 
-Docker 方案额外命令：
+**数据库服务命令：**
 
 ```bash
-docker logs -f tkd-crm-app    # 查看应用容器日志
-docker logs -f tkd-crm-db     # 查看数据库容器日志
-```
-
-#### 独立 Docker 镜像构建（不使用 Ansible）
-
-```bash
-# 本地构建并测试
-DOCKER_DEPLOY=true docker build -t tkd-crm:latest .
-
-# 本地启动（需外部 PostgreSQL）
-docker run -d \
-  -p 3000:3000 \
-  -e DATABASE_URL="postgresql://..." \
-  -e MODEL="openai:gpt-4o" \
-  -e OPENAI_API_KEY="sk-..." \
-  -v tkd_uploads:/app/public/uploads \
-  tkd-crm:latest
+systemctl status postgresql        # 查看数据库服务状态
+journalctl -u postgresql -f        # 查看数据库日志
 ```
 
 ---
@@ -726,8 +806,8 @@ docker run -d \
 1. **照片文件安全**：上传 API 已校验文件类型（仅 `image/*`）和大小（最大 5MB），防止恶意文件上传
 2. **备份导入安全**：导入前自动创建当前数据快照（SQL 导出）；恢复后快照路径在响应中返回；ZIP 内含 `backup-manifest.json` 用于校验完整性
 3. **并发控制**：批量点名扣减课时使用 PostgreSQL 事务保证原子性，并通过状态比对避免重复扣减
-4. **软删除**：学员和教练删除时执行软删除（将状态设为 `inactive`），不实际删除数据库记录
-5. **环境变量隔离**：`.env.local` 不提交到版本控制（已在 `.gitignore` 中）；生产环境 API Key 通过 Vercel Dashboard 管理
+4. **软删除**：学员、教练、班级在 REST API 删除时执行软删除（将状态设为 `inactive`），保留历史记录
+5. **环境变量隔离**：`.env.local` 不提交到版本控制（已在 `.gitignore` 中）；生产环境 API Key 通过环境变量管理
 6. **身份证存储**：当前实现中身份证号以明文存储，如需加密请使用 Node.js `crypto` 模块进行对称加密后再存入数据库
 
 ---
@@ -773,7 +853,7 @@ docker run -d \
 
 ## 开发参考资料
 
-本项目所有功能细节均在以下两份文档中定义，开发前请务必阅读：
+本项目所有功能细节均在以下文档中定义，开发前请务必阅读：
 
 | 文档 | 路径 | 内容 |
 |------|------|------|
