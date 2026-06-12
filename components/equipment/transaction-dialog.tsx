@@ -85,7 +85,12 @@ export function TransactionDialog({
       const res = await fetch(
         `/api/equipment/${equipment.id}/transactions?pageSize=9999`
       );
-      const data = await res.json();
+      let data: { transactions?: Transaction[] } = {};
+      try {
+        data = await res.json();
+      } catch {
+        // 服务端返回非 JSON
+      }
       setTransactions(data.transactions || []);
     } catch (err) {
       console.error("加载流水失败", err);
@@ -102,12 +107,24 @@ export function TransactionDialog({
     // 加载学员与教练下拉选项
     Promise.all([
       fetch("/api/students?pageSize=9999&status=active")
-        .then((res) => res.json())
-        .then((data) => setStudents(data.students || []))
+        .then(async (res) => {
+          try {
+            const data = await res.json();
+            setStudents(data.students || []);
+          } catch {
+            setStudents([]);
+          }
+        })
         .catch(() => setStudents([])),
       fetch("/api/coaches?pageSize=9999&status=active")
-        .then((res) => res.json())
-        .then((data) => setCoaches(data.coaches || []))
+        .then(async (res) => {
+          try {
+            const data = await res.json();
+            setCoaches(data.coaches || []);
+          } catch {
+            setCoaches([]);
+          }
+        })
         .catch(() => setCoaches([])),
     ]);
   }, [open, fetchTransactions]);

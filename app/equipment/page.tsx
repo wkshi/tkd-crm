@@ -68,7 +68,17 @@ export default function EquipmentPage() {
       params.set("pageSize", "9999");
 
       const res = await fetch(`/api/equipment?${params.toString()}`);
-      const data = await res.json();
+      let data: { equipment?: Equipment[] } = {};
+      try {
+        data = await res.json();
+      } catch {
+        // 服务端返回非 JSON，保持空列表
+      }
+      if (!res.ok) {
+        console.error("加载装备数据失败", data);
+        setEquipment([]);
+        return;
+      }
       setEquipment(data.equipment || []);
     } catch (err) {
       console.error("加载装备数据失败", err);
