@@ -150,7 +150,7 @@ describe("装备库存 API", () => {
     });
   });
 
-  it("PUT /api/equipment/[id] 更新装备", async () => {
+  it("PUT /api/equipment/[id] 更新装备基本信息（不直接修改库存）", async () => {
     const item = await createTestEquipment({ name: "更新前" });
 
     await testApiHandler({
@@ -163,7 +163,6 @@ describe("装备库存 API", () => {
           body: JSON.stringify({
             name: "更新后",
             category: "belt",
-            currentStock: 15,
             minStock: 3,
           }),
         });
@@ -171,7 +170,8 @@ describe("装备库存 API", () => {
         expect(res.status).toBe(200);
         expect(json.name).toBe("更新后");
         expect(json.category).toBe("belt");
-        expect(json.currentStock).toBe(15);
+        // 库存不能直接通过 PUT 修改，应保持原值
+        expect(json.currentStock).toBe(item.currentStock);
         expect(json.minStock).toBe(3);
       },
     });

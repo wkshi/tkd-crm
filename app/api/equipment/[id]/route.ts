@@ -2,14 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { EquipmentCategory, Status } from "@prisma/client";
 import { z } from "zod";
 
-// 更新装备的验证模式
+// 更新装备的验证模式（库存只能通过出入库流水变更）
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
   category: z
     .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
     .optional(),
   specification: z.string().optional(),
-  currentStock: z.number().int().min(0).optional(),
   minStock: z.number().int().min(0).optional(),
   status: z.enum(["active", "inactive", "suspended"]).optional(),
   remark: z.string().optional(),
@@ -47,7 +46,6 @@ export async function PUT(
       name: data.name,
       category: data.category as EquipmentCategory | undefined,
       specification: data.specification,
-      currentStock: data.currentStock,
       minStock: data.minStock,
       status: data.status as Status | undefined,
       remark: data.remark,

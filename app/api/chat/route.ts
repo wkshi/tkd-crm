@@ -42,6 +42,8 @@ import {
   createEquipment,
   updateEquipment,
   deleteEquipment,
+  searchEquipmentTransactions,
+  createEquipmentTransaction,
   getCurrentTime,
 } from "@/lib/ai-tools";
 
@@ -59,7 +61,8 @@ const SYSTEM_PROMPT = `你是跆拳道馆 CRM 系统的 AI 助手，可以帮助
 - 查询、创建、更新、删除考级晋升记录
 - 查询、创建、更新、删除比赛记录
 - 查询、创建、更新、删除集训/拓展活动记录
-- 查询、创建、更新、删除装备库存记录
+- 查询、创建、更新、删除装备库存记录（库存变更请通过出入库流水完成）
+- 查询、创建装备出入库流水记录（入库、出库、盘点调整）
 
 注意事项：
 - 所有日期请使用 ISO 8601 格式
@@ -121,6 +124,8 @@ export async function POST(req: NextRequest) {
       createEquipment,
       updateEquipment,
       deleteEquipment,
+      searchEquipmentTransactions,
+      createEquipmentTransaction,
       getCurrentTime,
     },
   });

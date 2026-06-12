@@ -27,7 +27,6 @@ export interface EquipmentFormData {
   name: string;
   category: "uniform" | "gear" | "belt" | "pad" | "accessory" | "other";
   specification: string;
-  currentStock: number;
   minStock: number;
   status: "active" | "inactive" | "suspended";
   remark: string;
@@ -66,7 +65,6 @@ export function EquipmentFormDialog({
     name: "",
     category: "gear",
     specification: "",
-    currentStock: 0,
     minStock: 0,
     status: "active",
     remark: "",
@@ -79,7 +77,6 @@ export function EquipmentFormDialog({
         name: initialData.name || "",
         category: (initialData.category as EquipmentFormData["category"]) || "gear",
         specification: initialData.specification || "",
-        currentStock: initialData.currentStock || 0,
         minStock: initialData.minStock || 0,
         status: (initialData.status as EquipmentFormData["status"]) || "active",
         remark: initialData.remark || "",
@@ -89,7 +86,6 @@ export function EquipmentFormDialog({
         name: "",
         category: "gear",
         specification: "",
-        currentStock: 0,
         minStock: 0,
         status: "active",
         remark: "",
@@ -224,18 +220,12 @@ export function EquipmentFormDialog({
               <Label className="text-[14px] font-medium text-[#1D1D1F]">
                 当前库存
               </Label>
-              <Input
-                type="number"
-                min={0}
-                value={form.currentStock}
-                onChange={(e) =>
-                  handleChange(
-                    "currentStock",
-                    e.target.value === "" ? 0 : Number(e.target.value)
-                  )
-                }
-                className="bg-black/[0.06] border-0 rounded-[10px] focus:ring-2 focus:ring-[#1D1D1F]/10 focus:bg-white"
-              />
+              <div className="h-10 px-3 flex items-center bg-black/[0.04] rounded-[10px] text-[14px] text-[#6E6E73]">
+                {initialData?.currentStock ?? 0}
+                <span className="ml-2 text-[12px] text-[#A1A1A6]">
+                  通过出入库流水变更
+                </span>
+              </div>
             </div>
 
             <div className="space-y-2">

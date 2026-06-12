@@ -27,7 +27,8 @@ model Student {
   camps        Camp[]
   recharges    Recharge[]
   attendances  Attendance[]
-  classes      Class[]      @relation("ClassToStudent")
+  classes               Class[]                @relation("ClassToStudent")
+  equipmentTransactions EquipmentTransaction[] @relation("StudentToEquipmentTransaction")
 
   @@index([name])
   @@index([status])
@@ -48,7 +49,8 @@ model Coach {
   createdAt  DateTime    @default(now()) @map("created_at")
   updatedAt  DateTime    @updatedAt @map("updated_at")
 
-  courses Course[]
+  courses               Course[]
+  equipmentTransactions EquipmentTransaction[] @relation("CoachToEquipmentTransaction")
 
   @@index([name])
   @@index([status])
@@ -181,16 +183,18 @@ model Recharge {
 }
 
 model Equipment {
-  id            String            @id @default(uuid())
+  id            String                 @id @default(uuid())
   name          String
-  category      EquipmentCategory @default(gear)
-  specification String?           @map("specification")
-  currentStock  Int               @default(0) @map("current_stock")
-  minStock      Int               @default(0) @map("min_stock")
-  status        Status            @default(active)
+  category      EquipmentCategory      @default(gear)
+  specification String?                @map("specification")
+  currentStock  Int                    @default(0) @map("current_stock")
+  minStock      Int                    @default(0) @map("min_stock")
+  status        Status                 @default(active)
   remark        String?
-  createdAt     DateTime          @default(now()) @map("created_at")
-  updatedAt     DateTime          @updatedAt @map("updated_at")
+  createdAt     DateTime               @default(now()) @map("created_at")
+  updatedAt     DateTime               @updatedAt @map("updated_at")
+
+  transactions EquipmentTransaction[]
 
   @@index([name])
   @@index([category])
@@ -244,4 +248,31 @@ enum EquipmentCategory {
   pad
   accessory
   other
+}
+
+model EquipmentTransaction {
+  id               String                   @id @default(uuid())
+  equipmentId      String                   @map("equipment_id")
+  type             EquipmentTransactionType
+  quantity         Int
+  reason           String?
+  operator         String?
+  relatedStudentId String?                  @map("related_student_id")
+  relatedCoachId   String?                  @map("related_coach_id")
+  createdAt        DateTime                 @default(now()) @map("created_at")
+
+  equipment      Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  relatedStudent Student?  @relation("StudentToEquipmentTransaction", fields: [relatedStudentId], references: [id], onDelete: SetNull)
+  relatedCoach   Coach?    @relation("CoachToEquipmentTransaction", fields: [relatedCoachId], references: [id], onDelete: SetNull)
+
+  @@index([equipmentId])
+  @@index([createdAt])
+  @@index([type])
+  @@map("equipment_transactions")
+}
+
+enum EquipmentTransactionType {
+  in
+  out
+  adjust
 }

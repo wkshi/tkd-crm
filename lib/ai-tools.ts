@@ -1140,3 +1140,112 @@ export const deleteEquipment = tool({
     return { success: true, message: "装备已删除" };
   },
 });
+
+// ==================== 装备出入库流水工具 ====================
+
+export const searchEquipmentTransactions = tool({
+  description: "查询装备出入库流水记录，支持按装备、类型筛选和分页",
+  inputSchema: zodSchema(
+    z.object({
+      equipmentId: z.string().optional().describe("装备 ID（可选）"),
+      type: z.enum(["in", "out", "adjust"]).optional().describe("流水类型：in 入库 / out 出库 / adjust 盘点调整"),
+      page: z.number().default(1).describe("页码"),
+      pageSize: z.number().default(20).describe("每页数量"),
+    })
+  ),
+  execute: async ({ equipmentId, type, page, pageSize }) => {
+    const where: Prisma.EquipmentTransactionWhereInput = {};
+    if (equipmentId) {
+      where.equipmentId = equipmentId;
+    }
+    if (type) {
+      where.type = type;
+    }
+    const [transactions, total] = await Promise.all([
+      prisma.equipmentTransaction.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          relatedStudent: { select: { id: true, name: true } },
+          relatedCoach: { select: { id: true, name: true } },
+        },
+      }),
+      prisma.equipmentTransaction.count({ where }),
+    ]);
+    return { transactions, total, page, pageSize };
+  },
+});
+
+export const createEquipmentTransaction = tool({
+  description: "登记装备出入库流水，自动更新装备当前库存。出库时若库存不足会失败。",
+  inputSchema: zodSchema(
+    z.object({
+      equipmentId: z.string().describe("装备 ID"),
+      type: z.enum(["in", "out", "adjust"]).describe("流水类型：in 入库 / out 出库 / adjust 盘点调整"),
+      quantity: z.number().int().describe("数量。in/out 必须大于 0；adjust 可正可负"),
+      reason: z.string().optional().describe("原因或备注"),
+      operator: z.string().optional().describe("操作人"),
+      relatedStudentId: z.string().optional().describe("关联学员 ID（可选）"),
+      relatedCoachId: z.string().optional().describe("关联教练 ID（可选）"),
+    })
+  ),
+  execute: async (data) => {
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const equipment = await tx.equipment.findUnique({
+          where: { id: data.equipmentId },
+        });
+        if (!equipment) {
+          throw new Error("装备不存在");
+        }
+
+        let stockDelta = 0;
+        if (data.type === "in") {
+          if (data.quantity <= 0) {
+            throw new Error("入库数量必须大于 0");
+          }
+          stockDelta = data.quantity;
+        } else if (data.type === "out") {
+          if (data.quantity <= 0) {
+            throw new Error("出库数量必须大于 0");
+          }
+          if (equipment.currentStock < data.quantity) {
+            throw new Error("库存不足，无法出库");
+          }
+          stockDelta = -data.quantity;
+        } else if (data.type === "adjust") {
+          const newStock = equipment.currentStock + data.quantity;
+          if (newStock < 0) {
+            throw new Error("盘点调整后库存不能为负");
+          }
+          stockDelta = data.quantity;
+        }
+
+        const transaction = await tx.equipmentTransaction.create({
+          data: {
+            equipmentId: data.equipmentId,
+            type: data.type,
+            quantity: data.quantity,
+            reason: data.reason,
+            operator: data.operator,
+            relatedStudentId: data.relatedStudentId,
+            relatedCoachId: data.relatedCoachId,
+          },
+        });
+
+        await tx.equipment.update({
+          where: { id: data.equipmentId },
+          data: { currentStock: { increment: stockDelta } },
+        });
+
+        return transaction;
+      });
+      return { success: true, transaction: result };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "操作失败";
+      return { success: false, error: message };
+    }
+  },
+});

@@ -13,8 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Package, AlertTriangle } from "lucide-react";
+import { Plus, Search, Package, AlertTriangle, History } from "lucide-react";
 import { EquipmentFormDialog } from "@/components/equipment/equipment-form";
+import { TransactionDialog } from "@/components/equipment/transaction-dialog";
 
 interface Equipment {
   id: string;
@@ -52,6 +53,11 @@ export default function EquipmentPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
 
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(
+    null
+  );
+
   const fetchEquipment = useCallback(async () => {
     setLoading(true);
     try {
@@ -84,6 +90,11 @@ export default function EquipmentPage() {
   function handleEdit(item: Equipment) {
     setEditingItem(item);
     setDialogOpen(true);
+  }
+
+  function handleOpenTransactions(item: Equipment) {
+    setSelectedEquipment(item);
+    setTransactionDialogOpen(true);
   }
 
   async function handleDelete(item: Equipment) {
@@ -246,6 +257,15 @@ export default function EquipmentPage() {
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => handleOpenTransactions(item)}
+                        className="rounded-full text-[#6E6E73] hover:text-[#1D1D1F]"
+                      >
+                        <History className="w-3.5 h-3.5 mr-1" />
+                        流水
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleEdit(item)}
                         className="rounded-full text-[#6E6E73] hover:text-[#1D1D1F]"
                       >
@@ -274,6 +294,15 @@ export default function EquipmentPage() {
         initialData={editingItem}
         onSuccess={fetchEquipment}
       />
+
+      {selectedEquipment && (
+        <TransactionDialog
+          equipment={selectedEquipment}
+          open={transactionDialogOpen}
+          onOpenChange={setTransactionDialogOpen}
+          onSuccess={fetchEquipment}
+        />
+      )}
     </div>
   );
 }

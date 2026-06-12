@@ -86,6 +86,7 @@
 │  /api/students  /api/coaches  /api/classes  /api/courses     │
 │  /api/attendance/batch  /api/recharges  /api/grading/batch   │
 │  /api/competition/batch  /api/camp/batch  /api/equipment     │
+│  /api/equipment/transactions  /api/equipment/[id]/transactions│
 │  /api/backup  /api/upload  /api/config  /api/chat  /api/correct│
 ├─────────────────────────────────────────────────────────────┤
 │                      数据处理层                               │
@@ -135,6 +136,10 @@ tkd-crm/
 │   │   ├── camp/route.ts
 │   │   ├── camp/[id]/route.ts
 │   │   ├── camp/batch/route.ts         # 批量创建集训记录
+│   │   ├── equipment/route.ts          # 装备库存列表查询与创建
+│   │   ├── equipment/[id]/route.ts     # 装备详情、更新（不含库存）、软删除
+│   │   ├── equipment/transactions/route.ts      # 出入库流水列表查询与创建
+│   │   ├── equipment/[id]/transactions/route.ts # 指定装备的出入库流水
 │   │   ├── chat/route.ts               # AI 对话流式接口
 │   │   ├── correct/route.ts            # 语音输入文本矫正
 │   │   ├── config/route.ts             # 返回客户端可用的系统配置（当前模型名）
@@ -152,12 +157,14 @@ tkd-crm/
 │   ├── grading/                    # 考级记录管理页面（列表 + 创建/编辑弹窗）
 │   ├── competition/                # 比赛记录管理页面（列表 + 创建/编辑弹窗）
 │   ├── camp/                       # 集训记录管理页面（列表 + 创建/编辑弹窗）
+│   ├── equipment/                  # 装备库存管理页面（列表 + 流水弹窗）
 │   └── backup/                     # 数据备份管理页面
 ├── components/                     # 可复用组件
 │   ├── ui/                         # shadcn/ui 组件（badge, button, card, dialog, input, label, select, table）
 │   ├── layout/                     # sidebar.tsx, header.tsx
 │   ├── students/                   # student-form.tsx（含拍照上传、班级多选）
 │   ├── coaches/                    # coach-form.tsx（基本信息、在职状态切换）
+│   ├── equipment/                  # equipment-form.tsx（装备台账）、transaction-dialog.tsx（出入库流水）
 │   └── classes/                    # class-form.tsx（基本信息、学员多选）
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
@@ -214,7 +221,8 @@ tkd-crm/
 - **Grading**（考级晋升记录）
 - **Competition**（比赛记录）
 - **Camp**（集训与拓展活动记录）
-- **Equipment**（装备库存）：装备台账，记录名称、类型、规格、当前库存、预警线与状态
+- **Equipment**（装备库存）：装备台账，记录名称、类型、规格、当前库存、预警线与状态；通过关联的 `EquipmentTransaction` 驱动库存变化
+- **EquipmentTransaction**（装备出入库流水）：记录每次入库、出库、盘点调整，可关联学员/教练
 
 ### 关键关联关系
 
@@ -225,16 +233,19 @@ Student (1) ──────< (N) Camp
 Student (1) ──────< (N) Recharge
 Student (1) ──────< (N) Attendance
 Student (N) ──────< (M) Class      (@relation("ClassToStudent"))
+Student (1) ──────< (N) EquipmentTransaction
 Coach   (1) ──────< (N) Course
+Coach   (1) ──────< (N) EquipmentTransaction
 Class   (1) ──────< (N) Course
 Class   (1) ──────< (M) Student    (@relation("ClassToStudent"))
 Course  (1) ──────< (N) Attendance
+Equipment (1) ──────< (N) EquipmentTransaction
 ```
 
 - Coach 删除时，Schema 层面 `Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
 - Class 删除时，Schema 层面关联 Course 级联删除（`onDelete: Cascade`）
 - Student/Course 删除时，关联 Attendance/Grading/Competition/Camp/Recharge 级联删除（`onDelete: Cascade`）
-- **应用层删除行为**：REST API 中 `/api/students/[id]/DELETE`、`/api/coaches/[id]/DELETE`、`/api/classes/[id]/DELETE`、`/api/equipment/[id]/DELETE` 均使用软删除（将 `status` 设为 `inactive`）；AI 工具 `deleteClass` 使用 Prisma 硬删除，会触发上述级联规则
+- **应用层删除行为**：REST API 中 `/api/students/[id]/DELETE`、`/api/coaches/[id]/DELETE`、`/api/classes/[id]/DELETE`、`/api/equipment/[id]/DELETE` 均使用软删除（将 `status` 设为 `inactive`）；AI 工具 `deleteClass` 使用 Prisma 硬删除，会触发上述级联规则；装备硬删除时会级联删除其 `EquipmentTransaction`
 
 ### 索引设计
 
@@ -257,6 +268,7 @@ Course  (1) ──────< (N) Attendance
 | `AttendanceStatus` | `present`, `absent`, `late`, `leave`, `unmarked` |
 | `BeltLevel` | `white` → `white_yellow` → `yellow` → `yellow_green` → `green` → `green_blue` → `blue` → `blue_red` → `red` → `red_black` → `black`（共 11 级） |
 | `EquipmentCategory` | `uniform`（道服）、`gear`（护具）、`belt`（腰带）、`pad`（脚靶/手靶）、`accessory`（配件）、`other`（其他） |
+| `EquipmentTransactionType` | `in`（入库）、`out`（出库）、`adjust`（盘点调整） |
 
 ---
 
@@ -578,7 +590,7 @@ const { messages, sendMessage, setMessages, status } = useChat({
 
 ### 测试目录结构
 
-- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, equipment, config）
+- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, equipment, equipment-transactions, config）
 - `__tests__/components/` —— 组件测试（sidebar, coaches-page, student-form）
 - `__tests__/lib/` —— 工具函数测试（prisma 单例, utils, ai-tools）
 - `__tests__/setup.ts` —— 全局 setup，mock `next/navigation` 和 `next/head`
@@ -604,6 +616,7 @@ const { messages, sendMessage, setMessages, status } = useChat({
 | `createTestClass(data?)` | 创建测试班级 |
 | `createTestCourse(data?)` | 创建测试课程（如未提供 classId 则自动创建班级） |
 | `createTestEquipment(data?)` | 创建测试装备，名称自动加 `[test]` 前缀 |
+| `createTestEquipmentTransaction(data?)` | 创建测试出入库流水，并同步更新对应装备库存 |
 
 ---
 

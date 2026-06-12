@@ -63,6 +63,9 @@ export async function cleanupTestData() {
     await prisma.class.deleteMany({ where: { id: { in: testClassIds } } });
   }
   if (testEquipmentIds.length > 0) {
+    await prisma.equipmentTransaction.deleteMany({
+      where: { equipmentId: { in: testEquipmentIds } },
+    });
     await prisma.equipment.deleteMany({ where: { id: { in: testEquipmentIds } } });
   }
 }
@@ -118,6 +121,43 @@ export async function createTestEquipment(data?: Partial<Prisma.EquipmentCreateI
   return prisma.equipment.create({
     data: { ...base, ...data, name: prefixedName },
   });
+}
+
+export async function createTestEquipmentTransaction(
+  data?: Partial<Prisma.EquipmentTransactionUncheckedCreateInput>
+) {
+  let equipmentId = data?.equipmentId;
+  if (!equipmentId) {
+    const equipment = await createTestEquipment({ currentStock: 0 });
+    equipmentId = equipment.id;
+  }
+
+  const type = (data?.type || "in") as "in" | "out" | "adjust";
+  const quantity = data?.quantity ?? 1;
+
+  const transaction = await prisma.equipmentTransaction.create({
+    data: {
+      equipmentId,
+      type,
+      quantity,
+      reason: data?.reason,
+      operator: data?.operator,
+      relatedStudentId: data?.relatedStudentId,
+      relatedCoachId: data?.relatedCoachId,
+    },
+  });
+
+  let delta = 0;
+  if (type === "in") delta = quantity;
+  else if (type === "out") delta = -quantity;
+  else if (type === "adjust") delta = quantity;
+
+  await prisma.equipment.update({
+    where: { id: equipmentId },
+    data: { currentStock: { increment: delta } },
+  });
+
+  return transaction;
 }
 
 export async function createTestCourse(data?: Partial<Prisma.CourseUncheckedCreateInput>) {
