@@ -14,7 +14,7 @@ const updateSchema = z.object({
       "accessory",
       "t_shirt",
       "tracksuit",
-      "sneakers",
+      "taekwondo_shoes",
       "backpack",
       "other",
     ])

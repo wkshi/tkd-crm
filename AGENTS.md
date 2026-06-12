@@ -267,7 +267,7 @@ Equipment (1) ──────< (N) EquipmentTransaction
 | `CoachStatus` | `active`, `inactive`, `on_leave` |
 | `AttendanceStatus` | `present`, `absent`, `late`, `leave`, `unmarked` |
 | `BeltLevel` | `white` → `white_yellow` → `yellow` → `yellow_green` → `green` → `green_blue` → `blue` → `blue_red` → `red` → `red_black` → `black`（共 11 级） |
-| `EquipmentCategory` | `uniform`（道服）、`gear`（护具）、`belt`（腰带）、`pad`（脚靶/手靶）、`accessory`（配件）、`t_shirt`（T恤）、`tracksuit`（运动套装）、`sneakers`（运动鞋）、`backpack`（背包）、`other`（其他） |
+| `EquipmentCategory` | `uniform`（道服）、`gear`（护具）、`belt`（腰带）、`pad`（脚靶/手靶）、`accessory`（配件）、`t_shirt`（T恤）、`tracksuit`（运动套装）、`taekwondo_shoes`（道鞋）、`backpack`（背包）、`other`（其他） |
 | `EquipmentTransactionType` | `in`（入库）、`out`（出库）、`adjust`（盘点调整） |
 
 ---

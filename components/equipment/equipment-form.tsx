@@ -33,7 +33,7 @@ export interface EquipmentFormData {
     | "accessory"
     | "t_shirt"
     | "tracksuit"
-    | "sneakers"
+    | "taekwondo_shoes"
     | "backpack"
     | "other";
   specification: string;
@@ -57,7 +57,7 @@ const categoryOptions = [
   { value: "accessory", label: "配件" },
   { value: "t_shirt", label: "T恤" },
   { value: "tracksuit", label: "运动套装" },
-  { value: "sneakers", label: "运动鞋" },
+  { value: "taekwondo_shoes", label: "道鞋" },
   { value: "backpack", label: "背包" },
   { value: "other", label: "其他" },
 ];

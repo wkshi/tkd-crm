@@ -249,7 +249,7 @@ enum EquipmentCategory {
   accessory
   t_shirt
   tracksuit
-  sneakers
+  taekwondo_shoes
   backpack
   other
 }

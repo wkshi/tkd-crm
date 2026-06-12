@@ -36,7 +36,7 @@ const categoryMap: Record<string, string> = {
   accessory: "配件",
   t_shirt: "T恤",
   tracksuit: "运动套装",
-  sneakers: "运动鞋",
+  taekwondo_shoes: "道鞋",
   backpack: "背包",
   other: "其他",
 };

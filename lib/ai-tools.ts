@@ -1035,7 +1035,7 @@ export const searchEquipment = tool({
           "accessory",
           "t_shirt",
           "tracksuit",
-          "sneakers",
+          "taekwondo_shoes",
           "backpack",
           "other",
         ])
@@ -1084,7 +1084,7 @@ export const createEquipment = tool({
           "accessory",
           "t_shirt",
           "tracksuit",
-          "sneakers",
+          "taekwondo_shoes",
           "backpack",
           "other",
         ])
@@ -1128,7 +1128,7 @@ export const updateEquipment = tool({
           "accessory",
           "t_shirt",
           "tracksuit",
-          "sneakers",
+          "taekwondo_shoes",
           "backpack",
           "other",
         ])
