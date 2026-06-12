@@ -1018,3 +1018,125 @@ export const searchCamps = tool({
     return { camps, total, page, pageSize };
   },
 });
+
+// ==================== 装备库存管理工具 ====================
+
+export const searchEquipment = tool({
+  description: "搜索装备库存列表，支持按名称搜索、类型筛选、状态筛选和分页",
+  inputSchema: zodSchema(
+    z.object({
+      search: z.string().optional().describe("搜索关键词（装备名称）"),
+      category: z
+        .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
+        .optional()
+        .describe("装备类型筛选"),
+      status: z.enum(["active", "inactive", "suspended"]).optional().describe("状态筛选"),
+      page: z.number().default(1).describe("页码"),
+      pageSize: z.number().default(20).describe("每页数量"),
+    })
+  ),
+  execute: async ({ search, category, status, page, pageSize }) => {
+    const where: Prisma.EquipmentWhereInput = {};
+    if (search) {
+      where.name = { contains: search, mode: "insensitive" };
+    }
+    if (category) {
+      where.category = category;
+    }
+    if (status) {
+      where.status = status;
+    }
+    const [equipment, total] = await Promise.all([
+      prisma.equipment.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.equipment.count({ where }),
+    ]);
+    return { equipment, total, page, pageSize };
+  },
+});
+
+export const createEquipment = tool({
+  description: "创建新的装备库存记录",
+  inputSchema: zodSchema(
+    z.object({
+      name: z.string().min(1).describe("装备名称"),
+      category: z
+        .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
+        .default("gear")
+        .describe("装备类型"),
+      specification: z.string().optional().describe("规格/尺码"),
+      currentStock: z.number().int().min(0).default(0).describe("当前库存"),
+      minStock: z.number().int().min(0).default(0).describe("最低库存预警线"),
+      status: z.enum(["active", "inactive", "suspended"]).default("active").describe("状态"),
+      remark: z.string().optional().describe("备注"),
+    })
+  ),
+  execute: async (data) => {
+    const item = await prisma.equipment.create({
+      data: {
+        name: data.name,
+        category: data.category,
+        specification: data.specification || undefined,
+        currentStock: data.currentStock,
+        minStock: data.minStock,
+        status: data.status,
+        remark: data.remark || undefined,
+      },
+    });
+    return item;
+  },
+});
+
+export const updateEquipment = tool({
+  description: "更新装备库存信息",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("装备 ID"),
+      name: z.string().min(1).optional().describe("装备名称"),
+      category: z
+        .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
+        .optional()
+        .describe("装备类型"),
+      specification: z.string().optional().describe("规格/尺码"),
+      currentStock: z.number().int().min(0).optional().describe("当前库存"),
+      minStock: z.number().int().min(0).optional().describe("最低库存预警线"),
+      status: z.enum(["active", "inactive", "suspended"]).optional().describe("状态"),
+      remark: z.string().optional().describe("备注"),
+    })
+  ),
+  execute: async ({ id, ...data }) => {
+    const item = await prisma.equipment.update({
+      where: { id },
+      data: {
+        name: data.name,
+        category: data.category,
+        specification: data.specification,
+        currentStock: data.currentStock,
+        minStock: data.minStock,
+        status: data.status,
+        remark: data.remark,
+      },
+    });
+    return item;
+  },
+});
+
+export const deleteEquipment = tool({
+  description: "删除装备库存记录",
+  inputSchema: zodSchema(
+    z.object({
+      id: z.string().describe("装备 ID"),
+    })
+  ),
+  execute: async ({ id }) => {
+    await prisma.equipment.update({
+      where: { id },
+      data: { status: "inactive" },
+    });
+    return { success: true, message: "装备已删除" };
+  },
+});

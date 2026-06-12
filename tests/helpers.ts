@@ -29,6 +29,12 @@ export async function cleanupTestData() {
   });
   const testClassIds = testClasses.map((c) => c.id);
 
+  const testEquipment = await prisma.equipment.findMany({
+    where: { name: { startsWith: "[test]" } },
+    select: { id: true },
+  });
+  const testEquipmentIds = testEquipment.map((e) => e.id);
+
   if (testStudentIds.length > 0 || testCourseIds.length > 0) {
     await prisma.attendance.deleteMany({
       where: {
@@ -55,6 +61,9 @@ export async function cleanupTestData() {
   }
   if (testClassIds.length > 0) {
     await prisma.class.deleteMany({ where: { id: { in: testClassIds } } });
+  }
+  if (testEquipmentIds.length > 0) {
+    await prisma.equipment.deleteMany({ where: { id: { in: testEquipmentIds } } });
   }
 }
 
@@ -93,6 +102,20 @@ export async function createTestClass(data?: Partial<Prisma.ClassCreateInput>) {
     status: "active",
   };
   return prisma.class.create({
+    data: { ...base, ...data, name: prefixedName },
+  });
+}
+
+export async function createTestEquipment(data?: Partial<Prisma.EquipmentCreateInput>) {
+  const prefixedName = data?.name ? `[test]${data.name}` : "[test]装备";
+  const base: Prisma.EquipmentCreateInput = {
+    name: prefixedName,
+    category: "gear",
+    currentStock: 10,
+    minStock: 2,
+    status: "active",
+  };
+  return prisma.equipment.create({
     data: { ...base, ...data, name: prefixedName },
   });
 }

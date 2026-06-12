@@ -180,6 +180,24 @@ model Recharge {
   @@map("recharges")
 }
 
+model Equipment {
+  id            String            @id @default(uuid())
+  name          String
+  category      EquipmentCategory @default(gear)
+  specification String?           @map("specification")
+  currentStock  Int               @default(0) @map("current_stock")
+  minStock      Int               @default(0) @map("min_stock")
+  status        Status            @default(active)
+  remark        String?
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  @@index([name])
+  @@index([category])
+  @@index([status])
+  @@map("equipment")
+}
+
 enum Gender {
   male
   female
@@ -217,4 +235,13 @@ enum BeltLevel {
   red
   red_black      @map("red-black")
   black
+}
+
+enum EquipmentCategory {
+  uniform
+  gear
+  belt
+  pad
+  accessory
+  other
 }

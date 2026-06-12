@@ -6,11 +6,11 @@
 
 ## 项目概述
 
-本项目是一个为跆拳道馆量身打造的客户关系管理（CRM）平台，覆盖学员全生命周期管理：从个人基本资料录入、课务与时间精细化管理、成长与活动记录，到课表排期与考勤点名的一体化操作。系统深度集成 AI Agent 能力，用户可通过自然语言对话完成学员、教练、班级、课程、考勤、充值、考级、比赛、集训等全模块的增删改查。
+本项目是一个为跆拳道馆量身打造的客户关系管理（CRM）平台，覆盖学员全生命周期管理：从个人基本资料录入、课务与时间精细化管理、成长与活动记录，到课表排期与考勤点名的一体化操作。系统深度集成 AI Agent 能力，用户可通过自然语言对话完成学员、教练、班级、课程、考勤、充值、考级、比赛、集训、装备库存等全模块的增删改查。
 
 **当前状态**：项目已完成核心功能编码，包括数据库 Schema、REST API、前端页面、AI 对话流、照片上传、数据备份与恢复，以及完整的测试基础设施。`docs/` 目录下保留有产品需求文档（PRD）和 UI 设计文档作为参考。
 
-前端已实现的页面包括：仪表盘首页、学员管理、教练管理、班级管理、课表日历、考勤查询与点名、充值管理、考级记录、比赛记录、集训记录、AI 助手对话、数据备份管理。
+前端已实现的页面包括：仪表盘首页、学员管理、教练管理、班级管理、课表日历、考勤查询与点名、充值管理、考级记录、比赛记录、集训记录、装备库存、AI 助手对话、数据备份管理。
 
 ---
 
@@ -85,8 +85,8 @@
 │                       API 路由层 (App Router)                 │
 │  /api/students  /api/coaches  /api/classes  /api/courses     │
 │  /api/attendance/batch  /api/recharges  /api/grading/batch   │
-│  /api/competition/batch  /api/camp/batch  /api/chat          │
-│  /api/backup  /api/upload  /api/config  /api/correct         │
+│  /api/competition/batch  /api/camp/batch  /api/equipment     │
+│  /api/backup  /api/upload  /api/config  /api/chat  /api/correct│
 ├─────────────────────────────────────────────────────────────┤
 │                      数据处理层                               │
 │  Prisma ORM + Zod Validation + PostgreSQL 事务               │
@@ -214,6 +214,7 @@ tkd-crm/
 - **Grading**（考级晋升记录）
 - **Competition**（比赛记录）
 - **Camp**（集训与拓展活动记录）
+- **Equipment**（装备库存）：装备台账，记录名称、类型、规格、当前库存、预警线与状态
 
 ### 关键关联关系
 
@@ -233,7 +234,7 @@ Course  (1) ──────< (N) Attendance
 - Coach 删除时，Schema 层面 `Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
 - Class 删除时，Schema 层面关联 Course 级联删除（`onDelete: Cascade`）
 - Student/Course 删除时，关联 Attendance/Grading/Competition/Camp/Recharge 级联删除（`onDelete: Cascade`）
-- **应用层删除行为**：REST API 中 `/api/students/[id]/DELETE`、`/api/coaches/[id]/DELETE`、`/api/classes/[id]/DELETE` 均使用软删除（将 `status` 设为 `inactive`）；AI 工具 `deleteClass` 使用 Prisma 硬删除，会触发上述级联规则
+- **应用层删除行为**：REST API 中 `/api/students/[id]/DELETE`、`/api/coaches/[id]/DELETE`、`/api/classes/[id]/DELETE`、`/api/equipment/[id]/DELETE` 均使用软删除（将 `status` 设为 `inactive`）；AI 工具 `deleteClass` 使用 Prisma 硬删除，会触发上述级联规则
 
 ### 索引设计
 
@@ -255,6 +256,7 @@ Course  (1) ──────< (N) Attendance
 | `CoachStatus` | `active`, `inactive`, `on_leave` |
 | `AttendanceStatus` | `present`, `absent`, `late`, `leave`, `unmarked` |
 | `BeltLevel` | `white` → `white_yellow` → `yellow` → `yellow_green` → `green` → `green_blue` → `blue` → `blue_red` → `red` → `red_black` → `black`（共 11 级） |
+| `EquipmentCategory` | `uniform`（道服）、`gear`（护具）、`belt`（腰带）、`pad`（脚靶/手靶）、`accessory`（配件）、`other`（其他） |
 
 ---
 
@@ -576,7 +578,7 @@ const { messages, sendMessage, setMessages, status } = useChat({
 
 ### 测试目录结构
 
-- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, config）
+- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, equipment, config）
 - `__tests__/components/` —— 组件测试（sidebar, coaches-page, student-form）
 - `__tests__/lib/` —— 工具函数测试（prisma 单例, utils, ai-tools）
 - `__tests__/setup.ts` —— 全局 setup，mock `next/navigation` 和 `next/head`
@@ -601,6 +603,7 @@ const { messages, sendMessage, setMessages, status } = useChat({
 | `createTestCoach(data?)` | 创建测试教练 |
 | `createTestClass(data?)` | 创建测试班级 |
 | `createTestCourse(data?)` | 创建测试课程（如未提供 classId 则自动创建班级） |
+| `createTestEquipment(data?)` | 创建测试装备，名称自动加 `[test]` 前缀 |
 
 ---
 

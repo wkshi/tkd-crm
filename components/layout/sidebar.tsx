@@ -9,6 +9,7 @@ import {
   UserCog,
   CalendarDays,
   ClipboardCheck,
+  Package,
   HardDrive,
   Sparkles,
   GraduationCap,
@@ -41,6 +42,7 @@ const navGroups: NavGroup[] = [
       { href: "/classes", icon: GraduationCap, label: "班级管理" },
       { href: "/calendar", icon: CalendarDays, label: "课表日历" },
       { href: "/attendance", icon: ClipboardCheck, label: "考勤查询" },
+      { href: "/equipment", icon: Package, label: "装备库存" },
     ],
   },
   {
