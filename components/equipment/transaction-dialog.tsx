@@ -144,9 +144,14 @@ export function TransactionDialog({
         }),
       });
 
-      const data = await res.json();
+      let data: { error?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        // 服务端返回非 JSON（如 500 HTML），忽略解析失败
+      }
       if (!res.ok) {
-        alert(data.error || "登记失败");
+        alert(data.error || `登记失败（${res.status}）`);
         return;
       }
 

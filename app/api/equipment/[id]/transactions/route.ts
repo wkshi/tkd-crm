@@ -7,33 +7,38 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const { searchParams } = new URL(req.url);
-  const type = searchParams.get("type") || undefined;
-  const page = parseInt(searchParams.get("page") || "1");
-  const pageSize = parseInt(searchParams.get("pageSize") || "20");
+  try {
+    const { id } = await params;
+    const { searchParams } = new URL(req.url);
+    const type = searchParams.get("type") || undefined;
+    const page = parseInt(searchParams.get("page") || "1");
+    const pageSize = parseInt(searchParams.get("pageSize") || "20");
 
-  const where: {
-    equipmentId: string;
-    type?: EquipmentTransactionType;
-  } = { equipmentId: id };
-  if (type) {
-    where.type = type as EquipmentTransactionType;
+    const where: {
+      equipmentId: string;
+      type?: EquipmentTransactionType;
+    } = { equipmentId: id };
+    if (type) {
+      where.type = type as EquipmentTransactionType;
+    }
+
+    const [transactions, total] = await Promise.all([
+      prisma.equipmentTransaction.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          relatedStudent: { select: { id: true, name: true } },
+          relatedCoach: { select: { id: true, name: true } },
+        },
+      }),
+      prisma.equipmentTransaction.count({ where }),
+    ]);
+
+    return Response.json({ transactions, total, page, pageSize });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "查询失败";
+    return Response.json({ error: message }, { status: 500 });
   }
-
-  const [transactions, total] = await Promise.all([
-    prisma.equipmentTransaction.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      include: {
-        relatedStudent: { select: { id: true, name: true } },
-        relatedCoach: { select: { id: true, name: true } },
-      },
-    }),
-    prisma.equipmentTransaction.count({ where }),
-  ]);
-
-  return Response.json({ transactions, total, page, pageSize });
 }
