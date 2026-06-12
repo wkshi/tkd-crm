@@ -7,7 +7,18 @@ import { z } from "zod";
 const createSchema = z.object({
   name: z.string().min(1),
   category: z
-    .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
+    .enum([
+      "uniform",
+      "gear",
+      "belt",
+      "pad",
+      "accessory",
+      "t_shirt",
+      "tracksuit",
+      "sneakers",
+      "backpack",
+      "other",
+    ])
     .default("gear"),
   specification: z.string().optional(),
   currentStock: z.number().int().min(0).default(0),

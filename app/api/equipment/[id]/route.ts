@@ -6,7 +6,18 @@ import { z } from "zod";
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
   category: z
-    .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
+    .enum([
+      "uniform",
+      "gear",
+      "belt",
+      "pad",
+      "accessory",
+      "t_shirt",
+      "tracksuit",
+      "sneakers",
+      "backpack",
+      "other",
+    ])
     .optional(),
   specification: z.string().optional(),
   minStock: z.number().int().min(0).optional(),

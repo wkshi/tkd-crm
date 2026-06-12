@@ -247,6 +247,10 @@ enum EquipmentCategory {
   belt
   pad
   accessory
+  t_shirt
+  tracksuit
+  sneakers
+  backpack
   other
 }
 

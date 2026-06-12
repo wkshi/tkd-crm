@@ -1027,7 +1027,18 @@ export const searchEquipment = tool({
     z.object({
       search: z.string().optional().describe("搜索关键词（装备名称）"),
       category: z
-        .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
+        .enum([
+          "uniform",
+          "gear",
+          "belt",
+          "pad",
+          "accessory",
+          "t_shirt",
+          "tracksuit",
+          "sneakers",
+          "backpack",
+          "other",
+        ])
         .optional()
         .describe("装备类型筛选"),
       status: z.enum(["active", "inactive", "suspended"]).optional().describe("状态筛选"),
@@ -1065,7 +1076,18 @@ export const createEquipment = tool({
     z.object({
       name: z.string().min(1).describe("装备名称"),
       category: z
-        .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
+        .enum([
+          "uniform",
+          "gear",
+          "belt",
+          "pad",
+          "accessory",
+          "t_shirt",
+          "tracksuit",
+          "sneakers",
+          "backpack",
+          "other",
+        ])
         .default("gear")
         .describe("装备类型"),
       specification: z.string().optional().describe("规格/尺码"),
@@ -1098,7 +1120,18 @@ export const updateEquipment = tool({
       id: z.string().describe("装备 ID"),
       name: z.string().min(1).optional().describe("装备名称"),
       category: z
-        .enum(["uniform", "gear", "belt", "pad", "accessory", "other"])
+        .enum([
+          "uniform",
+          "gear",
+          "belt",
+          "pad",
+          "accessory",
+          "t_shirt",
+          "tracksuit",
+          "sneakers",
+          "backpack",
+          "other",
+        ])
         .optional()
         .describe("装备类型"),
       specification: z.string().optional().describe("规格/尺码"),

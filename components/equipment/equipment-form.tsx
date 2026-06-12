@@ -25,7 +25,17 @@ interface Equipment {
 
 export interface EquipmentFormData {
   name: string;
-  category: "uniform" | "gear" | "belt" | "pad" | "accessory" | "other";
+  category:
+    | "uniform"
+    | "gear"
+    | "belt"
+    | "pad"
+    | "accessory"
+    | "t_shirt"
+    | "tracksuit"
+    | "sneakers"
+    | "backpack"
+    | "other";
   specification: string;
   minStock: number;
   status: "active" | "inactive" | "suspended";
@@ -45,6 +55,10 @@ const categoryOptions = [
   { value: "belt", label: "腰带" },
   { value: "pad", label: "脚靶" },
   { value: "accessory", label: "配件" },
+  { value: "t_shirt", label: "T恤" },
+  { value: "tracksuit", label: "运动套装" },
+  { value: "sneakers", label: "运动鞋" },
+  { value: "backpack", label: "背包" },
   { value: "other", label: "其他" },
 ];
 
