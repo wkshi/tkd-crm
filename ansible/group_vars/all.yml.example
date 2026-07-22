@@ -41,6 +41,16 @@ groq_api_key: ""
 custom_openai_base_url: ""
 custom_openai_api_key: ""
 
+# ── npm 镜像源 ──
+# 国内服务器建议使用 npmmirror 镜像加速依赖安装
+# 海外服务器可改为官方源 https://registry.npmjs.org/
+npm_registry: "https://registry.npmmirror.com"
+
+# ── npm HTTP 代理（可选）──
+# 留空表示不使用代理；可指向控制机上的局域网代理
+# 注意：代理软件需开启"允许局域网连接"，且目标服务器能访问该地址
+# npm_proxy: "http://192.168.10.111:7890"
+
 # ── 健康检查配置 ──
 health_check_retries: 12
 health_check_delay: 5

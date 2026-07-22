@@ -54,14 +54,16 @@
     mode: "0600"
 
 - name: 安装 npm 依赖
-  ansible.builtin.command: npm ci --registry=https://registry.npmjs.org/
+  ansible.builtin.command: npm ci --registry={{ npm_registry }}
   args:
     chdir: "{{ deploy_dir }}"
   become: true
   become_user: tkd-crm
   environment:
     HOME: "{{ deploy_dir }}"
-    NPM_CONFIG_REGISTRY: "https://registry.npmjs.org/"
+    NPM_CONFIG_REGISTRY: "{{ npm_registry }}"
+    http_proxy: "{{ npm_proxy | default(omit, true) }}"
+    https_proxy: "{{ npm_proxy | default(omit, true) }}"
   changed_when: true
 
 - name: 生成 Prisma Client
