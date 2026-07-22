@@ -22,6 +22,9 @@ import {
  * 仪表盘首页（Server Component）
  * 直接从 Prisma 查询统计数据，无需额外 API 调用
  */
+// 强制动态渲染：避免生产构建时将查询结果固化为静态 HTML
+export const dynamic = "force-dynamic"
+
 export default async function DashboardPage() {
   // ---------- 1. 统计查询 ----------
 
@@ -39,6 +42,11 @@ export default async function DashboardPage() {
 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  // 本月新增学员数（用于在册学员卡片的增长徽标）
+  const newStudentsThisMonth = await prisma.student.count({
+    where: { createdAt: { gte: startOfMonth, lte: endOfMonth } },
+  });
 
   const totalAttendance = await prisma.attendance.count({
     where: {
@@ -180,15 +188,14 @@ export default async function DashboardPage() {
                 <div className="w-9 h-9 rounded-[10px] bg-[#0071E3]/8 flex items-center justify-center">
                   <Users className="w-[18px] h-[18px] text-[#0071E3]" />
                 </div>
-                <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#34C759]/10 text-[#34C759]">
-                  +3
-                </span>
+                {newStudentsThisMonth > 0 && (
+                  <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md bg-[#34C759]/10 text-[#34C759]">
+                    +{newStudentsThisMonth} 本月新增
+                  </span>
+                )}
               </div>
               <div className="text-[32px] font-bold text-[#1D1D1F] leading-none">{totalStudents}</div>
               <div className="text-[13px] text-[#86868B] mt-1.5 font-medium">在册学员</div>
-              <div className="h-[3px] bg-black/[0.05] rounded-full mt-3 overflow-hidden">
-                <div className="h-full bg-[#0071E3] rounded-full" style={{ width: "80%" }} />
-              </div>
             </CardContent>
           </Card>
         </Link>
