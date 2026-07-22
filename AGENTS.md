@@ -6,49 +6,48 @@
 
 ## 项目概述
 
-本项目是一个为跆拳道馆量身打造的客户关系管理（CRM）平台，覆盖学员全生命周期管理：从个人基本资料录入、课务与时间精细化管理、成长与活动记录，到课表排期与考勤点名的一体化操作。系统深度集成 AI Agent 能力，用户可通过自然语言对话完成学员、教练、班级、课程、考勤、充值、考级、比赛、集训、装备库存等全模块的增删改查。
+本项目是一个为跆拳道馆量身打造的客户关系管理（CRM）平台，覆盖学员全生命周期管理——从个人基本资料的录入，到课务与时间的精细化管理，再到成长与活动的完整记录，以及课表排期、考勤点名、装备库存的一体化操作。系统深度集成 AI Agent 能力，用户可通过自然语言对话完成学员、教练、班级、课程、考勤、充值、考级、比赛、集训、装备库存等核心操作。
 
-**当前状态**：项目已完成核心功能编码，包括数据库 Schema、REST API、前端页面、AI 对话流、照片上传、数据备份与恢复，以及完整的测试基础设施。`docs/` 目录下保留有产品需求文档（PRD）和 UI 设计文档作为参考。
+**当前状态**：项目已完成核心功能编码，包括数据库 Schema、REST API、前端页面、AI 对话流、照片上传、数据备份与恢复、装备库存管理，以及完整的测试基础设施。`docs/` 目录下保留有产品需求文档（PRD）和 UI 设计文档作为参考。
 
-前端已实现的页面包括：仪表盘首页、学员管理、教练管理、班级管理、课表日历、考勤查询与点名、充值管理、考级记录、比赛记录、集训记录、装备库存、AI 助手对话、数据备份管理。
+前端页面已完整实现：仪表盘、学员管理、教练管理、班级管理、课表日历、考勤查询与点名、充值管理、考级记录、比赛记录、集训记录、装备库存、AI 助手对话、数据备份管理。
 
 ---
 
 ## 技术栈
 
-| 层级 | 技术方案 | 版本/说明 |
-|------|----------|-----------|
-| **前端框架** | Next.js + App Router + React | 16.1.7 / 19.2.4 |
-| **语言** | TypeScript | 5.9.3 |
-| **样式** | Tailwind CSS + shadcn/ui | 4.2.1 / base-nova 风格 |
-| **UI 底层** | `@base-ui/react` | shadcn/ui 组件基于此构建 |
-| **日历组件** | `@fullcalendar/react` | daygrid / timegrid / interaction / list |
-| **状态/主题** | `next-themes` | 默认 light，支持 `D` 键切换 dark/light |
-| **数据库** | PostgreSQL | 16 |
-| **ORM** | Prisma | 6.19.3 |
-| **AI SDK** | Vercel AI SDK + Provider Registry | 6.0.190 |
-| **数据表格** | TanStack Table | 8.21.3 |
-| **图表** | Recharts | 3.8.1 |
-| **图标** | Lucide React | latest |
-| **校验** | Zod | 4.4.3 |
-| **测试** | Vitest + jsdom + `@testing-library/react` + `next-test-api-route-handler` | 4.1.7 |
-| **容器化** | Docker + Docker Compose | — |
-| **构建工具** | Turbopack（开发模式） | — |
-| **其他** | `react-markdown` + `remark-gfm`（AI 消息渲染）、`archiver` + `decompress`（备份 ZIP）、`@faker-js/faker`（测试数据） | — |
+| 层级 | 技术方案 |
+|------|----------|
+| **前端框架** | Next.js 16.1.7 + App Router + React 19.2.4 |
+| **语言** | TypeScript 5.9.3 |
+| **样式** | Tailwind CSS 4.2.1 + shadcn/ui（base-nova 风格） |
+| **UI 底层** | `@base-ui/react`（shadcn/ui 组件基于此构建） |
+| **日历组件** | `@fullcalendar/react`（daygrid / timegrid / interaction / list） |
+| **数据库** | PostgreSQL 16 |
+| **ORM** | Prisma 6.19.3 |
+| **AI SDK** | Vercel AI SDK 6.0.190 + Provider Registry |
+| **数据表格** | TanStack Table 8.21.3 |
+| **图表** | Recharts 3.8.1 |
+| **图标** | Lucide React |
+| **容器化** | Docker + Docker Compose |
+| **校验** | Zod 4.4.3 |
+| **测试** | Vitest 4.1.7 + jsdom + `@testing-library/react` + `next-test-api-route-handler` |
+| **构建工具** | Turbopack（开发模式） |
+| **其他** | `react-markdown` + `remark-gfm`（AI 消息渲染）、`archiver` + `decompress`（备份 ZIP）、`@faker-js/faker`（测试数据）、`next-themes`（主题切换） |
 
 ### 支持的 LLM 提供商
 
-通过 Vercel AI SDK 的 Provider Registry 支持多提供商动态切换：
+通过 Vercel AI SDK 的 Provider Registry 支持多提供商动态切换（见 `lib/ai-model.ts`）：
 
-- OpenAI（`@ai-sdk/openai`）
-- Anthropic Claude（`@ai-sdk/anthropic`）
-- Google Gemini（`@ai-sdk/google`）
-- DeepSeek（`@ai-sdk/deepseek`）
-- Groq（`@ai-sdk/groq`）
+- OpenAI (`@ai-sdk/openai`)
+- Anthropic Claude (`@ai-sdk/anthropic`)
+- Google Gemini (`@ai-sdk/google`)
+- DeepSeek (`@ai-sdk/deepseek`)
+- Groq (`@ai-sdk/groq`)
 
-模型通过环境变量 `MODEL=provider:model-id` 指定，例如 `openai:gpt-4o`。额外支持 `custom:` 前缀，通过 `CUSTOM_OPENAI_BASE_URL` 和 `CUSTOM_OPENAI_API_KEY` 接入自定义 OpenAI 兼容端点。
+模型通过环境变量 `MODEL=provider:model-id` 格式指定，例如 `openai:gpt-4o`（未设置时默认 `openai:gpt-4o`）。额外支持 `custom:` 前缀，通过 `CUSTOM_OPENAI_BASE_URL` 和 `CUSTOM_OPENAI_API_KEY` 接入自定义 OpenAI 兼容端点。
 
-> **注意**：`lib/ai-model.ts` 中 Google 提供商读取的是 `GOOGLE_API_KEY` 环境变量（不是 `GOOGLE_GENERATIVE_AI_API_KEY`）。
+> **注意**：`lib/ai-model.ts` 中 Google 提供商读取的是 `GOOGLE_API_KEY` 环境变量（不是 `GOOGLE_GENERATIVE_AI_API_KEY`）。仓库自带的 `.env` 模板中注释掉的是 `GOOGLE_GENERATIVE_AI_API_KEY`，使用时需要自行改成 `GOOGLE_API_KEY`。
 
 ---
 
@@ -57,18 +56,17 @@
 | 文件 | 用途 |
 |------|------|
 | `package.json` | 项目依赖与 npm 脚本定义 |
-| `next.config.mjs` | Next.js 配置：Docker 部署时输出 `standalone`、客户端可访问环境变量 `APP_NAME`/`APP_VERSION`、图片优化、`trailingSlash: false` |
-| `vitest.config.ts` | 测试配置：`jsdom` 环境、全局模式、`fileParallelism: false`、别名 `@` 指向项目根目录 |
-| `tsconfig.json` | TypeScript 编译配置，`baseUrl: "."`，`@/*` 映射到 `./*` |
+| `next.config.mjs` | Next.js 配置：output 由 `NEXT_OUTPUT` 环境变量控制（生产 Docker 镜像内置 `NEXT_OUTPUT=standalone`）、图片优化、trailingSlash、客户端环境变量 `APP_NAME`（跆拳道 CRM）/ `APP_VERSION` |
+| `vitest.config.ts` | 测试配置：jsdom 环境、全局模式、`fileParallelism: false`、别名 `@` 指向项目根目录 |
+| `tsconfig.json` | TypeScript 编译配置，路径别名 `@/*` 映射 `./*` |
 | `eslint.config.mjs` | ESLint v9 flat config，继承 `eslint-config-next/core-web-vitals` 和 `eslint-config-next/typescript` |
-| `.prettierrc` | 代码格式化：无分号、双引号、2 空格缩进、printWidth 80、`prettier-plugin-tailwindcss` |
+| `.prettierrc` | 代码格式化：无分号、双引号、2 空格缩进、printWidth 80、prettier-plugin-tailwindcss |
 | `postcss.config.mjs` | PostCSS 配置（Tailwind CSS v4） |
-| `components.json` | shadcn/ui 项目配置，`style: base-nova`，`iconLibrary: lucide` |
-| `docker-compose.yml` | 开发环境：PostgreSQL 16 + pgAdmin + 本地生产数据库（`postgres-prod`） |
+| `components.json` | shadcn/ui 项目配置（style: base-nova，baseColor: neutral） |
+| `docker-compose.yml` | 开发环境：PostgreSQL 16 + pgAdmin + 本地生产数据库（postgres-prod） |
 | `docker-compose.prod.yml` | 生产环境编排：App + PostgreSQL + 持久化卷 |
 | `Dockerfile` | 多阶段构建（builder + runner），基于 `node:22-alpine`，内置 `postgresql-client` |
 | `.github/workflows/ci.yml` | GitHub Actions：测试 + 类型检查 + Lint + 构建 + Ansible 语法检查 |
-| `ansible/` | Ansible 自动化部署方案：在 RedHat 系服务器上通过 RPM 包安装 Node.js + PostgreSQL，并封装为 systemd 服务 |
 
 ---
 
@@ -85,9 +83,9 @@
 │                       API 路由层 (App Router)                 │
 │  /api/students  /api/coaches  /api/classes  /api/courses     │
 │  /api/attendance/batch  /api/recharges  /api/grading/batch   │
-│  /api/competition/batch  /api/camp/batch  /api/equipment     │
-│  /api/equipment/transactions  /api/equipment/[id]/transactions│
-│  /api/backup  /api/upload  /api/config  /api/chat  /api/correct│
+│  /api/competition/batch  /api/camp/batch  /api/chat          │
+│  /api/equipment  /api/equipment/transactions  /api/backup    │
+│  /api/upload  /api/config  /api/correct                      │
 ├─────────────────────────────────────────────────────────────┤
 │                      数据处理层                               │
 │  Prisma ORM + Zod Validation + PostgreSQL 事务               │
@@ -98,8 +96,8 @@
 ```
 
 - **开发服务器**：`npm run dev` 启动 Turbopack（前台运行），监听 `localhost:3000`
-- **生产服务器**：`npm run build` 构建后，`npm start` 启动；生产部署时设置 `NEXT_OUTPUT=standalone` 输出 standalone 包
-- **数据库连接**：通过 `DATABASE_URL` 环境变量，Prisma Client 单例模式管理连接（见 `lib/prisma.ts`）
+- **生产服务器**：`npm run build` 构建后，`npm start` 启动。Docker 镜像通过 `NEXT_OUTPUT=standalone` 输出 standalone 模式
+- **数据库连接**：通过 `DATABASE_URL` 环境变量，Prisma Client 单例模式管理连接
 - **照片存储**：本地文件系统 `public/uploads/{students,coaches}/{id}.jpg`，数据库只存相对路径
 
 ---
@@ -125,8 +123,8 @@ tkd-crm/
 │   │   ├── courses/[id]/route.ts
 │   │   ├── attendance/route.ts
 │   │   ├── attendance/batch/route.ts   # 批量点名（事务扣减课时）
-│   │   ├── recharges/route.ts          # 充值记录列表（按学员过滤）与创建
-│   │   ├── recharges/[id]/route.ts     # 充值记录详情、备注更新、删除并回滚课时
+│   │   ├── recharges/route.ts          # 充值记录列表与创建
+│   │   ├── recharges/[id]/route.ts     # 充值记录详情与删除
 │   │   ├── grading/route.ts
 │   │   ├── grading/[id]/route.ts
 │   │   ├── grading/batch/route.ts      # 批量创建考级记录
@@ -136,16 +134,16 @@ tkd-crm/
 │   │   ├── camp/route.ts
 │   │   ├── camp/[id]/route.ts
 │   │   ├── camp/batch/route.ts         # 批量创建集训记录
-│   │   ├── equipment/route.ts          # 装备库存列表查询与创建
-│   │   ├── equipment/[id]/route.ts     # 装备详情、更新（不含库存）、软删除
-│   │   ├── equipment/transactions/route.ts      # 出入库流水列表查询与创建
-│   │   ├── equipment/[id]/transactions/route.ts # 指定装备的出入库流水
+│   │   ├── equipment/route.ts          # 装备库存列表与创建
+│   │   ├── equipment/[id]/route.ts     # 装备详情、更新、删除（软删除）
+│   │   ├── equipment/[id]/transactions/route.ts
+│   │   ├── equipment/transactions/route.ts # 装备出入库流水
 │   │   ├── chat/route.ts               # AI 对话流式接口
 │   │   ├── correct/route.ts            # 语音输入文本矫正
 │   │   ├── config/route.ts             # 返回客户端可用的系统配置（当前模型名）
 │   │   ├── upload/route.ts             # 照片上传/删除
 │   │   └── backup/route.ts             # 数据备份/恢复（ZIP + pg_dump/psql）
-│   ├── students/                   # 学员列表、新增、详情、编辑页面
+│   ├── students/                   # 学员列表、新增（new/）、详情与编辑（[id]/）页面
 │   ├── coaches/                    # 教练管理（双Tab：教练列表 + 课时统计）、新增、详情、编辑页面
 │   ├── classes/                    # 班级列表、新增、详情、编辑页面
 │   ├── calendar/                   # 课表日历页面（FullCalendar 月/周/日 + 自定义周课表视图）
@@ -157,15 +155,17 @@ tkd-crm/
 │   ├── grading/                    # 考级记录管理页面（列表 + 创建/编辑弹窗）
 │   ├── competition/                # 比赛记录管理页面（列表 + 创建/编辑弹窗）
 │   ├── camp/                       # 集训记录管理页面（列表 + 创建/编辑弹窗）
-│   ├── equipment/                  # 装备库存管理页面（列表 + 流水弹窗）
+│   ├── equipment/                  # 装备库存管理页面（列表 + 创建/编辑弹窗 + 出入库流水）
 │   └── backup/                     # 数据备份管理页面
 ├── components/                     # 可复用组件
 │   ├── ui/                         # shadcn/ui 组件（badge, button, card, dialog, input, label, select, table）
 │   ├── layout/                     # sidebar.tsx, header.tsx
 │   ├── students/                   # student-form.tsx（含拍照上传、班级多选）
 │   ├── coaches/                    # coach-form.tsx（基本信息、在职状态切换）
-│   ├── equipment/                  # equipment-form.tsx（装备台账）、transaction-dialog.tsx（出入库流水）
-│   └── classes/                    # class-form.tsx（基本信息、学员多选）
+│   ├── classes/                    # class-form.tsx（基本信息、学员多选）
+│   ├── equipment/                  # equipment-form.tsx, transaction-dialog.tsx
+│   └── theme-provider.tsx          # next-themes 主题提供者（dark/light 切换）
+├── hooks/                          # 预留的自定义 Hooks 目录（当前为空）
 ├── lib/                            # 工具函数与配置
 │   ├── prisma.ts                   # Prisma Client 单例
 │   ├── ai-model.ts                 # AI Provider Registry + getModel()
@@ -173,13 +173,13 @@ tkd-crm/
 │   ├── belt-level.tsx              # 腰带级别中文映射、样式映射、BeltBadge 组件
 │   └── utils.ts                    # cn() 工具（clsx + tailwind-merge）
 ├── __tests__/                      # 测试文件
-│   ├── api/                        # API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, config）
+│   ├── api/                        # API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, equipment, config）
 │   ├── components/                 # 组件测试（sidebar, coaches-page, student-form）
 │   ├── lib/                        # 工具函数测试（prisma 单例, utils, ai-tools）
 │   ├── helpers.ts                  # 备用测试辅助函数（与 tests/helpers.ts 内容重叠）
 │   └── setup.ts                    # Vitest 全局 setup（mock next/navigation、next/head）
 ├── tests/                          # 主要测试辅助函数
-│   └── helpers.ts                  # cleanupTestData, createTestStudent 等（API 测试从此文件导入）
+│   └── helpers.ts                  # cleanupTestData, createTestStudent 等（API 测试从此导入）
 ├── prisma/
 │   ├── schema.prisma               # 数据库 Schema
 │   └── migrations/                 # 数据库迁移文件
@@ -193,6 +193,7 @@ tkd-crm/
 │   ├── 跆拳道馆CRM系统_UI设计文档.md # UI 设计文档
 │   └── 实施计划.md                 # 分阶段实施计划
 ├── .github/workflows/ci.yml        # GitHub Actions CI 工作流
+├── ansible/                        # Ansible 自动化部署（RedHat/Fedora RPM + systemd）
 ├── docker-compose.yml              # PostgreSQL 16 + pgAdmin + 本地生产数据库容器配置
 ├── docker-compose.prod.yml         # 生产环境 Docker Compose 配置
 ├── Dockerfile                      # 多阶段生产镜像构建
@@ -215,14 +216,14 @@ tkd-crm/
 - **Student**（学员）：基本信息、课务信息、照片路径
 - **Coach**（教练）：基本信息、工作信息、照片路径
 - **Class**（班级）：名称、级别、最大人数、关联学员和课程
-- **Course**（课程）：名称（可空，自动生成默认名称）、时间、关联教练和班级
+- **Course**（课程）：标题（可空，自动生成默认名称）、时间、关联教练和班级
 - **Attendance**（考勤）：课程-学员关联、出勤状态
-- **Recharge**（充值记录）：学员课时变动记录，包含 `increment`/`decrement` 操作和有效期
+- **Recharge**（充值记录）：学员课时变动记录，`action` 为 `increment`/`decrement`（String 字段，非枚举），包含变动次数和有效天数
 - **Grading**（考级晋升记录）
 - **Competition**（比赛记录）
-- **Camp**（集训与拓展活动记录）
-- **Equipment**（装备库存）：装备台账，记录名称、类型、规格、当前库存、预警线与状态；通过关联的 `EquipmentTransaction` 驱动库存变化
-- **EquipmentTransaction**（装备出入库流水）：记录每次入库、出库、盘点调整，可关联学员/教练
+- **Camp**（集训与拓展记录）
+- **Equipment**（装备库存）：名称、类型、规格、当前库存、最低库存预警线、状态、备注
+- **EquipmentTransaction**（装备出入库流水）：类型（入库/出库/盘点调整）、数量、原因、操作人、关联学员/教练
 
 ### 关键关联关系
 
@@ -232,20 +233,20 @@ Student (1) ──────< (N) Competition
 Student (1) ──────< (N) Camp
 Student (1) ──────< (N) Recharge
 Student (1) ──────< (N) Attendance
-Student (N) ──────< (M) Class      (@relation("ClassToStudent"))
 Student (1) ──────< (N) EquipmentTransaction
+Student (N) ──────< (M) Class      (@relation("ClassToStudent"))
 Coach   (1) ──────< (N) Course
 Coach   (1) ──────< (N) EquipmentTransaction
 Class   (1) ──────< (N) Course
 Class   (1) ──────< (M) Student    (@relation("ClassToStudent"))
 Course  (1) ──────< (N) Attendance
-Equipment (1) ──────< (N) EquipmentTransaction
+Equipment (1) ─────< (N) EquipmentTransaction
 ```
 
-- Coach 删除时，Schema 层面 `Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
-- Class 删除时，Schema 层面关联 Course 级联删除（`onDelete: Cascade`）
-- Student/Course 删除时，关联 Attendance/Grading/Competition/Camp/Recharge 级联删除（`onDelete: Cascade`）
-- **应用层删除行为**：REST API 中 `/api/students/[id]/DELETE`、`/api/coaches/[id]/DELETE`、`/api/classes/[id]/DELETE`、`/api/equipment/[id]/DELETE` 均使用软删除（将 `status` 设为 `inactive`）；AI 工具 `deleteClass` 使用 Prisma 硬删除，会触发上述级联规则；装备硬删除时会级联删除其 `EquipmentTransaction`
+- Coach 删除时，`Course.coachId` 自动设为 NULL（`onDelete: SetNull`）
+- Class 删除时，关联 Course 级联删除（`onDelete: Cascade`）
+- Student/Course/Equipment 删除时，关联 Attendance/Grading/Competition/Camp/Recharge/EquipmentTransaction 级联删除（`onDelete: Cascade`）
+- 学员/教练与装备流水关联删除时设为 NULL（`onDelete: SetNull`）
 
 ### 索引设计
 
@@ -253,6 +254,8 @@ Equipment (1) ──────< (N) EquipmentTransaction
 - `Course` 对 `startTime`、`coachId`、`classId` 建立索引
 - `Attendance` 对 `studentId`、`courseId` 建立索引
 - `Grading` 对 `studentId`、`examDate` 建立复合索引
+- `Equipment` 对 `name`、`category`、`status` 建立索引
+- `EquipmentTransaction` 对 `equipmentId`、`createdAt`、`type` 建立索引
 
 ### 唯一索引与约束
 
@@ -263,18 +266,33 @@ Equipment (1) ──────< (N) EquipmentTransaction
 | 枚举 | 值 |
 |------|-----|
 | `Gender` | `male`, `female` |
-| `Status`（学员/班级） | `active`, `inactive`, `suspended` |
+| `Status`（学员/班级/装备） | `active`, `inactive`, `suspended` |
 | `CoachStatus` | `active`, `inactive`, `on_leave` |
 | `AttendanceStatus` | `present`, `absent`, `late`, `leave`, `unmarked` |
-| `BeltLevel` | `white` → `white_yellow` → `yellow` → `yellow_green` → `green` → `green_blue` → `blue` → `blue_red` → `red` → `red_black` → `black`（共 11 级） |
-| `EquipmentCategory` | `uniform`（道服）、`gear`（护具）、`belt`（腰带）、`pad`（脚靶/手靶）、`accessory`（配件）、`t_shirt`（T恤）、`tracksuit`（运动套装）、`taekwondo_shoes`（道鞋）、`backpack`（背包）、`other`（其他） |
-| `EquipmentTransactionType` | `in`（入库）、`out`（出库）、`adjust`（盘点调整） |
+| `BeltLevel` | `white` → `white_yellow` → `yellow` → `yellow_green` → `green` → `green_blue` → `blue` → `blue_red` → `red` → `red_black` → `black`（共 11 级，数据库中带连字符存储，如 `white-yellow`） |
+| `EquipmentCategory` | `uniform`, `gear`, `belt`, `pad`, `accessory`, `t_shirt`, `tracksuit`, `taekwondo_shoes`, `backpack`, `other` |
+| `EquipmentTransactionType` | `in`（入库）, `out`（出库）, `adjust`（盘点调整） |
+
+### 迁移历史
+
+当前 `prisma/migrations/` 下包含以下迁移（按时间顺序）：
+
+1. `20260522015634_init` —— 初始 Schema
+2. `20260524201935_add_course_students` —— 课程与学员关联
+3. `20260524211711_add_class_model` —— 班级模型
+4. `20260524213856_remove_course_type` —— 移除课程类型字段
+5. `20260524214701_make_course_title_optional` —— 课程标题可选
+6. `20260525144713_add_recharge` —— 充值记录
+7. `20260612130244_add_equipment` —— 装备库存
+8. `20260612132527_add_equipment_transactions` —— 装备出入库流水
+9. `20260612135324_add_equipment_categories` —— 扩展装备类型
+10. `20260612215747_rename_sneakers_to_taekwondo_shoes` —— 装备类型重命名
 
 ---
 
 ## 环境变量
 
-开发环境需要的 `.env.local`（基于 `.env` 模板）：
+开发环境需要的 `.env.local`：
 
 ```env
 # 数据库（本地 Docker）
@@ -340,7 +358,7 @@ docker compose down -v
 # 安装依赖
 npm install
 
-# 数据库迁移（开发环境）
+# 数据库迁移
 npx prisma migrate dev --name init
 
 # 生成 Prisma Client 类型
@@ -385,13 +403,12 @@ npm run lint
 
 脚本行为：
 1. 启动 `postgres-prod` 容器（端口 5433）
-2. 等待数据库就绪（`pg_isready` 轮询，最多 30 秒）
+2. 等待数据库就绪（`pg_isready` 轮询）
 3. 设置 `DATABASE_URL` 指向生产数据库
 4. 执行 `prisma migrate deploy`
-5. 生成 Prisma Client
-6. `NODE_ENV=production npm run build`
-7. `NODE_ENV=production npx next start -p $PORT`
-8. **退出时自动停止**生产数据库容器（`trap EXIT/INT/TERM`）
+5. `NODE_ENV=production npm run build`
+6. `NODE_ENV=production npx next start -p $PORT`
+7. **退出时自动停止**生产数据库容器（`trap EXIT/INT/TERM`）
 
 ### 测试命令
 
@@ -468,16 +485,16 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 前端设计遵循 Apple Human Interface Guidelines，特点如下：
 
 - **默认 Light Mode**：系统通过 `ThemeProvider` 默认 `light` 主题，同时支持按 `D` 键切换 dark/light 主题
-- **主按钮颜色**：`bg-[#1D1D1F]`（深黑），hover `bg-black/80`
-- **危险操作**：仅破坏性操作使用 `bg-[#D9264A]`（红），如删除确认
+- **主色**：`#0071E3`（蓝色），用于图标、链接、主按钮高亮
+- **危险操作**：`#FF3B30`（红）或 `#D9264A`，用于删除确认
 - **次要按钮**：`bg-black/[0.06]` 灰色背景，hover `bg-black/[0.1]`
-- **圆角风格**：大圆角为主，如消息气泡 `rounded-[18px]`、卡片 `rounded-[20px]`、内嵌元素 `rounded-[10px]`
+- **圆角风格**：大圆角为主，如消息气泡 `rounded-[18px]`、卡片 `rounded-[14px]` / `rounded-[20px]`、内嵌元素 `rounded-[10px]`
 - **阴影层次**：极轻阴影或无边框，使用 `border-0 shadow-none`
 - **输入框样式**：`bg-black/[0.06] rounded-[10px] border-0`，无 focus ring（或使用 `focus:ring-2 focus:ring-[#1D1D1F]/10`）
 - **选择高亮**：`selection:bg-[#1D1D1F] selection:text-white`
 - **页面背景**：`bg-[#F5F5F7]`
 - **主文字**：`text-[#1D1D1F]`
-- **次要文字**：`text-[#6E6E73]`
+- **次要文字**：`text-[#6E6E73]` / `text-[#86868B]`
 - **弱化文字**：`text-[#A1A1A6]`
 - **成功色**：`text-[#34C759]`
 - **警告色**：`text-[#FF9500]`
@@ -488,15 +505,9 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 - 详情/更新/删除：`GET/PUT/DELETE /api/students/[id]`
 - 批量操作：`POST /api/attendance/batch`、`POST /api/grading/batch`、`POST /api/competition/batch`、`POST /api/camp/batch`
 - 使用 Zod 进行请求体验证，schema 定义在文件顶部
-- 分页标准：`skip: (page - 1) * pageSize`，返回 `{ data, total, page, pageSize }`（不同路由字段名可能为 `students`/`courses` 等）
+- 分页标准：`skip: (page - 1) * pageSize`，返回 `{ data, total, page, pageSize }`
 - 搜索使用 Prisma `contains` + `mode: "insensitive"`
 - 错误响应：`Response.json({ error: "..." }, { status: XXX })`
-
-#### 需要注意的实现细节
-
-- **学员创建**：`POST /api/students` 会强制将 `remainingSessions` 设为 0、`expiryDate` 设为当前日期；课时和有效期应通过充值管理维护
-- **充值记录**：`POST /api/recharges` 创建记录并在事务内更新学员课时和到期时间；`PUT /api/recharges/[id]` 仅允许修改备注；`DELETE /api/recharges/[id]` 会删除记录并回滚学员课时
-- **班级删除**：REST API `/api/classes/[id]/DELETE` 为软删除（`status → inactive`），不会级联删除课程；AI 工具 `deleteClass` 使用硬删除，会级联删除关联课程
 
 ### Server Component vs Client Component
 
@@ -529,7 +540,9 @@ await prisma.$transaction(async (tx) => {
 });
 ```
 
-充值操作同样使用事务，保证 `Recharge` 记录创建与 `Student` 课时/到期时间更新的一致性。
+充值操作同样使用事务，保证 Recharge 记录创建与 Student 课时/到期时间更新的一致性。
+
+装备出入库流水也使用事务，保证 EquipmentTransaction 记录创建与 Equipment 当前库存更新的原子性，并在库存不足时拒绝出库。
 
 ### AI 流式响应（AI SDK 6）
 
@@ -565,32 +578,15 @@ const { messages, sendMessage, setMessages, status } = useChat({
 - 服务端必须用 `convertToModelMessages()` 将 `UIMessage[]` 转为模型消息
 - 服务端返回 `result.toUIMessageStreamResponse()` 供前端消费
 
-### AI 工具覆盖范围
-
-`lib/ai-tools.ts` 中定义的 AI 工具覆盖以下模块：
-
-| 模块 | 工具能力 |
-|------|----------|
-| 学员 | searchStudents、getStudentDetail、createStudent、updateStudent、deleteStudent |
-| 教练 | searchCoaches、getCoachDetail、createCoach、updateCoach、deleteCoach |
-| 班级 | listClasses、createClass、updateClass、deleteClass、addStudentsToClass、removeStudentsFromClass |
-| 课程 | listCourses、createCourse、updateCourse、deleteCourse |
-| 考勤 | takeAttendance、getAttendance |
-| 充值 | createRecharge、searchRecharges |
-| 考级 | createGrading、updateGrading、deleteGrading、searchGradings |
-| 比赛 | createCompetition、updateCompetition、deleteCompetition、searchCompetitions |
-| 集训 | createCamp、updateCamp、deleteCamp、searchCamps |
-| 通用 | getCurrentTime（获取当前时间） |
-
 ---
 
 ## 测试策略
 
-测试基础设施使用 Vitest + jsdom + `@testing-library/react` + `next-test-api-route-handler`。
+测试基础设施已建立，使用 Vitest + jsdom + `@testing-library/react` + `next-test-api-route-handler`。
 
 ### 测试目录结构
 
-- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, equipment, equipment-transactions, config）
+- `__tests__/api/` —— API 路由测试（students, coaches, classes, courses, attendance, recharges, grading, competition, camp, equipment, config）
 - `__tests__/components/` —— 组件测试（sidebar, coaches-page, student-form）
 - `__tests__/lib/` —— 工具函数测试（prisma 单例, utils, ai-tools）
 - `__tests__/setup.ts` —— 全局 setup，mock `next/navigation` 和 `next/head`
@@ -599,7 +595,7 @@ const { messages, sendMessage, setMessages, status } = useChat({
 
 ### 测试规范
 
-- API 测试使用真实数据库连接，通过 `cleanupTestData()` 在每个测试前清理数据
+- API 测试使用真实数据库连接（依赖 `docker compose up -d postgres` 启动的开发数据库），通过 `cleanupTestData()` 在每个测试前清理数据
 - 测试并行已关闭（`fileParallelism: false`），避免数据库冲突
 - 测试数据使用 `[test]` 前缀隔离（如 `[test]学员`、`[test]课程`）
 - 使用 `@faker-js/faker` 生成测试数据（已安装）
@@ -610,20 +606,21 @@ const { messages, sendMessage, setMessages, status } = useChat({
 
 | 函数 | 用途 |
 |------|------|
-| `cleanupTestData()` | 删除所有名称以 `[test]` 开头的记录（按依赖顺序：attendance → grading/competition/camp/recharge → course → student → coach → class） |
+| `cleanupTestData()` | 删除所有名称以 `[test]` 开头的记录（按依赖顺序：attendance → grading/competition/camp → course → student → coach → class → equipmentTransaction → equipment；Recharge 依赖 Student 的级联删除自动清理） |
 | `createTestStudent(data?)` | 创建测试学员，名称自动加 `[test]` 前缀 |
 | `createTestCoach(data?)` | 创建测试教练 |
 | `createTestClass(data?)` | 创建测试班级 |
 | `createTestCourse(data?)` | 创建测试课程（如未提供 classId 则自动创建班级） |
-| `createTestEquipment(data?)` | 创建测试装备，名称自动加 `[test]` 前缀 |
-| `createTestEquipmentTransaction(data?)` | 创建测试出入库流水，并同步更新对应装备库存 |
+| `createTestEquipment(data?)` | 创建测试装备 |
+| `createTestEquipmentTransaction(data?)` | 创建测试装备流水，并同步更新库存 |
 
 ---
 
 ## 持续集成
 
-GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
+GitHub Actions 工作流定义在 `.github/workflows/ci.yml`，包含两个 job：
 
+**test** job：
 1. 启动 PostgreSQL 16 服务容器
 2. 安装依赖：`npm ci`
 3. 生成 Prisma Client：`npx prisma generate`
@@ -633,9 +630,11 @@ GitHub Actions 工作流定义在 `.github/workflows/ci.yml`：
 7. 类型检查：`npm run typecheck`
 8. 代码检查：`npm run lint`
 9. 构建检查：`npm run build`
-10. Ansible 语法检查：`ansible-lint ansible/` + `ansible-playbook --syntax-check`
 
-CI 在 `push` 到 `main` 分支或针对 `main` 分支的 `pull_request` 时触发。
+**ansible-test** job：
+1. 安装 Ansible 与 ansible-lint
+2. `ansible-lint ansible/`
+3. 复制 `inventory.yml.example` 为 `inventory.yml`，对 `playbook.yml` 和 `deploy-only.yml` 执行 `--syntax-check`
 
 ---
 
@@ -649,14 +648,14 @@ CI 在 `push` 到 `main` 分支或针对 `main` 分支的 `pull_request` 时触�
 
 ### Docker 生产部署
 
-项目已内置 `Dockerfile` 和 `docker-compose.prod.yml`，支持手动 Docker 部署。
+项目已内置 Dockerfile 和 `docker-compose.prod.yml`，支持手动 Docker 部署。
 
 #### 文件说明
 
 | 文件 | 用途 |
 |------|------|
-| `Dockerfile` | 多阶段构建，最终镜像基于 `node:22-alpine`，内置 `postgresql-client`，启动时执行 `prisma migrate deploy` |
-| `docker-compose.prod.yml` | 生产编排：App + PostgreSQL + 持久化卷 |
+| `Dockerfile` | 多阶段构建，最终镜像基于 `node:22-alpine`，内置 `postgresql-client` |
+| `docker-compose.prod.yml` | 生产编排：App（`tkd-crm-app`）+ PostgreSQL（`tkd-crm-db`）+ 持久化卷 |
 | `.dockerignore` | 构建排除规则 |
 
 #### 持久化说明
@@ -668,9 +667,6 @@ CI 在 `push` 到 `main` 分支或针对 `main` 分支的 `pull_request` 时触�
 #### 手动 Docker 运维（在目标服务器执行）
 
 ```bash
-# 构建并启动生产环境
-docker compose -f docker-compose.prod.yml up --build -d
-
 # 查看日志
 docker logs -f tkd-crm-app
 docker logs -f tkd-crm-db
@@ -707,31 +703,40 @@ docker run -d \
 
 ### Ansible 自动化部署
 
-项目内置 Ansible 自动化部署方案，在 **RedHat 系服务器**上直接通过 RPM 包安装 Node.js 与 PostgreSQL，并将应用封装为 systemd 服务。默认配置适配 Fedora 默认仓库路径：
+项目内置 Ansible 自动化部署方案，**当前仅支持 RedHat 系操作系统**（CentOS/RHEL/Rocky/AlmaLinux/Fedora），通过 RPM 包安装 Node.js + PostgreSQL，并使用 systemd 直接管理 Node.js 进程。详细使用说明另见 `ansible/README.md`。
 
-| 组件 | 说明 |
-|------|------|
-| 目标系统 | CentOS/RHEL/Rocky/AlmaLinux/Fedora 等 RedHat 系系统 |
-| Node.js | 通过 NodeSource RPM 仓库安装 Node.js 22 |
-| PostgreSQL | 通过系统默认 RPM 仓库安装（Fedora 默认包为 `postgresql-server`） |
-| 服务管理 | systemd 服务 `tkd-crm.service`，依赖 PostgreSQL 服务 |
-| 持久化 | 数据库数据在 PostgreSQL 默认目录，照片在 `/opt/tkd-crm/public/uploads/` |
+#### 部署方式详情
+
+**RPM 包 + systemd 方案**：
+- 确认目标系统为 RedHat 系（`ansible_facts['os_family'] == "RedHat"`）
+- 通过 `dnf` 安装 `nodejs` 和 `postgresql-server` / `postgresql-contrib`
+- 初始化 PostgreSQL 数据库、创建应用用户和数据库
+- 创建专用用户 `tkd-crm`
+- 同步代码到 `/opt/tkd-crm/`
+- 在目标机器上执行 `npm ci` + `npm run build`（standalone 模式）
+- 创建 systemd service 管理 Node.js 进程
+- 持久化：数据库在本地 PostgreSQL，照片在 `/opt/tkd-crm/public/uploads`
 
 #### 文件结构
 
 ```
 ansible/
 ├── ansible.cfg                  # Ansible 配置
+├── README.md                    # Ansible 部署详细使用说明
 ├── inventory.yml.example        # 主机清单模板（复制为 inventory.yml 后配置）
-├── playbook.yml                 # 主入口：RPM 包安装 + systemd 服务部署
+├── playbook.yml                 # 主入口：安装环境 + 部署应用
 ├── deploy-only.yml              # 仅更新应用（不重复安装基础环境）
 ├── group_vars/
-│   └── all.yml.example          # 全局变量模板（数据库密码、API Keys 等）
+│   ├── all.yml.example          # 全局变量模板（数据库密码、API Keys 等）
+│   └── all.yml                  # 实际变量（Git 忽略）
 └── roles/
-    ├── precheck/                # 环境检测，校验 RedHat 系系统
-    ├── system_setup/            # 通过 RPM 安装 Node.js + PostgreSQL，创建数据库/用户/运行用户
-    ├── app_deploy/              # 同步代码、渲染 .env、npm ci、构建
-    └── systemd_service/         # 创建并管理 tkd-crm systemd 服务
+    ├── precheck/                # 环境检测（确认 RedHat 系）
+    ├── system_setup/            # 安装 Node.js + PostgreSQL，初始化数据库
+    │   └── handlers/main.yml    # 重启 PostgreSQL
+    ├── app_deploy/              # 同步代码、渲染 .env、构建
+    │   └── templates/env-native.j2
+    └── systemd_service/         # 创建 systemd 服务
+        └── templates/tkd-crm-native.service.j2
 ```
 
 #### 前置要求
@@ -739,6 +744,7 @@ ansible/
 - 控制机（你的电脑）已安装 **Ansible >= 2.12**
 - 控制机已安装 **rsync**
 - 目标服务器可通过 SSH 登录（支持密码或密钥）
+- 目标服务器为 RedHat 系，且能访问 dnf 仓库
 
 ```bash
 # macOS
@@ -770,111 +776,83 @@ all:
 
 **2. 配置环境变量**
 
-复制并编辑 `ansible/group_vars/all.yml`（基于 `all.yml.example`），填写数据库密码和 API Keys：
+复制并编辑 `ansible/group_vars/all.yml`（基于 `all.yml.example`）：
 
 ```yaml
-postgres_password: "your-secure-password"
-openai_api_key: "sk-your-key"
-model: "openai:gpt-4o"
-```
+app_name: "跆拳道馆 CRM"
+app_version: "1.0.0"
+deploy_dir: /opt/tkd-crm
+app_port: 3000
+db_port: 5432
 
-> ⚠️ `inventory.yml` 和 `group_vars/all.yml` 已加入 `.gitignore`，请勿提交到 Git。
+postgres_user: taekwondo
+postgres_password: CHANGE_ME_TO_STRONG_PASSWORD
+postgres_db: taekwondo_crm
+
+# Fedora 默认路径，其他 RedHat 系发行版按需覆盖
+postgresql_service_name: postgresql
+postgresql_data_dir: "/var/lib/pgsql/data"
+postgresql_bin_dir: "/usr/bin"
+postgresql_packages:
+  - postgresql-server
+  - postgresql-contrib
+
+model: "openai:gpt-4o"
+openai_api_key: ""
+anthropic_api_key: ""
+google_api_key: ""
+deepseek_api_key: ""
+groq_api_key: ""
+
+custom_openai_base_url: ""
+custom_openai_api_key: ""
+
+# npm 镜像源（国内服务器建议用 npmmirror 加速）
+npm_registry: "https://registry.npmmirror.com"
+
+# npm HTTP 代理（可选，留空不使用，可指向控制机局域网代理）
+npm_proxy: ""
+
+health_check_retries: 12
+health_check_delay: 5
+```
 
 **3. 执行部署**
 
 ```bash
-# 完整部署（首次安装，RPM 包 + systemd 服务）
-ansible-playbook ansible/playbook.yml
+# 完整部署（安装环境 + 部署应用）
+ansible-playbook -i ansible/inventory.yml ansible/playbook.yml
 
-# 仅更新应用（代码有变更时，不重复安装基础环境）
-ansible-playbook ansible/deploy-only.yml
-
-# 查看服务状态
-ansible tkd_crm_servers -a "systemctl status tkd-crm"
-
-# 查看应用日志
-ansible tkd_crm_servers -a "journalctl -u tkd-crm -f"
+# 仅更新应用
+ansible-playbook -i ansible/inventory.yml ansible/deploy-only.yml
 ```
 
-#### 运维命令（部署后在目标机器执行）
-
-**通用命令：**
+部署完成后，可通过 `http://<服务器IP>:3000` 访问，使用 systemd 管理服务：
 
 ```bash
-systemctl start tkd-crm       # 启动服务
-systemctl stop tkd-crm        # 停止服务
-systemctl restart tkd-crm     # 重启服务
-systemctl status tkd-crm      # 查看状态
-journalctl -u tkd-crm -f      # 查看日志
-```
-
-**数据库服务命令：**
-
-```bash
-systemctl status postgresql        # 查看数据库服务状态
-journalctl -u postgresql -f        # 查看数据库日志
+systemctl start tkd-crm      # 启动服务
+systemctl stop tkd-crm       # 停止服务
+systemctl restart tkd-crm    # 重启服务
+systemctl status tkd-crm     # 查看状态
+journalctl -u tkd-crm -f     # 查看日志
 ```
 
 ---
 
-## 安全考虑
+## 安全注意事项
 
-1. **照片文件安全**：上传 API 已校验文件类型（仅 `image/*`）和大小（最大 5MB），防止恶意文件上传
-2. **备份导入安全**：导入前自动创建当前数据快照（SQL 导出）；恢复后快照路径在响应中返回；ZIP 内含 `backup-manifest.json` 用于校验完整性
-3. **并发控制**：批量点名扣减课时使用 PostgreSQL 事务保证原子性，并通过状态比对避免重复扣减
-4. **软删除**：学员、教练、班级在 REST API 删除时执行软删除（将状态设为 `inactive`），保留历史记录
-5. **环境变量隔离**：`.env.local` 不提交到版本控制（已在 `.gitignore` 中）；生产环境 API Key 通过环境变量管理
-6. **身份证存储**：当前实现中身份证号以明文存储，如需加密请使用 Node.js `crypto` 模块进行对称加密后再存入数据库
-
----
-
-## 提交前检查流程（强制）
-
-**每次修改代码后，必须按以下顺序执行（与 CI 保持一致）：**
-
-1. **生成 Prisma Client**：`npx prisma generate`
-   - 确保 Prisma Client 类型与 Schema 同步
-
-2. **数据库迁移**：`npx prisma migrate deploy`
-   - 确保数据库 Schema 为最新
-   - 本地开发使用 `.env.local` 中的 `DATABASE_URL`
-
-3. **运行所有测试**：`npm test`
-   - 所有测试必须通过
-   - 如测试失败，先修复代码或更新测试
-
-4. **类型检查**：`npm run typecheck`
-   - 必须 0 errors
-   - 如有类型错误，先修复
-
-5. **Lint 检查**：`npm run lint`
-   - 必须 0 errors、0 warnings
-   - 如有 warning，先修复或添加合理的 eslint-disable 注释
-
-6. **生产构建检查**：`npm run build`
-   - 必须构建成功，0 errors
-   - 如构建失败（例如 `useSearchParams` 未包裹 `Suspense`），先修复
-
-7. **用户确认**：**必须经用户确认修改无误后，才能执行后续步骤**
-   - 向用户展示修改摘要（改了哪些文件、核心变更点）
-   - 等待用户明确回复"可以提交"或类似确认
-   - **未经用户确认，不得擅自 commit**
-
-8. **Commit**：`git commit`
-
-9. **推送**：`git push origin main`
-   - 仅在 lint、测试全部通过且用户确认后推送
+1. **API Keys**：`.env.local` 和 `ansible/group_vars/all.yml` 包含敏感 API Key，均已加入 `.gitignore`，切勿提交到 Git。
+2. **数据库密码**：Ansible `group_vars/all.yml` 中的 `postgres_password` 必须设置为强密码。
+3. **照片上传限制**：上传接口限制文件类型为 `image/*`、大小不超过 5MB，并统一存储为 `.jpg`。
+4. **备份恢复风险**：`/api/backup` POST 导入会覆盖当前数据库，导入前会自动创建快照，但仍建议在维护窗口操作。
+5. **软删除**：学员、教练、装备删除时仅将状态设为 `inactive`，不会物理删除关联数据。
+6. **Prisma 查询**：避免在 Server Component 中暴露过多关联数据，注意权限和敏感字段过滤。
+7. **CORS 与鉴权**：当前系统为内部 CRM，未实现登录鉴权。如需对外开放，必须补充身份认证和授权机制。
 
 ---
 
-## 开发参考资料
+## 最近重要变更
 
-本项目所有功能细节均在以下文档中定义，开发前请务必阅读：
-
-| 文档 | 路径 | 内容 |
-|------|------|------|
-| **产品需求文档（PRD）** | `docs/跆拳道馆CRM系统_PRD.md` | 功能需求、数据库设计、API 设计、AI Agent 架构、核心代码示例、安装部署指南 |
-| **UI 设计文档** | `docs/跆拳道馆CRM系统_UI设计文档.md` | 设计系统（色彩/字体/间距/圆角/材质深度）、全局布局、各页面详细 UI 设计、组件规范、交互设计、响应式适配、图标系统 |
-| **实施计划** | `docs/实施计划.md` | 分阶段实施计划、测试策略、风险分析 |
-
-两份文档使用**中文**编写，是本项目开发的核心依据。
+- 新增装备库存管理模块（`Equipment`、`EquipmentTransaction`）及对应页面、API、AI 工具、测试。
+- Ansible 部署方案重构为 RedHat/Fedora 专用的 RPM 包 + systemd 方案（不再使用 Podman）。
+- 装备类型枚举扩展并标准化（如 `taekwondo_shoes` 道鞋）。
